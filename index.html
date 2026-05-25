@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -516,114 +517,74 @@ document.getElementById("publishBtn")
 .addEventListener("click",createPost);
 
 function renderPosts(posts){
-
-const container =
-document.getElementById("postsContainer");
-
+const container =document.getElementById("postsContainer");
 container.innerHTML = "";
-
 posts.forEach(post => {
-
-const div =
-document.createElement("div");
-
-div.className = `
-bg-zinc-950
-border border-zinc-800
-rounded-3xl
-p-5
-`;
-
+const div =document.createElement("div");
+div.className = `bg-zinc-950 border border-zinc-800 rounded-3xl p-5`;
 div.innerHTML = `
-
 <div class="flex gap-4 items-center">
-
-<img
-src="${post.authorAvatar || 'https://i.pravatar.cc/150'}"
-class="w-14 h-14 rounded-full object-cover">
-
+<img src="${post.authorAvatar || 'https://i.pravatar.cc/150'}" class="w-14 h-14 rounded-full object-cover">
 <div>
-
-<div class="font-bold text-lg">
-${post.author}
+<div class="font-bold text-lg">${post.author}</div>
 </div>
-
 </div>
-
-</div>
-
-<h2 class="text-2xl font-bold mt-5">
-${post.title}
-</h2>
-
-<p class="text-zinc-300 mt-3 whitespace-pre-wrap">
-${post.content}
-</p>
-
-${post.image
-? `<img
-src="${post.image}"
-class="mt-5 rounded-2xl w-full max-h-[500px] object-cover">`
-: ''
-}
-
+<h2 class="text-2xl font-bold mt-5">${post.title}</h2>
+<p class="text-zinc-300 mt-3 whitespace-pre-wrap">${post.content}</p>
+${post.image? `<img src="${post.image}" class="mt-5 rounded-2xl w-full max-h-[500px] object-cover">`: ''}
 <div class="mt-5 flex gap-3">
-
-<button
-class="bg-zinc-900 px-5 py-3 rounded-xl likeBtn"
-data-id="${post.id}">
-❤️ Like
+<!-- Botón Upvote (Triángulo Verde) -->
+<button class="bg-zinc-900 px-5 py-3 rounded-xl upvoteBtn flex items-center gap-2 hover:bg-zinc-800 transition" data-id="${post.id}">
+  <span class="text-green-500 text-xl">▲</span> Votar más
 </button>
-
-<button
-class="bg-zinc-900 px-5 py-3 rounded-xl followBtn"
-data-id="${post.authorId}">
-➕ Seguir
+<!-- Botón Downvote (Triángulo Rojo) -->
+<button class="bg-zinc-900 px-5 py-3 rounded-xl downvoteBtn flex items-center gap-2 hover:bg-zinc-800 transition" data-id="${post.id}">
+  <span class="text-red-500 text-xl">▼</span> Votar menos
 </button>
-
+<button class="bg-zinc-900 px-5 py-3 rounded-xl followBtn" data-id="${post.authorId}">➕ Seguir</button>
 </div>
-
 `;
-
 container.appendChild(div);
-
 });
 
-document.querySelectorAll(".likeBtn")
-.forEach(btn => {
-
+// Lógica para registrar un Voto Positivo (Upvote)
+document.querySelectorAll(".upvoteBtn").forEach(btn => {
 btn.onclick = async () => {
-
-await addDoc(collection(db,"likes"),{
-
-postId:btn.dataset.id,
-userId:currentUser.uid,
-createdAt:Date.now()
-
+if(!currentUser) { alert("Inicia sesión para votar"); return; }
+// Usamos setDoc con un ID compuesto para evitar que un usuario vote infinitas veces
+const voteId = `${currentUser.uid}_${btn.dataset.id}`;
+await setDoc(doc(db,"votes", voteId),{
+postId: btn.dataset.id,
+userId: currentUser.uid,
+type: "up",
+createdAt: Date.now()
 });
-
 };
-
 });
 
-document.querySelectorAll(".followBtn")
-.forEach(btn => {
-
+// Lógica para registrar un Voto Negativo (Downvote)
+document.querySelectorAll(".downvoteBtn").forEach(btn => {
 btn.onclick = async () => {
+if(!currentUser) { alert("Inicia sesión para votar"); return; }
+const voteId = `${currentUser.uid}_${btn.dataset.id}`;
+await setDoc(doc(db,"votes", voteId),{
+postId: btn.dataset.id,
+userId: currentUser.uid,
+type: "down",
+createdAt: Date.now()
+});
+};
+});
 
+document.querySelectorAll(".followBtn").forEach(btn => {
+btn.onclick = async () => {
+if(!currentUser) { alert("Inicia sesión para seguir"); return; }
 await addDoc(collection(db,"followers"),{
-
-followerId:currentUser.uid,
-followingId:btn.dataset.id
-
+followerId:currentUser.uid,followingId:btn.dataset.id
 });
-
 alert("Ahora sigues a este usuario");
-
 };
-
 });
-
 }
 
 async function loadUsers(){
