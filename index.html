@@ -1,313 +1,113 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Rankiu.com</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="manifest" href="manifest.json">
-
 <style>
-
-body{
-  background:#050505;
-}
-
-.scrollbar::-webkit-scrollbar{
-  width:6px;
-}
-
-.scrollbar::-webkit-scrollbar-thumb{
-  background:#222;
-  border-radius:20px;
-}
-
+body{  background:#050505;}
+.scrollbar::-webkit-scrollbar{  width:6px;}
+.scrollbar::-webkit-scrollbar-thumb{  background:#222;  border-radius:20px;}
 </style>
 </head>
-
 <body class="text-white min-h-screen">
 
 <nav class="border-b border-zinc-800 bg-black/80 sticky top-0 z-50">
-
 <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-
-<div class="text-3xl font-bold text-green-400">
-rankiu
-</div>
-
+<div class="text-3xl font-bold text-green-400">rankiu</div>
 <div class="flex gap-3 items-center">
-
-<button onclick="showSection('feed')" class="bg-zinc-900 px-4 py-2 rounded-xl">
-Feed
-</button>
-
-<button onclick="showSection('profile')" class="bg-zinc-900 px-4 py-2 rounded-xl">
-Perfil
-</button>
-
-<button onclick="showSection('chat')" class="bg-zinc-900 px-4 py-2 rounded-xl">
-Chat
-</button>
-
+<button onclick="showSection('feed')" class="bg-zinc-900 px-4 py-2 rounded-xl">Feed</button>
+<button onclick="showSection('profile')" class="bg-zinc-900 px-4 py-2 rounded-xl">Perfil</button>
+<button onclick="showSection('chat')" class="bg-zinc-900 px-4 py-2 rounded-xl">Chat</button>
 <div id="navUser"></div>
-
 </div>
-
 </div>
-
 </nav>
 
 <div class="max-w-7xl mx-auto px-4 py-6">
-
 <section id="feedSection">
-
 <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-6">
-
-<h2 class="text-2xl font-bold mb-4">
-Crear publicación
-</h2>
-
-<input
-id="postTitle"
-placeholder="Título"
-class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<textarea
-id="postContent"
-placeholder="¿Qué quieres compartir?"
-class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none"></textarea>
-
-<input
-type="file"
-id="postImage"
-accept="image/*"
-class="w-full mt-4"/>
-
-<button
-id="publishBtn"
-class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
-Publicar
-</button>
-
+<h2 class="text-2xl font-bold mb-4">Crear publicación</h2>
+<input id="postTitle" placeholder="Título" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<textarea id="postContent" placeholder="¿Qué quieres compartir?" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none"></textarea>
+<input type="file" id="postImage" accept="image/*" class="w-full mt-4"/>
+<button id="publishBtn" class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">Publicar</button>
 </div>
-
 <div id="postsContainer" class="space-y-5"></div>
-
 </section>
 
 <section id="profileSection" class="hidden">
-
 <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 max-w-xl mx-auto text-center">
-
-<img
-id="profileAvatar"
-class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-green-500 mb-5">
-
+<img id="profileAvatar" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-green-500 mb-5">
 <h2 id="profileUsername" class="text-3xl font-bold mb-3"></h2>
-
 <div id="profileBio" class="text-zinc-400"></div>
-
+<div class="mt-6">Seguidores: <span id="followersCount">0</span></div>
 <div class="mt-6">
-Seguidores:
-<span id="followersCount">0</span>
+<input type="file" id="newProfilePhoto" accept="image/*" class="w-full mb-4"/>
+<button id="updatePhotoBtn" class="bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">Actualizar foto de perfil</button>
 </div>
-
-<div class="mt-6">
-
-<input
-type="file"
-id="newProfilePhoto"
-accept="image/*"
-class="w-full mb-4"/>
-
-<button
-id="updatePhotoBtn"
-class="bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
-Actualizar foto de perfil
-</button>
-
 </div>
-
-
-</div>
-
 </section>
 
 <section id="chatSection" class="hidden">
-
 <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-
 <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-4 h-[700px] overflow-y-auto scrollbar">
-
-<h2 class="text-2xl font-bold mb-4">
-Usuarios
-</h2>
-
+<h2 class="text-2xl font-bold mb-4">Usuarios</h2>
 <div id="usersList" class="space-y-3"></div>
-
 </div>
-
 <div class="md:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl flex flex-col h-[700px]">
-
-<div id="chatHeader" class="border-b border-zinc-800 p-4 text-xl font-bold">
-Selecciona usuario
-</div>
-
+<div id="chatHeader" class="border-b border-zinc-800 p-4 text-xl font-bold">Selecciona usuario</div>
 <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar"></div>
-
 <div class="p-4 border-t border-zinc-800 flex gap-3">
-
-<input
-id="messageInput"
-placeholder="Escribe mensaje..."
-class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<button
-id="sendBtn"
-class="bg-green-500 text-black font-bold px-6 rounded-xl">
-Enviar
-</button>
-
+<input id="messageInput" placeholder="Escribe mensaje..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<button id="sendBtn" class="bg-green-500 text-black font-bold px-6 rounded-xl">Enviar</button>
 </div>
-
 </div>
-
 </div>
-
 </section>
-
 </div>
 
-<div
-id="authModal"
-class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-
+<div id="authModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
-
 <div class="flex gap-3 mb-6">
-
-<button onclick="switchAuth('login')" class="flex-1 bg-zinc-900 rounded-xl py-3">
-Login
-</button>
-
-<button onclick="switchAuth('register')" class="flex-1 bg-zinc-900 rounded-xl py-3">
-Registro
-</button>
-
+<button onclick="switchAuth('login')" class="flex-1 bg-zinc-900 rounded-xl py-3">Login</button>
+<button onclick="switchAuth('register')" class="flex-1 bg-zinc-900 rounded-xl py-3">Registro</button>
 </div>
-
 <div id="loginBox">
-
-<input
-id="loginEmail"
-placeholder="Email"
-class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<input
-type="password"
-id="loginPassword"
-placeholder="Contraseña"
-class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<button
-id="loginBtn"
-class="w-full bg-green-500 text-black font-bold py-4 rounded-xl">
-Iniciar sesión
-</button>
-
+<input id="loginEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input type="password" id="loginPassword" placeholder="Contraseña" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<button id="loginBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl">Iniciar sesión</button>
 </div>
-
 <div id="registerBox" class="hidden">
-
-<input
-id="registerUsername"
-placeholder="Usuario"
-class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<input
-id="registerEmail"
-placeholder="Email"
-class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<input
-type="password"
-id="registerPassword"
-placeholder="Contraseña"
-class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-<input
-type="file"
-id="registerAvatar"
-accept="image/*"
-class="w-full mb-4"/>
-
-<button
-id="registerBtn"
-class="w-full bg-green-500 text-black font-bold py-4 rounded-xl">
-Crear cuenta
-</button>
-
+<input id="registerUsername" placeholder="Usuario" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input id="registerEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input type="password" id="registerPassword" placeholder="Contraseña" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input type="file" id="registerAvatar" accept="image/*" class="w-full mb-4"/>
+<button id="registerBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl">Crear cuenta</button>
 </div>
-
 </div>
-
 </div>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-
-import {
-getAuth,
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword,
-onAuthStateChanged,
-signOut,
-updateProfile
-} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-
-import {
-getFirestore,
-collection,
-addDoc,
-doc,
-setDoc,
-getDocs,
-query,
-orderBy,
-serverTimestamp,
-onSnapshot,
-where
-} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-import {
-getStorage,
-ref,
-uploadBytes,
-getDownloadURL
-} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
 const firebaseConfig = {
-
 apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
 authDomain: "rankiu-5da90.firebaseapp.com",
 projectId: "rankiu-5da90",
 storageBucket: "rankiu-5da90.appspot.com",
 messagingSenderId: "365366406441",
 appId: "1:365366406441:web:4e4a068b57d93d21061b38"
-
 };
 
-
 const app = initializeApp(firebaseConfig);
-
 const auth = getAuth(app);
-
 const db = getFirestore(app);
-
 const storage = getStorage(app);
 
 let currentUser = null;
@@ -315,208 +115,77 @@ let selectedUser = null;
 let allUsers = [];
 
 function switchAuth(type){
-
 if(type === "login"){
-
-document.getElementById("loginBox")
-.classList.remove("hidden");
-
-document.getElementById("registerBox")
-.classList.add("hidden");
-
+document.getElementById("loginBox").classList.remove("hidden");
+document.getElementById("registerBox").classList.add("hidden");
 }else{
-
-document.getElementById("loginBox")
-.classList.add("hidden");
-
-document.getElementById("registerBox")
-.classList.remove("hidden");
-
+document.getElementById("loginBox").classList.add("hidden");
+document.getElementById("registerBox").classList.remove("hidden");
 }
-
 }
-
 window.switchAuth = switchAuth;
 
 async function uploadImage(file,path){
-
 const storageRef = ref(storage,path);
-
 await uploadBytes(storageRef,file);
-
 return await getDownloadURL(storageRef);
-
 }
 
 async function register(){
-
-const username =
-document.getElementById("registerUsername").value.trim();
-
-const email =
-document.getElementById("registerEmail").value.trim();
-
-const password =
-document.getElementById("registerPassword").value.trim();
-
-const avatarFile =
-document.getElementById("registerAvatar").files[0];
+const username = document.getElementById("registerUsername").value.trim();
+const email = document.getElementById("registerEmail").value.trim();
+const password = document.getElementById("registerPassword").value.trim();
+const avatarFile = document.getElementById("registerAvatar").files[0];
 
 if(!username || !email || !password){
-
 alert("Completa todos los campos");
 return;
-
 }
-
 try{
-
-const userCredential =
-await createUserWithEmailAndPassword(
-auth,
-email,
-password
-);
-
-let avatarUrl =
-"https://i.pravatar.cc/300";
-
+const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+let avatarUrl = "https://i.pravatar.cc/300";
 if(avatarFile){
-
-avatarUrl =
-await uploadImage(
-avatarFile,
-"avatars/" + Date.now()
-);
-
+avatarUrl = await uploadImage(avatarFile, "avatars/" + Date.now());
 }
-
-await updateProfile(userCredential.user,{
-
-displayName: username,
-photoURL: avatarUrl
-
+await updateProfile(userCredential.user,{ displayName: username, photoURL: avatarUrl });
+await setDoc(doc(db,"users",userCredential.user.uid), {
+username, email, avatar:avatarUrl, bio:"Nuevo en Rankiu", followers:0, createdAt:Date.now()
 });
-
-await setDoc(
-doc(db,"users",userCredential.user.uid),
-{
-
-username,
-email,
-avatar:avatarUrl,
-bio:"Nuevo en Rankiu",
-followers:0,
-createdAt:Date.now()
-
-}
-);
-
 alert("Cuenta creada");
-
-}catch(error){
-
-alert(error.message);
-
-}
-
+}catch(error){ alert(error.message); }
 }
 
 async function login(){
-
-const email =
-document.getElementById("loginEmail").value.trim();
-
-const password =
-document.getElementById("loginPassword").value.trim();
-
-try{
-
-await signInWithEmailAndPassword(
-auth,
-email,
-password
-);
-
-}catch(error){
-
-alert(error.message);
-
+const email = document.getElementById("loginEmail").value.trim();
+const password = document.getElementById("loginPassword").value.trim();
+try{ await signInWithEmailAndPassword(auth, email, password); }
+catch(error){ alert(error.message); }
 }
 
-}
+async function logout(){ await signOut(auth); }
 
-async function logout(){
-
-await signOut(auth);
-
-}
-
-document.getElementById("registerBtn")
-.addEventListener("click",register);
-
-document.getElementById("loginBtn")
-.addEventListener("click",login);
+document.getElementById("registerBtn").addEventListener("click",register);
+document.getElementById("loginBtn").addEventListener("click",login);
 
 async function createPost(){
+if(!currentUser){ alert("Inicia sesión"); return; }
+const title = document.getElementById("postTitle").value.trim();
+const content = document.getElementById("postContent").value.trim();
+const imageFile = document.getElementById("postImage").files[0];
 
-if(!currentUser){
-
-alert("Inicia sesión");
-return;
-
-}
-
-const title =
-document.getElementById("postTitle").value.trim();
-
-const content =
-document.getElementById("postContent").value.trim();
-
-const imageFile =
-document.getElementById("postImage").files[0];
-
-if(!title || !content){
-
-alert("Completa todos los campos");
-return;
-
-}
-
+if(!title || !content){ alert("Completa todos los campos"); return; }
 let imageUrl = "";
-
-if(imageFile){
-
-imageUrl =
-await uploadImage(
-imageFile,
-"posts/" + Date.now()
-);
-
-}
+if(imageFile){ imageUrl = await uploadImage(imageFile, "posts/" + Date.now()); }
 
 await addDoc(collection(db,"posts"),{
-
-title,
-content,
-image:imageUrl,
-author:currentUser.displayName,
-authorId:currentUser.uid,
-authorAvatar:currentUser.photoURL,
-likes:0,
-createdAt:serverTimestamp()
-
+title, content, image:imageUrl, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
 });
-
 document.getElementById("postTitle").value = "";
 document.getElementById("postContent").value = "";
-
 }
+document.getElementById("publishBtn").addEventListener("click",createPost);
 
-document.getElementById("publishBtn")
-.addEventListener("click",createPost);
-
-// 1. FUNCIÓN RENDERIZAR POSTS (Solo dibuja el HTML, no asigna funciones onclick repetitivas)
+// 1. FUNCIÓN RENDERIZAR POSTS
 function renderPosts(posts){
 const container = document.getElementById("postsContainer");
 container.innerHTML = "";
@@ -543,14 +212,12 @@ ${post.image? `<img src="${post.image}" class="mt-5 rounded-2xl w-full max-h-[50
     <span id="down-counter-${post.id}" class="font-bold text-red-500">0</span>
     <button class="px-3 py-2 downvoteBtn text-zinc-500 hover:text-red-500 transition text-xl" data-id="${post.id}">▼</button>
   </div>
-  
   <button class="bg-zinc-900 px-5 py-3 rounded-xl followBtn" data-id="${post.authorId}">➕ Seguir</button>
 </div>
 
 <div class="mt-4">
   <h3 class="text-sm font-semibold text-zinc-400 mb-2">Comentarios</h3>
   <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-40 overflow-y-auto scrollbar text-sm"></div>
-  
   <div class="flex gap-2">
     <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-zinc-700"/>
     <button class="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-xl text-sm commentBtn" data-id="${post.id}">Enviar</button>
@@ -559,15 +226,12 @@ ${post.image? `<img src="${post.image}" class="mt-5 rounded-2xl w-full max-h-[50
 `;
 container.appendChild(div);
 
-// Escucha en tiempo real de comentarios simplificada (Elimina el error de falta de índice en Firebase)
 const commentsQuery = query(collection(db, "comments"), where("postId", "==", post.id));
 onSnapshot(commentsQuery, (commentSnapshot) => {
     const commentListContainer = document.getElementById(`comments-list-${post.id}`);
     if (commentListContainer) {
         commentListContainer.innerHTML = "";
-        // Ordenamos localmente en JavaScript para evitar que Firebase bloquee la consulta
         const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
-        
         sortedDocs.forEach(comment => {
             const commentDiv = document.createElement("div");
             commentDiv.className = "bg-zinc-900/50 p-3 rounded-xl border border-zinc-900";
@@ -579,11 +243,10 @@ onSnapshot(commentsQuery, (commentSnapshot) => {
 });
 }
 
-// 2. ESCUCHADOR DE CLICS GLOBAL (Delegación de Eventos - Resuelve el conteo de 2 en 2 por completo)
+// 2. ESCUCHADOR DE CLICS GLOBAL ÚNICO (Soluciona el incremento doble)
 document.addEventListener("click", async (event) => {
     const target = event.target;
 
-    // Manejar Click en botón de comentario
     if (target.classList.contains("commentBtn")) {
         if(!currentUser) return alert("Inicia sesión para comentar");
         const postId = target.dataset.id;
@@ -601,7 +264,6 @@ document.addEventListener("click", async (event) => {
         input.value = "";
     }
 
-    // Manejar Click en Upvote
     if (target.classList.contains("upvoteBtn")) {
         if(!currentUser) return alert("Inicia sesión para votar");
         const voteId = `${currentUser.uid}_${target.dataset.id}`;
@@ -613,7 +275,6 @@ document.addEventListener("click", async (event) => {
         });
     }
 
-    // Manejar Click en Downvote
     if (target.classList.contains("downvoteBtn")) {
         if(!currentUser) return alert("Inicia sesión para votar");
         const voteId = `${currentUser.uid}_${target.dataset.id}`;
@@ -625,63 +286,6 @@ document.addEventListener("click", async (event) => {
         });
     }
 
-    // Manejar Click en Seguir
-    if (target.classList.contains("followBtn")) {
-        if(!currentUser) return alert("Inicia sesión para seguir");
-        await addDoc(collection(db, "followers"), {
-            followerId: currentUser.uid, followingId: target.dataset.id
-        });
-        alert("Ahora sigues a este usuario");
-    }
-});
-
-// 2. ESCUCHADOR DE CLICS GLOBAL (Delegación de Eventos - Resuelve el conteo de 2 en 2 por completo)
-document.addEventListener("click", async (event) => {
-    const target = event.target;
-
-    // Manejar Click en botón de comentario
-    if (target.classList.contains("commentBtn")) {
-        if(!currentUser) return alert("Inicia sesión para comentar");
-        const postId = target.dataset.id;
-        const input = document.getElementById(`comment-input-${postId}`);
-        const text = input.value.trim();
-        if(!text) return;
-
-        await addDoc(collection(db, "comments"), {
-            postId,
-            text,
-            author: currentUser.displayName,
-            authorId: currentUser.uid,
-            createdAt: Date.now()
-        });
-        input.value = "";
-    }
-
-    // Manejar Click en Upvote
-    if (target.classList.contains("upvoteBtn")) {
-        if(!currentUser) return alert("Inicia sesión para votar");
-        const voteId = `${currentUser.uid}_${target.dataset.id}`;
-        await setDoc(doc(db, "votes", voteId), {
-            postId: target.dataset.id,
-            userId: currentUser.uid,
-            type: "up",
-            createdAt: Date.now()
-        });
-    }
-
-    // Manejar Click en Downvote
-    if (target.classList.contains("downvoteBtn")) {
-        if(!currentUser) return alert("Inicia sesión para votar");
-        const voteId = `${currentUser.uid}_${target.dataset.id}`;
-        await setDoc(doc(db, "votes", voteId), {
-            postId: target.dataset.id,
-            userId: currentUser.uid,
-            type: "down",
-            createdAt: Date.now()
-        });
-    }
-
-    // Manejar Click en Seguir
     if (target.classList.contains("followBtn")) {
         if(!currentUser) return alert("Inicia sesión para seguir");
         await addDoc(collection(db, "followers"), {
@@ -692,341 +296,111 @@ document.addEventListener("click", async (event) => {
 });
 
 function renderUsers(){
-
-const container =
-document.getElementById("usersList");
-
+const container = document.getElementById("usersList");
 container.innerHTML = "";
-
 allUsers.forEach(user => {
-
-if(currentUser && user.id === currentUser.uid)
-return;
-
-const div =
-document.createElement("div");
-
-div.className = `
-flex items-center gap-3
-bg-zinc-900
-rounded-2xl
-p-3
-cursor-pointer
-`;
-
+if(currentUser && user.id === currentUser.uid) return;
+const div = document.createElement("div");
+div.className = `flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 cursor-pointer`;
 div.onclick = () => {
-
 selectedUser = user;
-
 listenMessages();
-
 };
-
 div.innerHTML = `
-
-<img
-src="${user.avatar}"
-class="w-12 h-12 rounded-full object-cover">
-
-<div class="font-bold">
-${user.username}
-</div>
-
+<img src="${user.avatar}" class="w-12 h-12 rounded-full object-cover">
+<div class="font-bold">${user.username}</div>
 `;
-
 container.appendChild(div);
-
 });
-
 }
 
 async function sendMessage(){
-
-if(!selectedUser){
-
-alert("Selecciona usuario");
-return;
-
-}
-
-const input =
-document.getElementById("messageInput");
-
-const text =
-input.value.trim();
-
+if(!selectedUser){ alert("Selecciona usuario"); return; }
+const input = document.getElementById("messageInput");
+const text = input.value.trim();
 if(!text) return;
 
 await addDoc(collection(db,"messages"),{
-
-from:currentUser.uid,
-to:selectedUser.id,
-text,
-createdAt:serverTimestamp()
-
+from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
 });
-
 input.value = "";
-
 }
-
-document.getElementById("sendBtn")
-.addEventListener("click",sendMessage);
+document.getElementById("sendBtn").addEventListener("click",sendMessage);
 
 function listenMessages(){
-
 if(!selectedUser) return;
-
-document.getElementById("chatHeader")
-.innerText =
-selectedUser.username;
-
-const q =
-query(
-collection(db,"messages"),
-orderBy("createdAt","asc")
-);
-
+document.getElementById("chatHeader").innerText = selectedUser.username;
+const q = query(collection(db,"messages"), orderBy("createdAt","asc"));
 onSnapshot(q,(snapshot)=>{
+const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
+.filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
 
-const messages =
-snapshot.docs
-.map(doc => ({
-id:doc.id,
-...doc.data()
-}))
-.filter(msg =>
-
-(
-msg.from === currentUser.uid &&
-msg.to === selectedUser.id
-)
-
-||
-
-(
-msg.to === currentUser.uid &&
-msg.from === selectedUser.id
-)
-
-);
-
-const container =
-document.getElementById("chatMessages");
-
+const container = document.getElementById("chatMessages");
 container.innerHTML = "";
-
 messages.forEach(msg => {
-
-const mine =
-msg.from === currentUser.uid;
-
-const div =
-document.createElement("div");
-
-div.className =
-`flex ${mine ? 'justify-end' : 'justify-start'}`;
-
-div.innerHTML = `
-
-<div class="
-max-w-[70%]
-px-4 py-3 rounded-2xl
-${mine
-? 'bg-green-500 text-black'
-: 'bg-zinc-800'}
-">
-
-${msg.text}
-
-</div>
-
-`;
-
+const mine = msg.from === currentUser.uid;
+const div = document.createElement("div");
+div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
+div.innerHTML = `<div class="max-w-[70%] px-4 py-3 rounded-2xl ${mine ? 'bg-green-500 text-black' : 'bg-zinc-800'}">${msg.text}</div>`;
 container.appendChild(div);
-
 });
-
 });
-
 }
 
 function showSection(section){
-
-document.getElementById("feedSection")
-.classList.add("hidden");
-
-document.getElementById("profileSection")
-.classList.add("hidden");
-
-document.getElementById("chatSection")
-.classList.add("hidden");
-
-if(section === "feed"){
-
-document.getElementById("feedSection")
-.classList.remove("hidden");
-
+document.getElementById("feedSection").classList.add("hidden");
+document.getElementById("profileSection").classList.add("hidden");
+document.getElementById("chatSection").classList.add("hidden");
+if(section === "feed") document.getElementById("feedSection").classList.remove("hidden");
+if(section === "profile") document.getElementById("profileSection").classList.remove("hidden");
+if(section === "chat") document.getElementById("chatSection").classList.remove("hidden");
 }
-
-if(section === "profile"){
-
-document.getElementById("profileSection")
-.classList.remove("hidden");
-
-}
-
-if(section === "chat"){
-
-document.getElementById("chatSection")
-.classList.remove("hidden");
-
-}
-
-}
-
 window.showSection = showSection;
 
 function updateNavbar(){
-
-const nav =
-document.getElementById("navUser");
-
+const nav = document.getElementById("navUser");
 if(currentUser){
-
 nav.innerHTML = `
-
 <div class="flex items-center gap-3">
-
-<img
-src="${currentUser.photoURL}"
-class="w-12 h-12 rounded-full object-cover border-2 border-green-500">
-
-<div class="font-bold">
-${currentUser.displayName}
-</div>
-
-<button
-id="logoutBtn"
-class="bg-red-500 text-black font-bold px-4 py-2 rounded-xl">
-Salir
-</button>
-
-</div>
-
-`;
-
-setTimeout(()=>{
-
-document.getElementById("logoutBtn")
-.addEventListener("click",logout);
-
-},100);
-
-}else{
-
-nav.innerHTML = `
-<div class="text-zinc-500">
-Invitado
+<img src="${currentUser.photoURL}" class="w-12 h-12 rounded-full object-cover border-2 border-green-500">
+<div class="font-bold">${currentUser.displayName}</div>
+<button id="logoutBtn" class="bg-red-500 text-black font-bold px-4 py-2 rounded-xl">Salir</button>
 </div>
 `;
-
-}
-
+setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click",logout); },100);
+}else{ nav.innerHTML = `<div class="text-zinc-500">Invitado</div>`; }
 }
 
 function renderProfile(){
-
 if(!currentUser) return;
-
-document.getElementById("profileAvatar")
-.src =
-currentUser.photoURL;
-
-document.getElementById("profileUsername")
-.innerText =
-currentUser.displayName;
-
-document.getElementById("profileBio")
-.innerText =
-"Usuario verificado de Rankiu";
-
+document.getElementById("profileAvatar").src = currentUser.photoURL;
+document.getElementById("profileUsername").innerText = currentUser.displayName;
+document.getElementById("profileBio").innerText = "Usuario verificado de Rankiu";
 }
 
-const postsQuery =
-query(
-collection(db,"posts"),
-orderBy("createdAt","desc")
-);
-
+const postsQuery = query(collection(db,"posts"), orderBy("createdAt","desc"));
 onSnapshot(postsQuery,(snapshot)=>{
-
-const posts =
-snapshot.docs.map(doc => ({
-id:doc.id,
-...doc.data()
-}));
-
+const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
 renderPosts(posts);
-
 });
-
 
 async function updateProfilePhoto(){
-
 if(!currentUser) return;
-
-const file =
-document.getElementById("newProfilePhoto").files[0];
-
-if(!file){
-
-alert("Selecciona una imagen");
-return;
-
-}
-
+const file = document.getElementById("newProfilePhoto").files[0];
+if(!file){ alert("Selecciona una imagen"); return; }
 try{
-
-const imageUrl =
-await uploadImage(
-file,
-"profilePhotos/" + currentUser.uid + "_" + Date.now()
-);
-
-await updateProfile(currentUser,{
-photoURL:imageUrl
-});
-
-await setDoc(
-doc(db,"users",currentUser.uid),
-{
-avatar:imageUrl
-},
-{ merge:true }
-);
-
-document.getElementById("profileAvatar")
-.src = imageUrl;
-
+const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
+await updateProfile(currentUser,{ photoURL:imageUrl });
+await setDoc(doc(db,"users",currentUser.uid), { avatar:imageUrl }, { merge:true });
+document.getElementById("profileAvatar").src = imageUrl;
 updateNavbar();
-
 alert("Foto de perfil actualizada");
-
-}catch(error){
-
-alert(error.message);
-
+}catch(error){ alert(error.message); }
 }
+document.getElementById("updatePhotoBtn").addEventListener("click",updateProfilePhoto);
 
-}
-
-document.getElementById("updatePhotoBtn")
-.addEventListener("click",updateProfilePhoto);
-
-// ESCUCHADOR GLOBAL DE VOTOS (Muestra positivos, negativos y cambia el color del marco)
+// ESCUCHADOR GLOBAL DE VOTOS ÚNICO
 onSnapshot(collection(db, "votes"), (snapshot) => {
-    // Almacenaremos contadores independientes por cada post
     const postVotes = {};
 
     snapshot.docs.forEach(doc => {
@@ -1034,12 +408,10 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
         if (!postVotes[vote.postId]) {
             postVotes[vote.postId] = { up: 0, down: 0 };
         }
-        
         if (vote.type === "up") postVotes[vote.postId].up += 1;
         if (vote.type === "down") postVotes[vote.postId].down += 1;
     });
 
-    // Actualizar los elementos HTML en base a los conteos individuales
     Object.keys(postVotes).forEach(postId => {
         const upCounter = document.getElementById(`up-counter-${postId}`);
         const downCounter = document.getElementById(`down-counter-${postId}`);
@@ -1048,79 +420,33 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
         const ups = postVotes[postId].up;
         const downs = postVotes[postId].down;
 
-        // Mostrar totales individuales en la interfaz
         if (upCounter) upCounter.innerText = ups;
         if (downCounter) downCounter.innerText = downs;
 
-        // Enmarcar la publicación comparando cuál voto es mayor
         if (postCard) {
             postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-800");
-
             if (ups > downs) {
-                postCard.classList.add("border-green-500"); // Más positivos que negativos
+                postCard.classList.add("border-green-500");
             } else if (downs > ups) {
-                postCard.classList.add("border-red-500");   // Más negativos que positivos
+                postCard.classList.add("border-red-500");
             } else {
-                postCard.classList.add("border-zinc-800");   // Empate o sin votos
+                postCard.classList.add("border-zinc-800");
             }
         }
     });
 });
-
-    // Actualizar los elementos HTML en base a los conteos individuales
-    Object.keys(postVotes).forEach(postId => {
-        const upCounter = document.getElementById(`up-counter-${postId}`);
-        const downCounter = document.getElementById(`down-counter-${postId}`);
-        const postCard = document.getElementById(`post-card-${postId}`);
-        
-        const ups = postVotes[postId].up;
-        const downs = postVotes[postId].down;
-
-        // Mostrar totales individuales en la interfaz
-        if (upCounter) upCounter.innerText = ups;
-        if (downCounter) downCounter.innerText = downs;
-
-        // Enmarcar la publicación comparando cuál voto es mayor
-        if (postCard) {
-            postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-800");
-
-            if (ups > downs) {
-                postCard.classList.add("border-green-500"); // Más positivos que negativos
-            } else if (downs > ups) {
-                postCard.classList.add("border-red-500");   // Más negativos que positivos
-            } else {
-                postCard.classList.add("border-zinc-800");   // Empate o sin votos
-            }
-        }
-    });
-;
 
 onAuthStateChanged(auth,async(user)=>{
-
 currentUser = user;
-
 updateNavbar();
-
 if(user){
-
-document.getElementById("authModal")
-.classList.add("hidden");
-
+document.getElementById("authModal").classList.add("hidden");
 renderProfile();
-
 await loadUsers();
-
 }else{
-
-document.getElementById("authModal")
-.classList.remove("hidden");
-
+document.getElementById("authModal").classList.remove("hidden");
 }
-
 });
-
-
 </script>
-
 </body>
 </html>
