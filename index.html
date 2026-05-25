@@ -516,12 +516,12 @@ document.getElementById("postContent").value = "";
 document.getElementById("publishBtn")
 .addEventListener("click",createPost);
 
+// 1. FUNCIÓN RENDERIZAR POSTS (Solo dibuja el HTML, no asigna funciones onclick repetitivas)
 function renderPosts(posts){
 const container = document.getElementById("postsContainer");
 container.innerHTML = "";
 posts.forEach(post => {
 const div = document.createElement("div");
-// Le asignamos un ID único a la tarjeta del post para poder cambiar su borde dinámicamente
 div.id = `post-card-${post.id}`;
 div.className = `bg-zinc-950 border border-zinc-800 rounded-3xl p-5 transition-all duration-300`;
 div.innerHTML = `
@@ -536,10 +536,12 @@ div.innerHTML = `
 ${post.image? `<img src="${post.image}" class="mt-5 rounded-2xl w-full max-h-[500px] object-cover">`: ''}
 
 <div class="mt-5 flex gap-4 items-center border-b border-zinc-900 pb-4">
-  <div class="flex items-center bg-zinc-900 rounded-xl p-1 border border-zinc-800">
-    <button class="px-4 py-2 upvoteBtn text-zinc-500 hover:text-green-500 transition text-xl" data-id="${post.id}">▲</button>
-    <span id="counter-${post.id}" class="px-2 font-bold text-lg text-zinc-300">0</span>
-    <button class="px-4 py-2 downvoteBtn text-zinc-500 hover:text-red-500 transition text-xl" data-id="${post.id}">▼</button>
+  <div class="flex items-center bg-zinc-900 rounded-xl p-1 border border-zinc-800 gap-2">
+    <button class="px-3 py-2 upvoteBtn text-zinc-500 hover:text-green-500 transition text-xl" data-id="${post.id}">▲</button>
+    <span id="up-counter-${post.id}" class="font-bold text-green-500">0</span>
+    <span class="text-zinc-600">|</span>
+    <span id="down-counter-${post.id}" class="font-bold text-red-500">0</span>
+    <button class="px-3 py-2 downvoteBtn text-zinc-500 hover:text-red-500 transition text-xl" data-id="${post.id}">▼</button>
   </div>
   
   <button class="bg-zinc-900 px-5 py-3 rounded-xl followBtn" data-id="${post.authorId}">➕ Seguir</button>
@@ -557,14 +559,16 @@ ${post.image? `<img src="${post.image}" class="mt-5 rounded-2xl w-full max-h-[50
 `;
 container.appendChild(div);
 
-// Escuchar comentarios en tiempo real para ESTE post en específico
-const commentsQuery = query(collection(db, "comments"), where("postId", "==", post.id), orderBy("createdAt", "asc"));
+// Escucha en tiempo real de comentarios simplificada (Elimina el error de falta de índice en Firebase)
+const commentsQuery = query(collection(db, "comments"), where("postId", "==", post.id));
 onSnapshot(commentsQuery, (commentSnapshot) => {
     const commentListContainer = document.getElementById(`comments-list-${post.id}`);
     if (commentListContainer) {
         commentListContainer.innerHTML = "";
-        commentSnapshot.docs.forEach(doc => {
-            const comment = doc.data();
+        // Ordenamos localmente en JavaScript para evitar que Firebase bloquee la consulta
+        const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
+        
+        sortedDocs.forEach(comment => {
             const commentDiv = document.createElement("div");
             commentDiv.className = "bg-zinc-900/50 p-3 rounded-xl border border-zinc-900";
             commentDiv.innerHTML = `<strong>${comment.author}:</strong> <span class="text-zinc-300">${comment.text}</span>`;
@@ -573,80 +577,119 @@ onSnapshot(commentsQuery, (commentSnapshot) => {
     }
 });
 });
-
-// Evento para enviar comentarios
-document.querySelectorAll(".commentBtn").forEach(btn => {
-btn.onclick = async () => {
-if(!currentUser) { alert("Inicia sesión para comentar"); return; }
-const postId = btn.dataset.id;
-const input = document.getElementById(`comment-input-${postId}`);
-const text = input.value.trim();
-if(!text) return;
-
-await addDoc(collection(db, "comments"), {
-    postId,
-    text,
-    author: currentUser.displayName,
-    authorId: currentUser.uid,
-    createdAt: Date.now()
-});
-input.value = "";
-};
-});
-
-// Lógica para registrar un Voto Positivo (Upvote)
-document.querySelectorAll(".upvoteBtn").forEach(btn => {
-btn.onclick = async () => {
-if(!currentUser) { alert("Inicia sesión para votar"); return; }
-const voteId = `${currentUser.uid}_${btn.dataset.id}`;
-await setDoc(doc(db,"votes", voteId),{
-postId: btn.dataset.id,
-userId: currentUser.uid,
-type: "up",
-createdAt: Date.now()
-});
-};
-});
-
-// Lógica para registrar un Voto Negativo (Downvote)
-document.querySelectorAll(".downvoteBtn").forEach(btn => {
-btn.onclick = async () => {
-if(!currentUser) { alert("Inicia sesión para votar"); return; }
-const voteId = `${currentUser.uid}_${btn.dataset.id}`;
-await setDoc(doc(db,"votes", voteId),{
-postId: btn.dataset.id,
-userId: currentUser.uid,
-type: "down",
-createdAt: Date.now()
-});
-};
-});
-
-document.querySelectorAll(".followBtn").forEach(btn => {
-btn.onclick = async () => {
-if(!currentUser) { alert("Inicia sesión para seguir"); return; }
-await addDoc(collection(db,"followers"),{
-followerId:currentUser.uid,followingId:btn.dataset.id
-});
-alert("Ahora sigues a este usuario");
-};
-});
 }
 
-async function loadUsers(){
+// 2. ESCUCHADOR DE CLICS GLOBAL (Delegación de Eventos - Resuelve el conteo de 2 en 2 por completo)
+document.addEventListener("click", async (event) => {
+    const target = event.target;
 
-const snapshot =
-await getDocs(collection(db,"users"));
+    // Manejar Click en botón de comentario
+    if (target.classList.contains("commentBtn")) {
+        if(!currentUser) return alert("Inicia sesión para comentar");
+        const postId = target.dataset.id;
+        const input = document.getElementById(`comment-input-${postId}`);
+        const text = input.value.trim();
+        if(!text) return;
 
-allUsers =
-snapshot.docs.map(doc => ({
-id:doc.id,
-...doc.data()
-}));
+        await addDoc(collection(db, "comments"), {
+            postId,
+            text,
+            author: currentUser.displayName,
+            authorId: currentUser.uid,
+            createdAt: Date.now()
+        });
+        input.value = "";
+    }
 
-renderUsers();
+    // Manejar Click en Upvote
+    if (target.classList.contains("upvoteBtn")) {
+        if(!currentUser) return alert("Inicia sesión para votar");
+        const voteId = `${currentUser.uid}_${target.dataset.id}`;
+        await setDoc(doc(db, "votes", voteId), {
+            postId: target.dataset.id,
+            userId: currentUser.uid,
+            type: "up",
+            createdAt: Date.now()
+        });
+    }
 
-}
+    // Manejar Click en Downvote
+    if (target.classList.contains("downvoteBtn")) {
+        if(!currentUser) return alert("Inicia sesión para votar");
+        const voteId = `${currentUser.uid}_${target.dataset.id}`;
+        await setDoc(doc(db, "votes", voteId), {
+            postId: target.dataset.id,
+            userId: currentUser.uid,
+            type: "down",
+            createdAt: Date.now()
+        });
+    }
+
+    // Manejar Click en Seguir
+    if (target.classList.contains("followBtn")) {
+        if(!currentUser) return alert("Inicia sesión para seguir");
+        await addDoc(collection(db, "followers"), {
+            followerId: currentUser.uid, followingId: target.dataset.id
+        });
+        alert("Ahora sigues a este usuario");
+    }
+});
+
+// 2. ESCUCHADOR DE CLICS GLOBAL (Delegación de Eventos - Resuelve el conteo de 2 en 2 por completo)
+document.addEventListener("click", async (event) => {
+    const target = event.target;
+
+    // Manejar Click en botón de comentario
+    if (target.classList.contains("commentBtn")) {
+        if(!currentUser) return alert("Inicia sesión para comentar");
+        const postId = target.dataset.id;
+        const input = document.getElementById(`comment-input-${postId}`);
+        const text = input.value.trim();
+        if(!text) return;
+
+        await addDoc(collection(db, "comments"), {
+            postId,
+            text,
+            author: currentUser.displayName,
+            authorId: currentUser.uid,
+            createdAt: Date.now()
+        });
+        input.value = "";
+    }
+
+    // Manejar Click en Upvote
+    if (target.classList.contains("upvoteBtn")) {
+        if(!currentUser) return alert("Inicia sesión para votar");
+        const voteId = `${currentUser.uid}_${target.dataset.id}`;
+        await setDoc(doc(db, "votes", voteId), {
+            postId: target.dataset.id,
+            userId: currentUser.uid,
+            type: "up",
+            createdAt: Date.now()
+        });
+    }
+
+    // Manejar Click en Downvote
+    if (target.classList.contains("downvoteBtn")) {
+        if(!currentUser) return alert("Inicia sesión para votar");
+        const voteId = `${currentUser.uid}_${target.dataset.id}`;
+        await setDoc(doc(db, "votes", voteId), {
+            postId: target.dataset.id,
+            userId: currentUser.uid,
+            type: "down",
+            createdAt: Date.now()
+        });
+    }
+
+    // Manejar Click en Seguir
+    if (target.classList.contains("followBtn")) {
+        if(!currentUser) return alert("Inicia sesión para seguir");
+        await addDoc(collection(db, "followers"), {
+            followerId: currentUser.uid, followingId: target.dataset.id
+        });
+        alert("Ahora sigues a este usuario");
+    }
+});
 
 function renderUsers(){
 
@@ -981,47 +1024,76 @@ alert(error.message);
 document.getElementById("updatePhotoBtn")
 .addEventListener("click",updateProfilePhoto);
 
-// Escuchar todos los votos en tiempo real, actualizar contadores y enmarcar publicaciones
+// ESCUCHADOR GLOBAL DE VOTOS (Muestra positivos, negativos y cambia el color del marco)
 onSnapshot(collection(db, "votes"), (snapshot) => {
-    const scores = {};
+    // Almacenaremos contadores independientes por cada post
+    const postVotes = {};
 
     snapshot.docs.forEach(doc => {
         const vote = doc.data();
-        if (!scores[vote.postId]) scores[vote.postId] = 0;
+        if (!postVotes[vote.postId]) {
+            postVotes[vote.postId] = { up: 0, down: 0 };
+        }
         
-        if (vote.type === "up") scores[vote.postId] += 1;
-        if (vote.type === "down") scores[vote.postId] -= 1;
+        if (vote.type === "up") postVotes[vote.postId].up += 1;
+        if (vote.type === "down") postVotes[vote.postId].down += 1;
     });
 
-    // Procesar y pintar cada post según su puntaje
-    Object.keys(scores).forEach(postId => {
-        const counterElement = document.getElementById(`counter-${postId}`);
+    // Actualizar los elementos HTML en base a los conteos individuales
+    Object.keys(postVotes).forEach(postId => {
+        const upCounter = document.getElementById(`up-counter-${postId}`);
+        const downCounter = document.getElementById(`down-counter-${postId}`);
         const postCard = document.getElementById(`post-card-${postId}`);
-        const total = scores[postId];
+        
+        const ups = postVotes[postId].up;
+        const downs = postVotes[postId].down;
 
-        // 1. Actualizar número y color del contador
-        if (counterElement) {
-            counterElement.innerText = total;
-            if (total > 0) counterElement.className = "px-2 font-bold text-lg text-green-400";
-            else if (total < 0) counterElement.className = "px-2 font-bold text-lg text-red-400";
-            else counterElement.className = "px-2 font-bold text-lg text-zinc-300";
-        }
+        // Mostrar totales individuales en la interfaz
+        if (upCounter) upCounter.innerText = ups;
+        if (downCounter) downCounter.innerText = downs;
 
-        // 2. Cambiar dinámicamente el marco (borde) de la publicación
+        // Enmarcar la publicación comparando cuál voto es mayor
         if (postCard) {
-            // Limpiamos los bordes anteriores para que no se acumulen las clases
             postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-800");
 
-            if (total > 0) {
-                postCard.classList.add("border-green-500");
-            } else if (total < 0) {
-                postCard.classList.add("border-red-500");
+            if (ups > downs) {
+                postCard.classList.add("border-green-500"); // Más positivos que negativos
+            } else if (downs > ups) {
+                postCard.classList.add("border-red-500");   // Más negativos que positivos
             } else {
-                postCard.classList.add("border-zinc-800"); // Borde por defecto gris oscuro
+                postCard.classList.add("border-zinc-800");   // Empate o sin votos
             }
         }
     });
 });
+
+    // Actualizar los elementos HTML en base a los conteos individuales
+    Object.keys(postVotes).forEach(postId => {
+        const upCounter = document.getElementById(`up-counter-${postId}`);
+        const downCounter = document.getElementById(`down-counter-${postId}`);
+        const postCard = document.getElementById(`post-card-${postId}`);
+        
+        const ups = postVotes[postId].up;
+        const downs = postVotes[postId].down;
+
+        // Mostrar totales individuales en la interfaz
+        if (upCounter) upCounter.innerText = ups;
+        if (downCounter) downCounter.innerText = downs;
+
+        // Enmarcar la publicación comparando cuál voto es mayor
+        if (postCard) {
+            postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-800");
+
+            if (ups > downs) {
+                postCard.classList.add("border-green-500"); // Más positivos que negativos
+            } else if (downs > ups) {
+                postCard.classList.add("border-red-500");   // Más negativos que positivos
+            } else {
+                postCard.classList.add("border-zinc-800");   // Empate o sin votos
+            }
+        }
+    });
+;
 
 onAuthStateChanged(auth,async(user)=>{
 
