@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rankiu</title>
+  <title>Rankiu Firebase</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -25,10 +25,7 @@
 
 <body class="text-white min-h-screen">
 
-<!-- NAVBAR -->
-
 <nav class="border-b border-zinc-800 bg-black/80 backdrop-blur sticky top-0 z-50">
-
   <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 
     <div class="text-3xl font-bold text-green-400">
@@ -36,42 +33,23 @@
     </div>
 
     <div class="flex gap-3 items-center">
-
-      <button
-        onclick="showSection('feed')"
-        class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
+      <button onclick="showSection('feed')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
         Feed
       </button>
 
-      <button
-        onclick="showSection('profile')"
-        class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
+      <button onclick="showSection('profile')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
         Perfil
       </button>
 
-      <button
-        onclick="showSection('messages')"
-        class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
-        Mensajes
-      </button>
-
       <div id="navUser" class="flex items-center gap-3"></div>
-
     </div>
 
   </div>
-
 </nav>
-
-<!-- MAIN -->
 
 <div class="max-w-7xl mx-auto px-4 py-6">
 
-  <!-- FEED -->
-
   <section id="feedSection">
-
-    <!-- CREATE POST -->
 
     <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-6">
 
@@ -90,20 +68,16 @@
         class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none"></textarea>
 
       <button
-        onclick="createPost()"
+        id="publishBtn"
         class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
         Publicar
       </button>
 
     </div>
 
-    <!-- POSTS -->
-
     <div id="postsContainer" class="space-y-5"></div>
 
   </section>
-
-  <!-- PROFILE -->
 
   <section id="profileSection" class="hidden">
 
@@ -121,67 +95,12 @@
       <div class="bg-zinc-900 rounded-2xl p-5 mt-4">
 
         <div class="text-zinc-400 text-sm">
-          TOTAL DE PUNTOS
+          EMAIL
         </div>
 
         <div
-          id="profilePoints"
-          class="text-5xl font-bold mt-2 text-green-400">
-          0
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
-
-  <!-- MESSAGES -->
-
-  <section id="messagesSection" class="hidden">
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-
-      <!-- USERS -->
-
-      <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-4 h-[700px] overflow-y-auto scrollbar">
-
-        <h2 class="text-2xl font-bold mb-4">
-          Usuarios
-        </h2>
-
-        <div id="usersList" class="space-y-3"></div>
-
-      </div>
-
-      <!-- CHAT -->
-
-      <div class="md:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl flex flex-col h-[700px]">
-
-        <div
-          id="chatHeader"
-          class="border-b border-zinc-800 p-4 text-xl font-bold">
-          Selecciona un usuario
-        </div>
-
-        <div
-          id="chatMessages"
-          class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar">
-        </div>
-
-        <div class="p-4 border-t border-zinc-800 flex gap-3">
-
-          <input
-            id="messageInput"
-            placeholder="Escribe un mensaje..."
-            class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
-
-          <button
-            onclick="sendMessage()"
-            class="bg-green-500 hover:bg-green-400 text-black font-bold px-6 rounded-xl">
-            Enviar
-          </button>
-
+          id="profileEmail"
+          class="text-xl font-bold mt-2 text-green-400">
         </div>
 
       </div>
@@ -192,11 +111,9 @@
 
 </div>
 
-<!-- AUTH MODAL -->
-
 <div
   id="authModal"
-  class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+  class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 
   <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
 
@@ -216,13 +133,11 @@
 
     </div>
 
-    <!-- LOGIN -->
-
     <div id="loginBox">
 
       <input
-        id="loginUsername"
-        placeholder="Usuario"
+        id="loginEmail"
+        placeholder="Email"
         class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
       <input
@@ -232,14 +147,12 @@
         class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
       <button
-        onclick="login()"
+        id="loginBtn"
         class="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-xl">
         Iniciar sesión
       </button>
 
     </div>
-
-    <!-- REGISTER -->
 
     <div id="registerBox" class="hidden">
 
@@ -249,19 +162,18 @@
         class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
       <input
+        id="registerEmail"
+        placeholder="Email"
+        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+      <input
         type="password"
         id="registerPassword"
         placeholder="Contraseña"
         class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <input
-        type="file"
-        id="registerAvatar"
-        accept="image/*"
-        class="w-full mb-4"/>
-
       <button
-        onclick="register()"
+        id="registerBtn"
         class="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-xl">
         Crear cuenta
       </button>
@@ -272,100 +184,44 @@
 
 </div>
 
-<!-- LOGIN REQUIRED -->
+<script type="module">
 
-<div
-  id="loginRequired"
-  class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
-  <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 text-center max-w-sm">
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
-    <h2 class="text-2xl font-bold mb-4">
-      Debes iniciar sesión
-    </h2>
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    <button
-      onclick="openAuthModal()"
-      class="bg-green-500 text-black font-bold px-6 py-3 rounded-xl">
-      Iniciar sesión
-    </button>
+const firebaseConfig = {
+  apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
+  authDomain: "rankiu-5da90.firebaseapp.com",
+  projectId: "rankiu-5da90",
+  storageBucket: "rankiu-5da90.firebasestorage.app",
+  messagingSenderId: "365366406441",
+  appId: "1:365366406441:web:4e4a068b57d93d21061b38"
+};
 
-  </div>
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-</div>
-
-<script>
-
-/* =========================
-   STORAGE
-========================= */
-
-let users =
-  JSON.parse(localStorage.getItem("rankiu_users"))
-  || [];
-
-let posts =
-  JSON.parse(localStorage.getItem("rankiu_posts"))
-  || [];
-
-let messages =
-  JSON.parse(localStorage.getItem("rankiu_messages"))
-  || [];
-
-let currentUser =
-  JSON.parse(localStorage.getItem("rankiu_currentUser"))
-  || null;
-
-let selectedChatUser = null;
-
-/* =========================
-   SAVE
-========================= */
-
-function saveData(){
-
-  localStorage.setItem(
-    "rankiu_users",
-    JSON.stringify(users)
-  );
-
-  localStorage.setItem(
-    "rankiu_posts",
-    JSON.stringify(posts)
-  );
-
-  localStorage.setItem(
-    "rankiu_messages",
-    JSON.stringify(messages)
-  );
-
-  localStorage.setItem(
-    "rankiu_currentUser",
-    JSON.stringify(currentUser)
-  );
-
-}
-
-/* =========================
-   AUTH MODAL
-========================= */
-
-function openAuthModal(){
-
-  document.getElementById("authModal")
-    .classList.remove("hidden");
-
-  document.getElementById("authModal")
-    .classList.add("flex");
-
-}
-
-function closeAuthModal(){
-
-  document.getElementById("authModal")
-    .classList.add("hidden");
-
-}
+let currentUser = null;
+let posts = [];
 
 function switchAuth(type){
 
@@ -389,162 +245,82 @@ function switchAuth(type){
 
 }
 
-/* =========================
-   REGISTER
-========================= */
+window.switchAuth = switchAuth;
 
-function register(){
+async function register(){
 
   const username =
-    document.getElementById("registerUsername")
-      .value.trim();
+    document.getElementById("registerUsername").value.trim();
+
+  const email =
+    document.getElementById("registerEmail").value.trim();
 
   const password =
-    document.getElementById("registerPassword")
-      .value.trim();
+    document.getElementById("registerPassword").value.trim();
 
-  const avatarFile =
-    document.getElementById("registerAvatar")
-      .files[0];
-
-  if(!username || !password){
-
+  if(!username || !email || !password){
     alert("Completa todos los campos");
-
     return;
-
   }
 
-  const exists =
-    users.find(u => u.username === username);
+  try{
 
-  if(exists){
-
-    alert("Ese usuario ya existe");
-
-    return;
-
-  }
-
-  if(avatarFile){
-
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-
-      createUser(
-        username,
-        password,
-        e.target.result
+    const userCredential =
+      await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
       );
 
-    };
+    await updateProfile(userCredential.user,{
+      displayName: username
+    });
 
-    reader.readAsDataURL(avatarFile);
+    alert("Cuenta creada correctamente");
 
-  }else{
+  }catch(error){
 
-    createUser(
-      username,
-      password,
-      "https://i.pravatar.cc/150"
-    );
+    alert(error.message);
 
   }
 
 }
 
-function createUser(
-  username,
-  password,
-  avatar
-){
+async function login(){
 
-  const user = {
-
-    id:Date.now(),
-
-    username,
-
-    password,
-
-    avatar
-
-  };
-
-  users.push(user);
-
-  currentUser = user;
-
-  saveData();
-
-  updateNavbar();
-
-  closeAuthModal();
-
-  renderAll();
-
-}
-
-/* =========================
-   LOGIN
-========================= */
-
-function login(){
-
-  const username =
-    document.getElementById("loginUsername")
-      .value.trim();
+  const email =
+    document.getElementById("loginEmail").value.trim();
 
   const password =
-    document.getElementById("loginPassword")
-      .value.trim();
+    document.getElementById("loginPassword").value.trim();
 
-  const user =
-    users.find(u =>
-      u.username === username &&
-      u.password === password
+  try{
+
+    await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
     );
 
-  if(!user){
+  }catch(error){
 
-    alert("Credenciales incorrectas");
-
-    return;
+    alert(error.message);
 
   }
 
-  currentUser = user;
+}
 
-  saveData();
+async function logout(){
 
-  updateNavbar();
-
-  closeAuthModal();
-
-  renderAll();
+  await signOut(auth);
 
 }
 
-/* =========================
-   LOGOUT
-========================= */
+document.getElementById("registerBtn")
+  .addEventListener("click", register);
 
-function logout(){
-
-  currentUser = null;
-
-  saveData();
-
-  updateNavbar();
-
-  renderAll();
-
-}
-
-/* =========================
-   NAVBAR
-========================= */
+document.getElementById("loginBtn")
+  .addEventListener("click", login);
 
 function updateNavbar(){
 
@@ -554,77 +330,45 @@ function updateNavbar(){
   if(currentUser){
 
     nav.innerHTML = `
-
-      <img
-        src="${currentUser.avatar}"
-        class="w-12 h-12 rounded-full object-cover border-2 border-green-500">
-
       <div class="font-bold">
-        ${currentUser.username}
+        ${currentUser.displayName || 'Usuario'}
       </div>
 
       <button
-        onclick="logout()"
+        id="logoutBtn"
         class="bg-red-500 px-4 py-2 rounded-xl text-black font-bold">
         Salir
       </button>
-
     `;
+
+    setTimeout(()=>{
+
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", logout);
+
+    },100);
 
   }else{
 
     nav.innerHTML = `
-
-      <button
-        onclick="openAuthModal()"
-        class="bg-green-500 text-black font-bold px-5 py-3 rounded-xl">
-        Login / Registro
-      </button>
-
+      <div class="text-zinc-400">
+        Invitado
+      </div>
     `;
 
   }
 
 }
 
-/* =========================
-   LOGIN REQUIRED
-========================= */
-
-function requireLogin(){
+async function createPost(){
 
   if(!currentUser){
 
-    document.getElementById("loginRequired")
-      .classList.remove("hidden");
-
-    document.getElementById("loginRequired")
-      .classList.add("flex");
-
-    return true;
+    alert("Debes iniciar sesión");
+    return;
 
   }
-
-  return false;
-
-}
-
-document
-  .getElementById("loginRequired")
-  .addEventListener("click", () => {
-
-    document.getElementById("loginRequired")
-      .classList.add("hidden");
-
-  });
-
-/* =========================
-   POSTS
-========================= */
-
-function createPost(){
-
-  if(requireLogin()) return;
 
   const title =
     document.getElementById("postTitle")
@@ -637,108 +381,42 @@ function createPost(){
   if(!title || !content){
 
     alert("Completa todos los campos");
-
     return;
 
   }
 
-  posts.unshift({
+  try{
 
-    id:Date.now(),
+    await addDoc(collection(db,"posts"),{
 
-    title,
+      title,
+      content,
 
-    content,
+      author:
+        currentUser.displayName || "Usuario",
 
-    author:currentUser.username,
+      authorId:
+        currentUser.uid,
 
-    authorAvatar:currentUser.avatar,
+      createdAt:
+        serverTimestamp()
 
-    votes:{},
+    });
 
-    comments:[],
+    document.getElementById("postTitle").value = "";
+    document.getElementById("postContent").value = "";
 
-    createdAt:new Date()
+  }catch(error){
 
-  });
-
-  saveData();
-
-  renderPosts();
-
-  document.getElementById("postTitle").value = "";
-  document.getElementById("postContent").value = "";
-
-}
-
-function getPostScore(post){
-
-  return Object.values(post.votes)
-    .reduce((a,b)=>a+b,0);
-
-}
-
-function vote(postId, value){
-
-  if(requireLogin()) return;
-
-  const post =
-    posts.find(p => p.id === postId);
-
-  const currentVote =
-    post.votes[currentUser.username];
-
-  if(currentVote === value){
-
-    delete post.votes[currentUser.username];
-
-  }else{
-
-    post.votes[currentUser.username] = value;
+    alert(error.message);
 
   }
 
-  saveData();
-
-  renderPosts();
-
-  renderProfile();
-
 }
 
-function addComment(postId){
-
-  if(requireLogin()) return;
-
-  const input =
-    document.getElementById(`comment-${postId}`);
-
-  const text = input.value.trim();
-
-  if(!text) return;
-
-  const post =
-    posts.find(p => p.id === postId);
-
-  post.comments.push({
-
-    id:Date.now(),
-
-    author:currentUser.username,
-
-    avatar:currentUser.avatar,
-
-    text
-
-  });
-
-  input.value = "";
-
-  saveData();
-
-  renderPosts();
-
-}
+document
+  .getElementById("publishBtn")
+  .addEventListener("click", createPost);
 
 function renderPosts(){
 
@@ -749,66 +427,31 @@ function renderPosts(){
 
   posts.forEach(post => {
 
-    const score =
-      getPostScore(post);
-
-    let borderClass =
-      "border-zinc-700";
-
-    if(score > 0){
-
-      borderClass =
-        "border-green-500";
-
-    }
-
-    if(score < 0){
-
-      borderClass =
-        "border-red-500";
-
-    }
-
-    const userVote =
-      currentUser
-      ? post.votes[currentUser.username]
-      : null;
-
     const div =
       document.createElement("div");
 
     div.className = `
       bg-zinc-950
-      border-2
-      ${borderClass}
+      border
+      border-zinc-800
       rounded-3xl
       p-5
     `;
 
     div.innerHTML = `
 
-      <div class="flex gap-4">
-
-        <img
-          src="${post.authorAvatar}"
-          class="w-14 h-14 rounded-full object-cover">
-
-        <div>
-
-          <div class="font-bold text-lg">
-            ${post.author}
-          </div>
-
-          <div class="text-zinc-500 text-sm">
-            ${new Date(post.createdAt)
-              .toLocaleString()}
-          </div>
-
-        </div>
-
+      <div class="font-bold text-green-400 text-lg">
+        ${post.author}
       </div>
 
-      <h2 class="text-2xl font-bold mt-5">
+      <div class="text-zinc-500 text-sm mt-1">
+        ${post.createdAt
+          ? new Date(post.createdAt.seconds * 1000)
+            .toLocaleString()
+          : "Ahora"}
+      </div>
+
+      <h2 class="text-2xl font-bold mt-4">
         ${post.title}
       </h2>
 
@@ -816,91 +459,6 @@ function renderPosts(){
         ${post.content}
       </p>
 
-      <!-- VOTES -->
-
-      <div class="flex items-center gap-4 mt-5">
-
-        <button
-          onclick="vote(${post.id},1)"
-          class="
-            px-4 py-2 rounded-xl
-            ${userVote === 1
-              ? 'bg-green-500 text-black'
-              : 'bg-zinc-900'}
-          ">
-
-          ▲
-
-        </button>
-
-        <div class="font-bold text-xl">
-          ${score}
-        </div>
-
-        <button
-          onclick="vote(${post.id},-1)"
-          class="
-            px-4 py-2 rounded-xl
-            ${userVote === -1
-              ? 'bg-red-500 text-black'
-              : 'bg-zinc-900'}
-          ">
-
-          ▼
-
-        </button>
-
-      </div>
-
-      <!-- COMMENTS -->
-
-      <div class="mt-6 border-t border-zinc-800 pt-5">
-
-        <div class="space-y-4">
-
-          ${post.comments.map(comment => `
-
-            <div class="flex gap-3">
-
-              <img
-                src="${comment.avatar}"
-                class="w-10 h-10 rounded-full object-cover">
-
-              <div class="bg-zinc-900 rounded-2xl px-4 py-3 flex-1">
-
-                <div class="font-bold">
-                  ${comment.author}
-                </div>
-
-                <div class="text-zinc-300 mt-1">
-                  ${comment.text}
-                </div>
-
-              </div>
-
-            </div>
-
-          `).join("")}
-
-        </div>
-
-        <div class="flex gap-3 mt-5">
-
-          <input
-            id="comment-${post.id}"
-            placeholder="Escribe un comentario..."
-            class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4">
-
-          <button
-            onclick="addComment(${post.id})"
-            class="bg-green-500 text-black font-bold px-5 rounded-xl">
-            Enviar
-          </button>
-
-        </div>
-
-      </div>
-
     `;
 
     container.appendChild(div);
@@ -908,212 +466,24 @@ function renderPosts(){
   });
 
 }
-
-/* =========================
-   PROFILE
-========================= */
 
 function renderProfile(){
 
-  if(!currentUser){
-
-    document.getElementById("profileUsername")
-      .innerText = "Invitado";
-
-    document.getElementById("profilePoints")
-      .innerText = "0";
-
-    return;
-
-  }
-
-  document.getElementById("profileAvatar")
-    .src = currentUser.avatar;
+  if(!currentUser) return;
 
   document.getElementById("profileUsername")
-    .innerText = currentUser.username;
-
-  let totalPoints = 0;
-
-  posts.forEach(post => {
-
-    if(post.author === currentUser.username){
-
-      totalPoints += getPostScore(post);
-
-    }
-
-  });
-
-  document.getElementById("profilePoints")
-    .innerText = totalPoints;
-
-}
-
-/* =========================
-   MESSAGES
-========================= */
-
-function renderUsers(){
-
-  const container =
-    document.getElementById("usersList");
-
-  container.innerHTML = "";
-
-  users
-    .filter(u =>
-      !currentUser ||
-      u.username !== currentUser.username
-    )
-    .forEach(user => {
-
-      const div =
-        document.createElement("div");
-
-      div.className = `
-        flex items-center gap-3
-        bg-zinc-900
-        rounded-2xl
-        p-3
-        cursor-pointer
-        hover:bg-zinc-800
-      `;
-
-      div.onclick = () => {
-
-        if(requireLogin()) return;
-
-        selectedChatUser = user;
-
-        renderChat();
-
-      };
-
-      div.innerHTML = `
-
-        <img
-          src="${user.avatar}"
-          class="w-12 h-12 rounded-full object-cover">
-
-        <div class="font-bold">
-          ${user.username}
-        </div>
-
-      `;
-
-      container.appendChild(div);
-
-    });
-
-}
-
-function renderChat(){
-
-  if(!selectedChatUser) return;
-
-  document.getElementById("chatHeader")
     .innerText =
-      selectedChatUser.username;
+      currentUser.displayName || "Usuario";
 
-  const container =
-    document.getElementById("chatMessages");
+  document.getElementById("profileEmail")
+    .innerText =
+      currentUser.email;
 
-  container.innerHTML = "";
-
-  const convo =
-    messages.filter(msg =>
-
-      (
-        msg.from === currentUser.username &&
-        msg.to === selectedChatUser.username
-      )
-
-      ||
-
-      (
-        msg.to === currentUser.username &&
-        msg.from === selectedChatUser.username
-      )
-
-    );
-
-  convo.forEach(msg => {
-
-    const mine =
-      msg.from === currentUser.username;
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      `flex ${mine ? 'justify-end' : 'justify-start'}`;
-
-    div.innerHTML = `
-
-      <div class="
-        max-w-[70%]
-        px-4 py-3 rounded-2xl
-        ${mine
-          ? 'bg-green-500 text-black'
-          : 'bg-zinc-800'}
-      ">
-
-        ${msg.text}
-
-      </div>
-
-    `;
-
-    container.appendChild(div);
-
-  });
+  document.getElementById("profileAvatar")
+    .src =
+      "https://i.pravatar.cc/300";
 
 }
-
-function sendMessage(){
-
-  if(requireLogin()) return;
-
-  if(!selectedChatUser){
-
-    alert("Selecciona un usuario");
-
-    return;
-
-  }
-
-  const input =
-    document.getElementById("messageInput");
-
-  const text =
-    input.value.trim();
-
-  if(!text) return;
-
-  messages.push({
-
-    id:Date.now(),
-
-    from:currentUser.username,
-
-    to:selectedChatUser.username,
-
-    text
-
-  });
-
-  input.value = "";
-
-  saveData();
-
-  renderChat();
-
-}
-
-/* =========================
-   NAVIGATION
-========================= */
 
 function showSection(section){
 
@@ -1123,10 +493,6 @@ function showSection(section){
 
   document
     .getElementById("profileSection")
-    .classList.add("hidden");
-
-  document
-    .getElementById("messagesSection")
     .classList.add("hidden");
 
   if(section === "feed"){
@@ -1145,53 +511,51 @@ function showSection(section){
 
   }
 
-  if(section === "messages"){
+}
 
-    document
-      .getElementById("messagesSection")
+window.showSection = showSection;
+
+const q =
+  query(
+    collection(db,"posts"),
+    orderBy("createdAt","desc")
+  );
+
+onSnapshot(q,(snapshot)=>{
+
+  posts =
+    snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+  renderPosts();
+
+});
+
+onAuthStateChanged(auth,(user)=>{
+
+  currentUser = user;
+
+  updateNavbar();
+
+  renderProfile();
+
+  if(user){
+
+    document.getElementById("authModal")
+      .classList.add("hidden");
+
+  }else{
+
+    document.getElementById("authModal")
       .classList.remove("hidden");
 
   }
 
-}
-
-/* =========================
-   INIT
-========================= */
-
-function renderAll(){
-
-  renderPosts();
-
-  renderProfile();
-
-  renderUsers();
-
-}
-
-updateNavbar();
-
-renderAll();
+});
 
 </script>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
-    authDomain: "rankiu-5da90.firebaseapp.com",
-    projectId: "rankiu-5da90",
-    storageBucket: "rankiu-5da90.firebasestorage.app",
-    messagingSenderId: "365366406441",
-    appId: "1:365366406441:web:4e4a068b57d93d21061b38"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
 </body>
 </html>
