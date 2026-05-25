@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rankiu</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body{
+      background:#050505;
+    }
+
+    .scrollbar::-webkit-scrollbar{
+      width:6px;
+    }
+
+    .scrollbar::-webkit-scrollbar-thumb{
+      background:#222;
+      border-radius:20px;
+    }
+  </style>
+</head>
+
+<body class="text-white min-h-screen">
+
+<!-- NAVBAR -->
+
+<nav class="border-b border-zinc-800 bg-black/80 backdrop-blur sticky top-0 z-50">
+
+  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+
+    <div class="text-3xl font-bold text-green-400">
+      rankiu
+    </div>
+
+    <div class="flex gap-3 items-center">
+
+      <button
+        onclick="showSection('feed')"
+        class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
+        Feed
+      </button>
+
+      <button
+        onclick="showSection('profile')"
+        class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
+        Perfil
+      </button>
+
+      <button
+        onclick="showSection('messages')"
+        class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
+        Mensajes
+      </button>
+
+      <div id="navUser" class="flex items-center gap-3"></div>
+
+    </div>
+
+  </div>
+
+</nav>
+
+<!-- MAIN -->
+
+<div class="max-w-7xl mx-auto px-4 py-6">
+
+  <!-- FEED -->
+
+  <section id="feedSection">
+
+    <!-- CREATE POST -->
+
+    <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-6">
+
+      <h2 class="text-2xl font-bold mb-4">
+        Crear publicación
+      </h2>
+
+      <input
+        id="postTitle"
+        placeholder="Título"
+        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+      <textarea
+        id="postContent"
+        placeholder="¿Qué quieres compartir?"
+        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none"></textarea>
+
+      <button
+        onclick="createPost()"
+        class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
+        Publicar
+      </button>
+
+    </div>
+
+    <!-- POSTS -->
+
+    <div id="postsContainer" class="space-y-5"></div>
+
+  </section>
+
+  <!-- PROFILE -->
+
+  <section id="profileSection" class="hidden">
+
+    <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 max-w-xl mx-auto text-center">
+
+      <img
+        id="profileAvatar"
+        class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-green-500 mb-5">
+
+      <h2
+        id="profileUsername"
+        class="text-3xl font-bold mb-3">
+      </h2>
+
+      <div class="bg-zinc-900 rounded-2xl p-5 mt-4">
+
+        <div class="text-zinc-400 text-sm">
+          TOTAL DE PUNTOS
+        </div>
+
+        <div
+          id="profilePoints"
+          class="text-5xl font-bold mt-2 text-green-400">
+          0
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- MESSAGES -->
+
+  <section id="messagesSection" class="hidden">
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+      <!-- USERS -->
+
+      <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-4 h-[700px] overflow-y-auto scrollbar">
+
+        <h2 class="text-2xl font-bold mb-4">
+          Usuarios
+        </h2>
+
+        <div id="usersList" class="space-y-3"></div>
+
+      </div>
+
+      <!-- CHAT -->
+
+      <div class="md:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl flex flex-col h-[700px]">
+
+        <div
+          id="chatHeader"
+          class="border-b border-zinc-800 p-4 text-xl font-bold">
+          Selecciona un usuario
+        </div>
+
+        <div
+          id="chatMessages"
+          class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar">
+        </div>
+
+        <div class="p-4 border-t border-zinc-800 flex gap-3">
+
+          <input
+            id="messageInput"
+            placeholder="Escribe un mensaje..."
+            class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+          <button
+            onclick="sendMessage()"
+            class="bg-green-500 hover:bg-green-400 text-black font-bold px-6 rounded-xl">
+            Enviar
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+<!-- AUTH MODAL -->
+
+<div
+  id="authModal"
+  class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+
+  <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
+
+    <div class="flex gap-3 mb-6">
+
+      <button
+        onclick="switchAuth('login')"
+        class="flex-1 bg-zinc-900 rounded-xl py-3">
+        Login
+      </button>
+
+      <button
+        onclick="switchAuth('register')"
+        class="flex-1 bg-zinc-900 rounded-xl py-3">
+        Registro
+      </button>
+
+    </div>
+
+    <!-- LOGIN -->
+
+    <div id="loginBox">
+
+      <input
+        id="loginUsername"
+        placeholder="Usuario"
+        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+      <input
+        type="password"
+        id="loginPassword"
+        placeholder="Contraseña"
+        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+      <button
+        onclick="login()"
+        class="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-xl">
+        Iniciar sesión
+      </button>
+
+    </div>
+
+    <!-- REGISTER -->
+
+    <div id="registerBox" class="hidden">
+
+      <input
+        id="registerUsername"
+        placeholder="Usuario"
+        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+      <input
+        type="password"
+        id="registerPassword"
+        placeholder="Contraseña"
+        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+      <input
+        type="file"
+        id="registerAvatar"
+        accept="image/*"
+        class="w-full mb-4"/>
+
+      <button
+        onclick="register()"
+        class="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-xl">
+        Crear cuenta
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- LOGIN REQUIRED -->
+
+<div
+  id="loginRequired"
+  class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+
+  <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 text-center max-w-sm">
+
+    <h2 class="text-2xl font-bold mb-4">
+      Debes iniciar sesión
+    </h2>
+
+    <button
+      onclick="openAuthModal()"
+      class="bg-green-500 text-black font-bold px-6 py-3 rounded-xl">
+      Iniciar sesión
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+/* =========================
+   STORAGE
+========================= */
+
+let users =
+  JSON.parse(localStorage.getItem("rankiu_users"))
+  || [];
+
+let posts =
+  JSON.parse(localStorage.getItem("rankiu_posts"))
+  || [];
+
+let messages =
+  JSON.parse(localStorage.getItem("rankiu_messages"))
+  || [];
+
+let currentUser =
+  JSON.parse(localStorage.getItem("rankiu_currentUser"))
+  || null;
+
+let selectedChatUser = null;
+
+/* =========================
+   SAVE
+========================= */
+
+function saveData(){
+
+  localStorage.setItem(
+    "rankiu_users",
+    JSON.stringify(users)
+  );
+
+  localStorage.setItem(
+    "rankiu_posts",
+    JSON.stringify(posts)
+  );
+
+  localStorage.setItem(
+    "rankiu_messages",
+    JSON.stringify(messages)
+  );
+
+  localStorage.setItem(
+    "rankiu_currentUser",
+    JSON.stringify(currentUser)
+  );
+
+}
+
+/* =========================
+   AUTH MODAL
+========================= */
+
+function openAuthModal(){
+
+  document.getElementById("authModal")
+    .classList.remove("hidden");
+
+  document.getElementById("authModal")
+    .classList.add("flex");
+
+}
+
+function closeAuthModal(){
+
+  document.getElementById("authModal")
+    .classList.add("hidden");
+
+}
+
+function switchAuth(type){
+
+  if(type === "login"){
+
+    document.getElementById("loginBox")
+      .classList.remove("hidden");
+
+    document.getElementById("registerBox")
+      .classList.add("hidden");
+
+  }else{
+
+    document.getElementById("loginBox")
+      .classList.add("hidden");
+
+    document.getElementById("registerBox")
+      .classList.remove("hidden");
+
+  }
+
+}
+
+/* =========================
+   REGISTER
+========================= */
+
+function register(){
+
+  const username =
+    document.getElementById("registerUsername")
+      .value.trim();
+
+  const password =
+    document.getElementById("registerPassword")
+      .value.trim();
+
+  const avatarFile =
+    document.getElementById("registerAvatar")
+      .files[0];
+
+  if(!username || !password){
+
+    alert("Completa todos los campos");
+
+    return;
+
+  }
+
+  const exists =
+    users.find(u => u.username === username);
+
+  if(exists){
+
+    alert("Ese usuario ya existe");
+
+    return;
+
+  }
+
+  if(avatarFile){
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+      createUser(
+        username,
+        password,
+        e.target.result
+      );
+
+    };
+
+    reader.readAsDataURL(avatarFile);
+
+  }else{
+
+    createUser(
+      username,
+      password,
+      "https://i.pravatar.cc/150"
+    );
+
+  }
+
+}
+
+function createUser(
+  username,
+  password,
+  avatar
+){
+
+  const user = {
+
+    id:Date.now(),
+
+    username,
+
+    password,
+
+    avatar
+
+  };
+
+  users.push(user);
+
+  currentUser = user;
+
+  saveData();
+
+  updateNavbar();
+
+  closeAuthModal();
+
+  renderAll();
+
+}
+
+/* =========================
+   LOGIN
+========================= */
+
+function login(){
+
+  const username =
+    document.getElementById("loginUsername")
+      .value.trim();
+
+  const password =
+    document.getElementById("loginPassword")
+      .value.trim();
+
+  const user =
+    users.find(u =>
+      u.username === username &&
+      u.password === password
+    );
+
+  if(!user){
+
+    alert("Credenciales incorrectas");
+
+    return;
+
+  }
+
+  currentUser = user;
+
+  saveData();
+
+  updateNavbar();
+
+  closeAuthModal();
+
+  renderAll();
+
+}
+
+/* =========================
+   LOGOUT
+========================= */
+
+function logout(){
+
+  currentUser = null;
+
+  saveData();
+
+  updateNavbar();
+
+  renderAll();
+
+}
+
+/* =========================
+   NAVBAR
+========================= */
+
+function updateNavbar(){
+
+  const nav =
+    document.getElementById("navUser");
+
+  if(currentUser){
+
+    nav.innerHTML = `
+
+      <img
+        src="${currentUser.avatar}"
+        class="w-12 h-12 rounded-full object-cover border-2 border-green-500">
+
+      <div class="font-bold">
+        ${currentUser.username}
+      </div>
+
+      <button
+        onclick="logout()"
+        class="bg-red-500 px-4 py-2 rounded-xl text-black font-bold">
+        Salir
+      </button>
+
+    `;
+
+  }else{
+
+    nav.innerHTML = `
+
+      <button
+        onclick="openAuthModal()"
+        class="bg-green-500 text-black font-bold px-5 py-3 rounded-xl">
+        Login / Registro
+      </button>
+
+    `;
+
+  }
+
+}
+
+/* =========================
+   LOGIN REQUIRED
+========================= */
+
+function requireLogin(){
+
+  if(!currentUser){
+
+    document.getElementById("loginRequired")
+      .classList.remove("hidden");
+
+    document.getElementById("loginRequired")
+      .classList.add("flex");
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+document
+  .getElementById("loginRequired")
+  .addEventListener("click", () => {
+
+    document.getElementById("loginRequired")
+      .classList.add("hidden");
+
+  });
+
+/* =========================
+   POSTS
+========================= */
+
+function createPost(){
+
+  if(requireLogin()) return;
+
+  const title =
+    document.getElementById("postTitle")
+      .value.trim();
+
+  const content =
+    document.getElementById("postContent")
+      .value.trim();
+
+  if(!title || !content){
+
+    alert("Completa todos los campos");
+
+    return;
+
+  }
+
+  posts.unshift({
+
+    id:Date.now(),
+
+    title,
+
+    content,
+
+    author:currentUser.username,
+
+    authorAvatar:currentUser.avatar,
+
+    votes:{},
+
+    comments:[],
+
+    createdAt:new Date()
+
+  });
+
+  saveData();
+
+  renderPosts();
+
+  document.getElementById("postTitle").value = "";
+  document.getElementById("postContent").value = "";
+
+}
+
+function getPostScore(post){
+
+  return Object.values(post.votes)
+    .reduce((a,b)=>a+b,0);
+
+}
+
+function vote(postId, value){
+
+  if(requireLogin()) return;
+
+  const post =
+    posts.find(p => p.id === postId);
+
+  const currentVote =
+    post.votes[currentUser.username];
+
+  if(currentVote === value){
+
+    delete post.votes[currentUser.username];
+
+  }else{
+
+    post.votes[currentUser.username] = value;
+
+  }
+
+  saveData();
+
+  renderPosts();
+
+  renderProfile();
+
+}
+
+function addComment(postId){
+
+  if(requireLogin()) return;
+
+  const input =
+    document.getElementById(`comment-${postId}`);
+
+  const text = input.value.trim();
+
+  if(!text) return;
+
+  const post =
+    posts.find(p => p.id === postId);
+
+  post.comments.push({
+
+    id:Date.now(),
+
+    author:currentUser.username,
+
+    avatar:currentUser.avatar,
+
+    text
+
+  });
+
+  input.value = "";
+
+  saveData();
+
+  renderPosts();
+
+}
+
+function renderPosts(){
+
+  const container =
+    document.getElementById("postsContainer");
+
+  container.innerHTML = "";
+
+  posts.forEach(post => {
+
+    const score =
+      getPostScore(post);
+
+    let borderClass =
+      "border-zinc-700";
+
+    if(score > 0){
+
+      borderClass =
+        "border-green-500";
+
+    }
+
+    if(score < 0){
+
+      borderClass =
+        "border-red-500";
+
+    }
+
+    const userVote =
+      currentUser
+      ? post.votes[currentUser.username]
+      : null;
+
+    const div =
+      document.createElement("div");
+
+    div.className = `
+      bg-zinc-950
+      border-2
+      ${borderClass}
+      rounded-3xl
+      p-5
+    `;
+
+    div.innerHTML = `
+
+      <div class="flex gap-4">
+
+        <img
+          src="${post.authorAvatar}"
+          class="w-14 h-14 rounded-full object-cover">
+
+        <div>
+
+          <div class="font-bold text-lg">
+            ${post.author}
+          </div>
+
+          <div class="text-zinc-500 text-sm">
+            ${new Date(post.createdAt)
+              .toLocaleString()}
+          </div>
+
+        </div>
+
+      </div>
+
+      <h2 class="text-2xl font-bold mt-5">
+        ${post.title}
+      </h2>
+
+      <p class="text-zinc-300 mt-3 whitespace-pre-wrap">
+        ${post.content}
+      </p>
+
+      <!-- VOTES -->
+
+      <div class="flex items-center gap-4 mt-5">
+
+        <button
+          onclick="vote(${post.id},1)"
+          class="
+            px-4 py-2 rounded-xl
+            ${userVote === 1
+              ? 'bg-green-500 text-black'
+              : 'bg-zinc-900'}
+          ">
+
+          ▲
+
+        </button>
+
+        <div class="font-bold text-xl">
+          ${score}
+        </div>
+
+        <button
+          onclick="vote(${post.id},-1)"
+          class="
+            px-4 py-2 rounded-xl
+            ${userVote === -1
+              ? 'bg-red-500 text-black'
+              : 'bg-zinc-900'}
+          ">
+
+          ▼
+
+        </button>
+
+      </div>
+
+      <!-- COMMENTS -->
+
+      <div class="mt-6 border-t border-zinc-800 pt-5">
+
+        <div class="space-y-4">
+
+          ${post.comments.map(comment => `
+
+            <div class="flex gap-3">
+
+              <img
+                src="${comment.avatar}"
+                class="w-10 h-10 rounded-full object-cover">
+
+              <div class="bg-zinc-900 rounded-2xl px-4 py-3 flex-1">
+
+                <div class="font-bold">
+                  ${comment.author}
+                </div>
+
+                <div class="text-zinc-300 mt-1">
+                  ${comment.text}
+                </div>
+
+              </div>
+
+            </div>
+
+          `).join("")}
+
+        </div>
+
+        <div class="flex gap-3 mt-5">
+
+          <input
+            id="comment-${post.id}"
+            placeholder="Escribe un comentario..."
+            class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4">
+
+          <button
+            onclick="addComment(${post.id})"
+            class="bg-green-500 text-black font-bold px-5 rounded-xl">
+            Enviar
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+    container.appendChild(div);
+
+  });
+
+}
+
+/* =========================
+   PROFILE
+========================= */
+
+function renderProfile(){
+
+  if(!currentUser){
+
+    document.getElementById("profileUsername")
+      .innerText = "Invitado";
+
+    document.getElementById("profilePoints")
+      .innerText = "0";
+
+    return;
+
+  }
+
+  document.getElementById("profileAvatar")
+    .src = currentUser.avatar;
+
+  document.getElementById("profileUsername")
+    .innerText = currentUser.username;
+
+  let totalPoints = 0;
+
+  posts.forEach(post => {
+
+    if(post.author === currentUser.username){
+
+      totalPoints += getPostScore(post);
+
+    }
+
+  });
+
+  document.getElementById("profilePoints")
+    .innerText = totalPoints;
+
+}
+
+/* =========================
+   MESSAGES
+========================= */
+
+function renderUsers(){
+
+  const container =
+    document.getElementById("usersList");
+
+  container.innerHTML = "";
+
+  users
+    .filter(u =>
+      !currentUser ||
+      u.username !== currentUser.username
+    )
+    .forEach(user => {
+
+      const div =
+        document.createElement("div");
+
+      div.className = `
+        flex items-center gap-3
+        bg-zinc-900
+        rounded-2xl
+        p-3
+        cursor-pointer
+        hover:bg-zinc-800
+      `;
+
+      div.onclick = () => {
+
+        if(requireLogin()) return;
+
+        selectedChatUser = user;
+
+        renderChat();
+
+      };
+
+      div.innerHTML = `
+
+        <img
+          src="${user.avatar}"
+          class="w-12 h-12 rounded-full object-cover">
+
+        <div class="font-bold">
+          ${user.username}
+        </div>
+
+      `;
+
+      container.appendChild(div);
+
+    });
+
+}
+
+function renderChat(){
+
+  if(!selectedChatUser) return;
+
+  document.getElementById("chatHeader")
+    .innerText =
+      selectedChatUser.username;
+
+  const container =
+    document.getElementById("chatMessages");
+
+  container.innerHTML = "";
+
+  const convo =
+    messages.filter(msg =>
+
+      (
+        msg.from === currentUser.username &&
+        msg.to === selectedChatUser.username
+      )
+
+      ||
+
+      (
+        msg.to === currentUser.username &&
+        msg.from === selectedChatUser.username
+      )
+
+    );
+
+  convo.forEach(msg => {
+
+    const mine =
+      msg.from === currentUser.username;
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      `flex ${mine ? 'justify-end' : 'justify-start'}`;
+
+    div.innerHTML = `
+
+      <div class="
+        max-w-[70%]
+        px-4 py-3 rounded-2xl
+        ${mine
+          ? 'bg-green-500 text-black'
+          : 'bg-zinc-800'}
+      ">
+
+        ${msg.text}
+
+      </div>
+
+    `;
+
+    container.appendChild(div);
+
+  });
+
+}
+
+function sendMessage(){
+
+  if(requireLogin()) return;
+
+  if(!selectedChatUser){
+
+    alert("Selecciona un usuario");
+
+    return;
+
+  }
+
+  const input =
+    document.getElementById("messageInput");
+
+  const text =
+    input.value.trim();
+
+  if(!text) return;
+
+  messages.push({
+
+    id:Date.now(),
+
+    from:currentUser.username,
+
+    to:selectedChatUser.username,
+
+    text
+
+  });
+
+  input.value = "";
+
+  saveData();
+
+  renderChat();
+
+}
+
+/* =========================
+   NAVIGATION
+========================= */
+
+function showSection(section){
+
+  document
+    .getElementById("feedSection")
+    .classList.add("hidden");
+
+  document
+    .getElementById("profileSection")
+    .classList.add("hidden");
+
+  document
+    .getElementById("messagesSection")
+    .classList.add("hidden");
+
+  if(section === "feed"){
+
+    document
+      .getElementById("feedSection")
+      .classList.remove("hidden");
+
+  }
+
+  if(section === "profile"){
+
+    document
+      .getElementById("profileSection")
+      .classList.remove("hidden");
+
+  }
+
+  if(section === "messages"){
+
+    document
+      .getElementById("messagesSection")
+      .classList.remove("hidden");
+
+  }
+
+}
+
+/* =========================
+   INIT
+========================= */
+
+function renderAll(){
+
+  renderPosts();
+
+  renderProfile();
+
+  renderUsers();
+
+}
+
+updateNavbar();
+
+renderAll();
+
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
+    authDomain: "rankiu-5da90.firebaseapp.com",
+    projectId: "rankiu-5da90",
+    storageBucket: "rankiu-5da90.firebasestorage.app",
+    messagingSenderId: "365366406441",
+    appId: "1:365366406441:web:4e4a068b57d93d21061b38"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
+</body>
+</html>
