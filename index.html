@@ -1,186 +1,257 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rankiu Firebase</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Rankiu Ultimate</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com"></script>
 
-  <style>
-    body{
-      background:#050505;
-    }
+<link rel="manifest" href="manifest.json">
 
-    .scrollbar::-webkit-scrollbar{
-      width:6px;
-    }
+<style>
 
-    .scrollbar::-webkit-scrollbar-thumb{
-      background:#222;
-      border-radius:20px;
-    }
-  </style>
+body{
+  background:#050505;
+}
+
+.scrollbar::-webkit-scrollbar{
+  width:6px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb{
+  background:#222;
+  border-radius:20px;
+}
+
+</style>
 </head>
 
 <body class="text-white min-h-screen">
 
-<nav class="border-b border-zinc-800 bg-black/80 backdrop-blur sticky top-0 z-50">
-  <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+<nav class="border-b border-zinc-800 bg-black/80 sticky top-0 z-50">
 
-    <div class="text-3xl font-bold text-green-400">
-      rankiu
-    </div>
+<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
 
-    <div class="flex gap-3 items-center">
-      <button onclick="showSection('feed')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
-        Feed
-      </button>
+<div class="text-3xl font-bold text-green-400">
+rankiu
+</div>
 
-      <button onclick="showSection('profile')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800">
-        Perfil
-      </button>
+<div class="flex gap-3 items-center">
 
-      <div id="navUser" class="flex items-center gap-3"></div>
-    </div>
+<button onclick="showSection('feed')" class="bg-zinc-900 px-4 py-2 rounded-xl">
+Feed
+</button>
 
-  </div>
+<button onclick="showSection('profile')" class="bg-zinc-900 px-4 py-2 rounded-xl">
+Perfil
+</button>
+
+<button onclick="showSection('chat')" class="bg-zinc-900 px-4 py-2 rounded-xl">
+Chat
+</button>
+
+<div id="navUser"></div>
+
+</div>
+
+</div>
+
 </nav>
 
 <div class="max-w-7xl mx-auto px-4 py-6">
 
-  <section id="feedSection">
+<section id="feedSection">
 
-    <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-6">
+<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-6">
 
-      <h2 class="text-2xl font-bold mb-4">
-        Crear publicación
-      </h2>
+<h2 class="text-2xl font-bold mb-4">
+Crear publicación
+</h2>
 
-      <input
-        id="postTitle"
-        placeholder="Título"
-        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input
+id="postTitle"
+placeholder="Título"
+class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <textarea
-        id="postContent"
-        placeholder="¿Qué quieres compartir?"
-        class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none"></textarea>
+<textarea
+id="postContent"
+placeholder="¿Qué quieres compartir?"
+class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none"></textarea>
 
-      <button
-        id="publishBtn"
-        class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
-        Publicar
-      </button>
+<input
+type="file"
+id="postImage"
+accept="image/*"
+class="w-full mt-4"/>
 
-    </div>
+<button
+id="publishBtn"
+class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
+Publicar
+</button>
 
-    <div id="postsContainer" class="space-y-5"></div>
+</div>
 
-  </section>
+<div id="postsContainer" class="space-y-5"></div>
 
-  <section id="profileSection" class="hidden">
+</section>
 
-    <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 max-w-xl mx-auto text-center">
+<section id="profileSection" class="hidden">
 
-      <img
-        id="profileAvatar"
-        class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-green-500 mb-5">
+<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 max-w-xl mx-auto text-center">
 
-      <h2
-        id="profileUsername"
-        class="text-3xl font-bold mb-3">
-      </h2>
+<img
+id="profileAvatar"
+class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-green-500 mb-5">
 
-      <div class="bg-zinc-900 rounded-2xl p-5 mt-4">
+<h2 id="profileUsername" class="text-3xl font-bold mb-3"></h2>
 
-        <div class="text-zinc-400 text-sm">
-          EMAIL
-        </div>
+<div id="profileBio" class="text-zinc-400"></div>
 
-        <div
-          id="profileEmail"
-          class="text-xl font-bold mt-2 text-green-400">
-        </div>
+<div class="mt-6">
+Seguidores:
+<span id="followersCount">0</span>
+</div>
 
-      </div>
+<div class="mt-6">
 
-    </div>
+<input
+type="file"
+id="newProfilePhoto"
+accept="image/*"
+class="w-full mb-4"/>
 
-  </section>
+<button
+id="updatePhotoBtn"
+class="bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl">
+Actualizar foto de perfil
+</button>
+
+</div>
+
+
+</div>
+
+</section>
+
+<section id="chatSection" class="hidden">
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-4 h-[700px] overflow-y-auto scrollbar">
+
+<h2 class="text-2xl font-bold mb-4">
+Usuarios
+</h2>
+
+<div id="usersList" class="space-y-3"></div>
+
+</div>
+
+<div class="md:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl flex flex-col h-[700px]">
+
+<div id="chatHeader" class="border-b border-zinc-800 p-4 text-xl font-bold">
+Selecciona usuario
+</div>
+
+<div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar"></div>
+
+<div class="p-4 border-t border-zinc-800 flex gap-3">
+
+<input
+id="messageInput"
+placeholder="Escribe mensaje..."
+class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+
+<button
+id="sendBtn"
+class="bg-green-500 text-black font-bold px-6 rounded-xl">
+Enviar
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
 
 </div>
 
 <div
-  id="authModal"
-  class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+id="authModal"
+class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
 
-  <div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
+<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
 
-    <div class="flex gap-3 mb-6">
+<div class="flex gap-3 mb-6">
 
-      <button
-        onclick="switchAuth('login')"
-        class="flex-1 bg-zinc-900 rounded-xl py-3">
-        Login
-      </button>
+<button onclick="switchAuth('login')" class="flex-1 bg-zinc-900 rounded-xl py-3">
+Login
+</button>
 
-      <button
-        onclick="switchAuth('register')"
-        class="flex-1 bg-zinc-900 rounded-xl py-3">
-        Registro
-      </button>
+<button onclick="switchAuth('register')" class="flex-1 bg-zinc-900 rounded-xl py-3">
+Registro
+</button>
 
-    </div>
+</div>
 
-    <div id="loginBox">
+<div id="loginBox">
 
-      <input
-        id="loginEmail"
-        placeholder="Email"
-        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input
+id="loginEmail"
+placeholder="Email"
+class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <input
-        type="password"
-        id="loginPassword"
-        placeholder="Contraseña"
-        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input
+type="password"
+id="loginPassword"
+placeholder="Contraseña"
+class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <button
-        id="loginBtn"
-        class="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-xl">
-        Iniciar sesión
-      </button>
+<button
+id="loginBtn"
+class="w-full bg-green-500 text-black font-bold py-4 rounded-xl">
+Iniciar sesión
+</button>
 
-    </div>
+</div>
 
-    <div id="registerBox" class="hidden">
+<div id="registerBox" class="hidden">
 
-      <input
-        id="registerUsername"
-        placeholder="Usuario"
-        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input
+id="registerUsername"
+placeholder="Usuario"
+class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <input
-        id="registerEmail"
-        placeholder="Email"
-        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input
+id="registerEmail"
+placeholder="Email"
+class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <input
-        type="password"
-        id="registerPassword"
-        placeholder="Contraseña"
-        class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
+<input
+type="password"
+id="registerPassword"
+placeholder="Contraseña"
+class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4"/>
 
-      <button
-        id="registerBtn"
-        class="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-4 rounded-xl">
-        Crear cuenta
-      </button>
+<input
+type="file"
+id="registerAvatar"
+accept="image/*"
+class="w-full mb-4"/>
 
-    </div>
+<button
+id="registerBtn"
+class="w-full bg-green-500 text-black font-bold py-4 rounded-xl">
+Crear cuenta
+</button>
 
-  </div>
+</div>
+
+</div>
 
 </div>
 
@@ -189,369 +260,742 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 
 import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut,
-  updateProfile
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+onAuthStateChanged,
+signOut,
+updateProfile
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 
 import {
-  getFirestore,
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp
+getFirestore,
+collection,
+addDoc,
+doc,
+setDoc,
+getDocs,
+query,
+orderBy,
+serverTimestamp,
+onSnapshot,
+where
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
+import {
+getStorage,
+ref,
+uploadBytes,
+getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
-  authDomain: "rankiu-5da90.firebaseapp.com",
-  projectId: "rankiu-5da90",
-  storageBucket: "rankiu-5da90.firebasestorage.app",
-  messagingSenderId: "365366406441",
-  appId: "1:365366406441:web:4e4a068b57d93d21061b38"
+
+apiKey: "TU_API_KEY",
+authDomain: "TU_AUTH_DOMAIN",
+projectId: "TU_PROJECT_ID",
+storageBucket: "TU_STORAGE_BUCKET",
+messagingSenderId: "TU_SENDER_ID",
+appId: "TU_APP_ID"
+
 };
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
+const storage = getStorage(app);
+
 let currentUser = null;
-let posts = [];
+let selectedUser = null;
+let allUsers = [];
 
 function switchAuth(type){
 
-  if(type === "login"){
+if(type === "login"){
 
-    document.getElementById("loginBox")
-      .classList.remove("hidden");
+document.getElementById("loginBox")
+.classList.remove("hidden");
 
-    document.getElementById("registerBox")
-      .classList.add("hidden");
+document.getElementById("registerBox")
+.classList.add("hidden");
 
-  }else{
+}else{
 
-    document.getElementById("loginBox")
-      .classList.add("hidden");
+document.getElementById("loginBox")
+.classList.add("hidden");
 
-    document.getElementById("registerBox")
-      .classList.remove("hidden");
+document.getElementById("registerBox")
+.classList.remove("hidden");
 
-  }
+}
 
 }
 
 window.switchAuth = switchAuth;
 
+async function uploadImage(file,path){
+
+const storageRef = ref(storage,path);
+
+await uploadBytes(storageRef,file);
+
+return await getDownloadURL(storageRef);
+
+}
+
 async function register(){
 
-  const username =
-    document.getElementById("registerUsername").value.trim();
+const username =
+document.getElementById("registerUsername").value.trim();
 
-  const email =
-    document.getElementById("registerEmail").value.trim();
+const email =
+document.getElementById("registerEmail").value.trim();
 
-  const password =
-    document.getElementById("registerPassword").value.trim();
+const password =
+document.getElementById("registerPassword").value.trim();
 
-  if(!username || !email || !password){
-    alert("Completa todos los campos");
-    return;
-  }
+const avatarFile =
+document.getElementById("registerAvatar").files[0];
 
-  try{
+if(!username || !email || !password){
 
-    const userCredential =
-      await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+alert("Completa todos los campos");
+return;
 
-    await updateProfile(userCredential.user,{
-      displayName: username
-    });
+}
 
-    alert("Cuenta creada correctamente");
+try{
 
-  }catch(error){
+const userCredential =
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
 
-    alert(error.message);
+let avatarUrl =
+"https://i.pravatar.cc/300";
 
-  }
+if(avatarFile){
+
+avatarUrl =
+await uploadImage(
+avatarFile,
+"avatars/" + Date.now()
+);
+
+}
+
+await updateProfile(userCredential.user,{
+
+displayName: username,
+photoURL: avatarUrl
+
+});
+
+await setDoc(
+doc(db,"users",userCredential.user.uid),
+{
+
+username,
+email,
+avatar:avatarUrl,
+bio:"Nuevo en Rankiu",
+followers:0,
+createdAt:Date.now()
+
+}
+);
+
+alert("Cuenta creada");
+
+}catch(error){
+
+alert(error.message);
+
+}
 
 }
 
 async function login(){
 
-  const email =
-    document.getElementById("loginEmail").value.trim();
+const email =
+document.getElementById("loginEmail").value.trim();
 
-  const password =
-    document.getElementById("loginPassword").value.trim();
+const password =
+document.getElementById("loginPassword").value.trim();
 
-  try{
+try{
 
-    await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
 
-  }catch(error){
+}catch(error){
 
-    alert(error.message);
+alert(error.message);
 
-  }
+}
 
 }
 
 async function logout(){
 
-  await signOut(auth);
+await signOut(auth);
 
 }
 
 document.getElementById("registerBtn")
-  .addEventListener("click", register);
+.addEventListener("click",register);
 
 document.getElementById("loginBtn")
-  .addEventListener("click", login);
-
-function updateNavbar(){
-
-  const nav =
-    document.getElementById("navUser");
-
-  if(currentUser){
-
-    nav.innerHTML = `
-      <div class="font-bold">
-        ${currentUser.displayName || 'Usuario'}
-      </div>
-
-      <button
-        id="logoutBtn"
-        class="bg-red-500 px-4 py-2 rounded-xl text-black font-bold">
-        Salir
-      </button>
-    `;
-
-    setTimeout(()=>{
-
-      document
-        .getElementById("logoutBtn")
-        .addEventListener("click", logout);
-
-    },100);
-
-  }else{
-
-    nav.innerHTML = `
-      <div class="text-zinc-400">
-        Invitado
-      </div>
-    `;
-
-  }
-
-}
+.addEventListener("click",login);
 
 async function createPost(){
 
-  if(!currentUser){
+if(!currentUser){
 
-    alert("Debes iniciar sesión");
-    return;
-
-  }
-
-  const title =
-    document.getElementById("postTitle")
-      .value.trim();
-
-  const content =
-    document.getElementById("postContent")
-      .value.trim();
-
-  if(!title || !content){
-
-    alert("Completa todos los campos");
-    return;
-
-  }
-
-  try{
-
-    await addDoc(collection(db,"posts"),{
-
-      title,
-      content,
-
-      author:
-        currentUser.displayName || "Usuario",
-
-      authorId:
-        currentUser.uid,
-
-      createdAt:
-        serverTimestamp()
-
-    });
-
-    document.getElementById("postTitle").value = "";
-    document.getElementById("postContent").value = "";
-
-  }catch(error){
-
-    alert(error.message);
-
-  }
+alert("Inicia sesión");
+return;
 
 }
 
-document
-  .getElementById("publishBtn")
-  .addEventListener("click", createPost);
+const title =
+document.getElementById("postTitle").value.trim();
 
-function renderPosts(){
+const content =
+document.getElementById("postContent").value.trim();
 
-  const container =
-    document.getElementById("postsContainer");
+const imageFile =
+document.getElementById("postImage").files[0];
 
-  container.innerHTML = "";
+if(!title || !content){
 
-  posts.forEach(post => {
-
-    const div =
-      document.createElement("div");
-
-    div.className = `
-      bg-zinc-950
-      border
-      border-zinc-800
-      rounded-3xl
-      p-5
-    `;
-
-    div.innerHTML = `
-
-      <div class="font-bold text-green-400 text-lg">
-        ${post.author}
-      </div>
-
-      <div class="text-zinc-500 text-sm mt-1">
-        ${post.createdAt
-          ? new Date(post.createdAt.seconds * 1000)
-            .toLocaleString()
-          : "Ahora"}
-      </div>
-
-      <h2 class="text-2xl font-bold mt-4">
-        ${post.title}
-      </h2>
-
-      <p class="text-zinc-300 mt-3 whitespace-pre-wrap">
-        ${post.content}
-      </p>
-
-    `;
-
-    container.appendChild(div);
-
-  });
+alert("Completa todos los campos");
+return;
 
 }
 
-function renderProfile(){
+let imageUrl = "";
 
-  if(!currentUser) return;
+if(imageFile){
 
-  document.getElementById("profileUsername")
-    .innerText =
-      currentUser.displayName || "Usuario";
+imageUrl =
+await uploadImage(
+imageFile,
+"posts/" + Date.now()
+);
 
-  document.getElementById("profileEmail")
-    .innerText =
-      currentUser.email;
+}
 
-  document.getElementById("profileAvatar")
-    .src =
-      "https://i.pravatar.cc/300";
+await addDoc(collection(db,"posts"),{
+
+title,
+content,
+image:imageUrl,
+author:currentUser.displayName,
+authorId:currentUser.uid,
+authorAvatar:currentUser.photoURL,
+likes:0,
+createdAt:serverTimestamp()
+
+});
+
+document.getElementById("postTitle").value = "";
+document.getElementById("postContent").value = "";
+
+}
+
+document.getElementById("publishBtn")
+.addEventListener("click",createPost);
+
+function renderPosts(posts){
+
+const container =
+document.getElementById("postsContainer");
+
+container.innerHTML = "";
+
+posts.forEach(post => {
+
+const div =
+document.createElement("div");
+
+div.className = `
+bg-zinc-950
+border border-zinc-800
+rounded-3xl
+p-5
+`;
+
+div.innerHTML = `
+
+<div class="flex gap-4 items-center">
+
+<img
+src="${post.authorAvatar || 'https://i.pravatar.cc/150'}"
+class="w-14 h-14 rounded-full object-cover">
+
+<div>
+
+<div class="font-bold text-lg">
+${post.author}
+</div>
+
+</div>
+
+</div>
+
+<h2 class="text-2xl font-bold mt-5">
+${post.title}
+</h2>
+
+<p class="text-zinc-300 mt-3 whitespace-pre-wrap">
+${post.content}
+</p>
+
+${post.image
+? `<img
+src="${post.image}"
+class="mt-5 rounded-2xl w-full max-h-[500px] object-cover">`
+: ''
+}
+
+<div class="mt-5 flex gap-3">
+
+<button
+class="bg-zinc-900 px-5 py-3 rounded-xl likeBtn"
+data-id="${post.id}">
+❤️ Like
+</button>
+
+<button
+class="bg-zinc-900 px-5 py-3 rounded-xl followBtn"
+data-id="${post.authorId}">
+➕ Seguir
+</button>
+
+</div>
+
+`;
+
+container.appendChild(div);
+
+});
+
+document.querySelectorAll(".likeBtn")
+.forEach(btn => {
+
+btn.onclick = async () => {
+
+await addDoc(collection(db,"likes"),{
+
+postId:btn.dataset.id,
+userId:currentUser.uid,
+createdAt:Date.now()
+
+});
+
+};
+
+});
+
+document.querySelectorAll(".followBtn")
+.forEach(btn => {
+
+btn.onclick = async () => {
+
+await addDoc(collection(db,"followers"),{
+
+followerId:currentUser.uid,
+followingId:btn.dataset.id
+
+});
+
+alert("Ahora sigues a este usuario");
+
+};
+
+});
+
+}
+
+async function loadUsers(){
+
+const snapshot =
+await getDocs(collection(db,"users"));
+
+allUsers =
+snapshot.docs.map(doc => ({
+id:doc.id,
+...doc.data()
+}));
+
+renderUsers();
+
+}
+
+function renderUsers(){
+
+const container =
+document.getElementById("usersList");
+
+container.innerHTML = "";
+
+allUsers.forEach(user => {
+
+if(currentUser && user.id === currentUser.uid)
+return;
+
+const div =
+document.createElement("div");
+
+div.className = `
+flex items-center gap-3
+bg-zinc-900
+rounded-2xl
+p-3
+cursor-pointer
+`;
+
+div.onclick = () => {
+
+selectedUser = user;
+
+listenMessages();
+
+};
+
+div.innerHTML = `
+
+<img
+src="${user.avatar}"
+class="w-12 h-12 rounded-full object-cover">
+
+<div class="font-bold">
+${user.username}
+</div>
+
+`;
+
+container.appendChild(div);
+
+});
+
+}
+
+async function sendMessage(){
+
+if(!selectedUser){
+
+alert("Selecciona usuario");
+return;
+
+}
+
+const input =
+document.getElementById("messageInput");
+
+const text =
+input.value.trim();
+
+if(!text) return;
+
+await addDoc(collection(db,"messages"),{
+
+from:currentUser.uid,
+to:selectedUser.id,
+text,
+createdAt:serverTimestamp()
+
+});
+
+input.value = "";
+
+}
+
+document.getElementById("sendBtn")
+.addEventListener("click",sendMessage);
+
+function listenMessages(){
+
+if(!selectedUser) return;
+
+document.getElementById("chatHeader")
+.innerText =
+selectedUser.username;
+
+const q =
+query(
+collection(db,"messages"),
+orderBy("createdAt","asc")
+);
+
+onSnapshot(q,(snapshot)=>{
+
+const messages =
+snapshot.docs
+.map(doc => ({
+id:doc.id,
+...doc.data()
+}))
+.filter(msg =>
+
+(
+msg.from === currentUser.uid &&
+msg.to === selectedUser.id
+)
+
+||
+
+(
+msg.to === currentUser.uid &&
+msg.from === selectedUser.id
+)
+
+);
+
+const container =
+document.getElementById("chatMessages");
+
+container.innerHTML = "";
+
+messages.forEach(msg => {
+
+const mine =
+msg.from === currentUser.uid;
+
+const div =
+document.createElement("div");
+
+div.className =
+`flex ${mine ? 'justify-end' : 'justify-start'}`;
+
+div.innerHTML = `
+
+<div class="
+max-w-[70%]
+px-4 py-3 rounded-2xl
+${mine
+? 'bg-green-500 text-black'
+: 'bg-zinc-800'}
+">
+
+${msg.text}
+
+</div>
+
+`;
+
+container.appendChild(div);
+
+});
+
+});
 
 }
 
 function showSection(section){
 
-  document
-    .getElementById("feedSection")
-    .classList.add("hidden");
+document.getElementById("feedSection")
+.classList.add("hidden");
 
-  document
-    .getElementById("profileSection")
-    .classList.add("hidden");
+document.getElementById("profileSection")
+.classList.add("hidden");
 
-  if(section === "feed"){
+document.getElementById("chatSection")
+.classList.add("hidden");
 
-    document
-      .getElementById("feedSection")
-      .classList.remove("hidden");
+if(section === "feed"){
 
-  }
+document.getElementById("feedSection")
+.classList.remove("hidden");
 
-  if(section === "profile"){
+}
 
-    document
-      .getElementById("profileSection")
-      .classList.remove("hidden");
+if(section === "profile"){
 
-  }
+document.getElementById("profileSection")
+.classList.remove("hidden");
+
+}
+
+if(section === "chat"){
+
+document.getElementById("chatSection")
+.classList.remove("hidden");
+
+}
 
 }
 
 window.showSection = showSection;
 
-const q =
-  query(
-    collection(db,"posts"),
-    orderBy("createdAt","desc")
-  );
+function updateNavbar(){
 
-onSnapshot(q,(snapshot)=>{
+const nav =
+document.getElementById("navUser");
 
-  posts =
-    snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+if(currentUser){
 
-  renderPosts();
+nav.innerHTML = `
+
+<div class="flex items-center gap-3">
+
+<img
+src="${currentUser.photoURL}"
+class="w-12 h-12 rounded-full object-cover border-2 border-green-500">
+
+<div class="font-bold">
+${currentUser.displayName}
+</div>
+
+<button
+id="logoutBtn"
+class="bg-red-500 text-black font-bold px-4 py-2 rounded-xl">
+Salir
+</button>
+
+</div>
+
+`;
+
+setTimeout(()=>{
+
+document.getElementById("logoutBtn")
+.addEventListener("click",logout);
+
+},100);
+
+}else{
+
+nav.innerHTML = `
+<div class="text-zinc-500">
+Invitado
+</div>
+`;
+
+}
+
+}
+
+function renderProfile(){
+
+if(!currentUser) return;
+
+document.getElementById("profileAvatar")
+.src =
+currentUser.photoURL;
+
+document.getElementById("profileUsername")
+.innerText =
+currentUser.displayName;
+
+document.getElementById("profileBio")
+.innerText =
+"Usuario verificado de Rankiu";
+
+}
+
+const postsQuery =
+query(
+collection(db,"posts"),
+orderBy("createdAt","desc")
+);
+
+onSnapshot(postsQuery,(snapshot)=>{
+
+const posts =
+snapshot.docs.map(doc => ({
+id:doc.id,
+...doc.data()
+}));
+
+renderPosts(posts);
 
 });
 
-onAuthStateChanged(auth,(user)=>{
 
-  currentUser = user;
+async function updateProfilePhoto(){
 
-  updateNavbar();
+if(!currentUser) return;
 
-  renderProfile();
+const file =
+document.getElementById("newProfilePhoto").files[0];
 
-  if(user){
+if(!file){
 
-    document.getElementById("authModal")
-      .classList.add("hidden");
+alert("Selecciona una imagen");
+return;
 
-  }else{
+}
 
-    document.getElementById("authModal")
-      .classList.remove("hidden");
+try{
 
-  }
+const imageUrl =
+await uploadImage(
+file,
+"profilePhotos/" + currentUser.uid + "_" + Date.now()
+);
+
+await updateProfile(currentUser,{
+photoURL:imageUrl
+});
+
+await setDoc(
+doc(db,"users",currentUser.uid),
+{
+avatar:imageUrl
+},
+{ merge:true }
+);
+
+document.getElementById("profileAvatar")
+.src = imageUrl;
+
+updateNavbar();
+
+alert("Foto de perfil actualizada");
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+document.getElementById("updatePhotoBtn")
+.addEventListener("click",updateProfilePhoto);
+
+
+
+onAuthStateChanged(auth,async(user)=>{
+
+currentUser = user;
+
+updateNavbar();
+
+if(user){
+
+document.getElementById("authModal")
+.classList.add("hidden");
+
+renderProfile();
+
+await loadUsers();
+
+}else{
+
+document.getElementById("authModal")
+.classList.remove("hidden");
+
+}
 
 });
 
