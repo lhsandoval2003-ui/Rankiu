@@ -264,9 +264,12 @@ document.addEventListener("click", async (event) => {
         input.value = "";
     }
 
+    // ... (Mantén arriba la lógica de commentBtn igual)
+
     if (target.classList.contains("upvoteBtn")) {
         if(!currentUser) return alert("Inicia sesión para votar");
-        const voteId = `${currentUser.uid}_${target.dataset.id}`;
+        // ID único que incluye "up", así no interfiere con el "down"
+        const voteId = `${currentUser.uid}_${target.dataset.id}_up`;
         await setDoc(doc(db, "votes", voteId), {
             postId: target.dataset.id,
             userId: currentUser.uid,
@@ -277,7 +280,8 @@ document.addEventListener("click", async (event) => {
 
     if (target.classList.contains("downvoteBtn")) {
         if(!currentUser) return alert("Inicia sesión para votar");
-        const voteId = `${currentUser.uid}_${target.dataset.id}`;
+        // ID único que incluye "down", permitiendo que coexistan ambos
+        const voteId = `${currentUser.uid}_${target.dataset.id}_down`;
         await setDoc(doc(db, "votes", voteId), {
             postId: target.dataset.id,
             userId: currentUser.uid,
@@ -285,6 +289,8 @@ document.addEventListener("click", async (event) => {
             createdAt: Date.now()
         });
     }
+
+    // ... (Mantén abajo la lógica de followBtn igual)
 
     if (target.classList.contains("followBtn")) {
         if(!currentUser) return alert("Inicia sesión para seguir");
