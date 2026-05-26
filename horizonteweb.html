@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HorizonteWeb | Agencia de Desarrollo Web Premium</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#070B14',
+                        electricBlue: '#4F46E5',
+                        modernPurple: '#7C3AED',
+                        softWhite: '#F8FAFC',
+                        elegantGray: '#94A3B8',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #070B14;
+            color: #F8FAFC;
+            overflow-x: hidden;
+        }
+        .glass {
+            background: rgba(7, 11, 20, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bg-gradient-premium {
+            background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+        }
+        .glow-orb {
+            position: absolute;
+            filter: blur(140px);
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        /* Estilos para el carrusel */
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 300%;
+        }
+        .carousel-item {
+            width: 33.33333%;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <!-- GLOW EFFECTS BACKGROUND -->
+    <div class="glow-orb bg-electricBlue w-[400px] h-[400px] top-[-100px] left-[-100px]"></div>
+    <div class="glow-orb bg-modernPurple w-[500px] h-[500px] top-[30%] right-[-150px]"></div>
+    <div class="glow-orb bg-electricBlue w-[600px] h-[600px] bottom-[10%] left-[-200px]"></div>
+
+    <!-- 1. NAVBAR -->
+    <nav class="fixed top-0 left-0 w-full z-50 glass border-b border-white/5 px-6 py-4 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="relative w-10 h-10 flex items-center justify-center rounded-full border border-white/20 bg-darkBg overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-premium opacity-20 group-hover:opacity-40 transition-opacity"></div>
+                    <span class="text-xl font-bold text-softWhite relative z-10 font-sans pl-[1px]">H</span>
+                    <div class="absolute inset-0 border-2 border-transparent border-t-electricBlue border-r-modernPurple rounded-full animate-spin" style="animation-duration: 8s;"></div>
+                </div>
+                <span class="text-xl font-bold tracking-tight">
+                    <span class="text-softWhite">Horizonte</span><span class="text-gradient">Web</span>
+                </span>
+            </a>
+
+            <!-- Menu Desktop -->
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-elegantGray">
+                <a href="#" class="hover:text-softWhite transition-colors">Inicio</a>
+                <a href="#servicios" class="hover:text-softWhite transition-colors">Servicios</a>
+                <a href="#proyectos" class="hover:text-softWhite transition-colors">Catálogo</a>
+                <a href="#proceso" class="hover:text-softWhite transition-colors">Nuestro Proceso</a>
+                <a href="#contacto" class="hover:text-softWhite transition-colors">Contacto</a>
+            </div>
+
+            <!-- CTA -->
+            <div class="hidden md:block">
+                <a href="https://wa.me/50557401981?text=Hola%20%C2%BFPuedo%20crear%20una%20pagina%20web%20para%20mi%20negocio%3F" target="_blank" class="bg-gradient-premium hover:opacity-90 text-softWhite text-sm font-semibold px-5 py-2.5 rounded-full transition-all duration-300 shadow-lg shadow-electricBlue/20 hover:shadow-modernPurple/40 flex items-center gap-2 hover:scale-105 transform">
+                    <i class="fab fa-whatsapp text-base"></i> Solicitar página
+                </a>
+            </div>
+
+            <!-- Mobile Menu Burger -->
+            <button id="menu-btn" class="md:hidden text-softWhite focus:outline-none">
+                <i class="fa-solid fa-bars text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-darkBg/95 backdrop-blur-lg border-b border-white/10 flex flex-col p-6 gap-4 text-center font-medium">
+            <a href="#" class="text-softWhite py-2">Inicio</a>
+            <a href="#servicios" class="text-elegantGray py-2">Servicios</a>
+            <a href="#proyectos" class="text-elegantGray py-2">Catálogo</a>
+            <a href="#proceso" class="text-elegantGray py-2">Nuestro Proceso</a>
+            <a href="#contacto" class="text-elegantGray py-2">Contacto</a>
+            <a href="https://wa.me/50557401981?text=Hola%20%C2%BFPuedo%20crear%20una%20pagina%20web%20para%20mi%20negocio%3F" target="_blank" class="bg-gradient-premium text-softWhite py-3 rounded-full mt-2 flex items-center justify-center gap-2">
+                <i class="fab fa-whatsapp"></i> Solicitar página
+            </a>
+        </div>
+    </nav>
+
+    <!-- 2. HERO SECTION -->
+    <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 max-w-7xl mx-auto z-10 min-h-screen flex items-center">
+        <div class="grid md:grid-cols-2 gap-12 items-center w-full">
+            <!-- Left Content -->
+            <div class="space-y-8 text-center md:text-left">
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-softWhite">
+                    Páginas web que <br class="hidden lg:block">
+                    <span class="text-gradient">impulsan tu negocio</span>
+                </h1>
+                <p class="text-base sm:text-lg text-elegantGray max-w-xl mx-auto md:mx-0 font-light leading-relaxed">
+                    Diseñamos páginas modernas, rápidas y adaptadas a celulares para negocios que quieren verse profesionales y conseguir más clientes.
+                </p>
+                
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+                    <a href="https://wa.me/50557401981?text=Hola%20%C2%BFPuedo%20crear%20una%20pagina%20web%20para%20mi%20negocio%3F" target="_blank" class="w-full sm:w-auto bg-gradient-premium text-softWhite font-semibold px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-electricBlue/20 hover:shadow-modernPurple/40 flex items-center justify-center gap-2 hover:scale-105 transform">
+                        <i class="fab fa-whatsapp text-lg"></i> Quiero mi página
+                    </a>
+                    <a href="#proyectos" class="w-full sm:w-auto bg-white/5 border border-white/10 text-softWhite hover:bg-white/10 font-semibold px-8 py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-2">
+                        Ver catálogo interactivo <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </a>
+                </div>
+
+                <!-- Badges -->
+                <div class="pt-6 grid grid-cols-2 sm:flex flex-wrap gap-3 justify-center md:justify-start">
+                    <span class="glass px-4 py-2 rounded-full text-xs font-medium text-softWhite/80 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-electricBlue"></div> Entrega rápida</span>
+                    <span class="glass px-4 py-2 rounded-full text-xs font-medium text-softWhite/80 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-modernPurple"></div> Responsive</span>
+                    <span class="glass px-4 py-2 rounded-full text-xs font-medium text-softWhite/80 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-indigo-400"></div> Diseño moderno</span>
+                    <span class="glass px-4 py-2 rounded-full text-xs font-medium text-softWhite/80 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-emerald-400"></div> WhatsApp integrado</span>
+                </div>
+            </div>
+
+            <!-- Right Content (Mockups) -->
+            <div class="relative flex justify-center items-center lg:h-[500px]">
+                <div class="absolute w-72 h-72 rounded-full bg-gradient-premium filter blur-[80px] opacity-40 animate-pulse"></div>
+                
+                <!-- Laptop Mockup -->
+                <div class="relative w-full max-w-[460px] glass-card p-2 rounded-xl border border-white/10 shadow-2xl transform -rotate-2 hover:rotate-0 transition-transform duration-500 z-10">
+                    <div class="bg-darkBg rounded-lg overflow-hidden border border-white/5 aspect-[16/10] relative">
+                        <div class="absolute top-2 left-3 flex gap-1">
+                            <span class="w-2 h-2 rounded-full bg-red-500/60"></span>
+                            <span class="w-2 h-2 rounded-full bg-yellow-500/60"></span>
+                            <span class="w-2 h-2 rounded-full bg-green-500/60"></span>
+                        </div>
+                        <div class="p-8 pt-10 h-full flex flex-col justify-between">
+                            <div class="space-y-2">
+                                <div class="w-20 h-3 bg-gradient-premium rounded-full"></div>
+                                <div class="w-full h-6 bg-white/10 rounded-md mt-4"></div>
+                                <div class="w-2/3 h-4 bg-white/5 rounded-md"></div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="h-16 bg-white/5 rounded-md border border-white/5"></div>
+                                <div class="h-16 bg-white/5 rounded-md border border-white/5"></div>
+                                <div class="h-16 bg-gradient-premium opacity-30 rounded-md"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phone Mockup -->
+                <div class="absolute bottom-[-20px] right-[10%] sm:right-[15%] w-[150px] glass-card p-1.5 rounded-[2rem] border border-white/20 shadow-2xl transform rotate-6 hover:rotate-0 transition-transform duration-500 z-20">
+                    <div class="bg-darkBg rounded-[1.8rem] overflow-hidden border border-white/10 aspect-[9/19] p-4 flex flex-col justify-between relative">
+                        <div class="absolute top-1.5 left-1/2 transform -translate-x-1/2 w-12 h-3 bg-black rounded-full"></div>
+                        <div class="space-y-2 pt-4">
+                            <div class="w-8 h-2 bg-modernPurple rounded-full"></div>
+                            <div class="w-full h-3 bg-white/10 rounded-sm"></div>
+                            <div class="w-full h-3 bg-white/10 rounded-sm"></div>
+                        </div>
+                        <div class="w-full h-6 bg-gradient-premium rounded-full mb-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. SECCIÓN DE EJEMPLOS EN ENFOQUE CARRUSEL -->
+    <section id="proyectos" class="reveal py-24 px-6 max-w-5xl mx-auto z-10 relative">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-electricBlue bg-electricBlue/10 px-4 py-1.5 rounded-full">Modelos Disponibles</span>
+            <h2 class="text-3xl sm:text-4xl font-bold mt-4 text-softWhite">Nuestras Estructuras de Diseño</h2>
+            <p class="text-elegantGray mt-3">Explora directamente los acabados visuales y secciones preestablecidas que podemos adaptar para tu marca.</p>
+        </div>
+
+        <!-- Contenedor Principal del Carrusel -->
+        <div class="relative group max-w-4xl mx-auto">
+            <!-- Ventana del Navegador Simulada -->
+            <div class="overflow-hidden rounded-2xl border border-white/10 bg-darkBg/60 backdrop-blur-xl shadow-2xl shadow-indigo-950/20">
+                <!-- Barra superior de la ventana -->
+                <div class="bg-white/5 border-b border-white/10 px-4 py-3 flex items-center justify-between">
+                    <div class="flex gap-1.5">
+                        <span class="w-3 h-3 rounded-full bg-red-500/40"></span>
+                        <span class="w-3 h-3 rounded-full bg-yellow-500/40"></span>
+                        <span class="w-3 h-3 rounded-full bg-green-500/40"></span>
+                    </div>
+                    <!-- Barra de Dirección Falsa -->
+                    <div id="browser-url" class="bg-black/40 text-elegantGray text-xs px-12 py-1 rounded-md font-mono border border-white/5 max-w-xs truncate">
+                        https://horizonteweb.com/demo-restaurante
+                    </div>
+                    <div class="w-12"></div>
+                </div>
+
+                <!-- Deslizador/Track del Carrusel -->
+                <div class="overflow-hidden">
+                    <div id="carouselTrack" class="carousel-track">
+                        
+                        <!-- SLIDE 1: Restaurante -->
+                        <div class="carousel-item p-6 sm:p-10 grid md:grid-cols-2 gap-8 items-center">
+                            <div class="space-y-4">
+                                <span class="text-amber-500 text-xs font-bold uppercase tracking-wider">Sector Gastronómico</span>
+                                <h3 class="text-2xl sm:text-3xl font-bold text-softWhite">Estilo Gourmet "Sabor Casero"</h3>
+                                <p class="text-elegantGray text-sm leading-relaxed">
+                                    Una interfaz oscura e imponente que resalta la fotografía de tus platos. Ideal para restaurantes de alta cocina que necesitan un menú digital y sistema interactivo de reservaciones directamente enlazado a sus canales de atención.
+                                </p>
+                                <div class="flex gap-2 pt-2">
+                                    <span class="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-elegantGray">Elegante</span>
+                                    <span class="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-elegantGray">Menú Digital</span>
+                                </div>
+                            </div>
+                            <div class="relative rounded-xl overflow-hidden aspect-video border border-white/10 bg-cover bg-center h-48 md:h-64 flex items-center justify-center" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80');">
+                                <div class="text-center p-4">
+                                    <h4 class="font-serif font-bold text-lg text-white">Alta Cocina Tradicional</h4>
+                                    <span class="mt-2 inline-block bg-amber-600 text-white text-[10px] px-3 py-1 rounded">Ver Menú</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 2: Barbería -->
+                        <div class="carousel-item p-6 sm:p-10 grid md:grid-cols-2 gap-8 items-center">
+                            <div class="space-y-4">
+                                <span class="text-zinc-400 text-xs font-bold uppercase tracking-wider">Cuidado Personal</span>
+                                <h3 class="text-2xl sm:text-3xl font-bold text-softWhite">Estilo Urbano "Elite Barber"</h3>
+                                <p class="text-elegantGray text-sm leading-relaxed">
+                                    Diseño minimalista y moderno con una estética rústica y masculina. Diseñado específicamente para que los clientes exploren tarifas, vean catálogos de cortes y agenden sus citas de forma ágil y cómoda desde su celular.
+                                </p>
+                                <div class="flex gap-2 pt-2">
+                                    <span class="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-elegantGray">Urbano</span>
+                                    <span class="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-elegantGray">Lista de Precios</span>
+                                </div>
+                            </div>
+                            <div class="relative rounded-xl overflow-hidden aspect-video border border-white/10 bg-cover bg-center h-48 md:h-64 flex items-center justify-center" style="background-image: linear-gradient(rgba(28,25,23,0.6), rgba(28,25,23,0.8)), url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=600&q=80');">
+                                <div class="text-center p-4">
+                                    <h4 class="font-mono uppercase tracking-widest text-sm text-white">Corte & Estilo Premium</h4>
+                                    <span class="mt-2 inline-block bg-zinc-100 text-black text-[10px] font-bold px-3 py-1 rounded uppercase">Agendar Turno</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLIDE 3: Gimnasio -->
+                        <div class="carousel-item p-6 sm:p-10 grid md:grid-cols-2 gap-8 items-center">
+                            <div class="space-y-4">
+                                <span class="text-lime-400 text-xs font-bold uppercase tracking-wider">Salud y Deporte</span>
+                                <h3 class="text-2xl sm:text-3xl font-bold text-softWhite">Estilo Deportivo "Titan Gym"</h3>
+                                <p class="text-elegantGray text-sm leading-relaxed">
+                                    Estructura con contrastes neón de alta energía. Ideal para gimnasios, centros fitness o entrenadores personales que buscan capturar nuevas membresías proyectando fuerza, planes de precios claros y testimonios de éxito.
+                                </p>
+                                <div class="flex gap-2 pt-2">
+                                    <span class="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-elegantGray">Energético</span>
+                                    <span class="text-[11px] bg-white/5 border border-white/10 px-3 py-1 rounded-full text-elegantGray">Membresías</span>
+                                </div>
+                            </div>
+                            <div class="relative rounded-xl overflow-hidden aspect-video border border-white/10 bg-zinc-950 h-48 md:h-64 flex items-center justify-center">
+                                <div class="absolute top-0 right-0 w-20 h-20 bg-lime-500/20 rounded-full filter blur-xl"></div>
+                                <div class="text-center p-4">
+                                    <h4 class="font-black italic text-xl text-white uppercase leading-none">NO PAIN<br><span class="text-lime-400">NO GAIN.</span></h4>
+                                    <span class="mt-3 inline-block bg-lime-400 text-black text-[10px] font-black px-4 py-1 rounded italic transform -skew-x-12">UNIRSE</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botones de Navegación del Carrusel -->
+            <button id="prevBtn" class="absolute left-[-20px] top-1/2 transform -translate-y-1/2 w-11 h-11 rounded-full glass border border-white/10 flex items-center justify-center text-softWhite hover:bg-white/10 transition-colors z-20 focus:outline-none">
+                <i class="fa-solid fa-chevron-left text-sm"></i>
+            </button>
+            <button id="nextBtn" class="absolute right-[-20px] top-1/2 transform -translate-y-1/2 w-11 h-11 rounded-full glass border border-white/10 flex items-center justify-center text-softWhite hover:bg-white/10 transition-colors z-20 focus:outline-none">
+                <i class="fa-solid fa-chevron-right text-sm"></i>
+            </button>
+
+            <!-- Indicadores de Puntos (Dots) -->
+            <div class="flex justify-center gap-2 mt-6">
+                <button class="carousel-dot w-2 h-2 rounded-full bg-electricBlue transition-all duration-300" onclick="goToSlide(0)"></button>
+                <button class="carousel-dot w-2 h-2 rounded-full bg-white/20 transition-all duration-300" onclick="goToSlide(1)"></button>
+                <button class="carousel-dot w-2 h-2 rounded-full bg-white/20 transition-all duration-300" onclick="goToSlide(2)"></button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. SERVICIOS -->
+    <section id="servicios" class="reveal py-24 px-6 max-w-7xl mx-auto z-10 relative">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <span class="text-xs font-bold uppercase tracking-widest text-modernPurple bg-modernPurple/10 px-4 py-1.5 rounded-full font-mono">Soluciones</span>
+            <h2 class="text-3xl sm:text-4xl font-bold mt-4 text-softWhite">Servicios Digitales Exclusivos</h2>
+            <p class="text-elegantGray mt-3">Diseñados con precisión técnica y enfoque comercial para destacar en el ecosistema digital.</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Servicio 1 -->
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-electricBlue/10 border border-electricBlue/20 flex items-center justify-center text-electricBlue mb-6 text-xl">
+                        <i class="fa-solid fa-laptop-code"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-softWhite mb-3">Diseño web profesional</h3>
+                    <p class="text-elegantGray text-sm leading-relaxed">Sitios corporativos estructurados a medida que reflejan la solidez, sofisticación y valores esenciales de las marcas.</p>
+                </div>
+            </div>
+            <!-- Servicio 2 -->
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-modernPurple/10 border border-modernPurple/20 flex items-center justify-center text-modernPurple mb-6 text-xl">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-softWhite mb-3">Landing pages</h3>
+                    <p class="text-elegantGray text-sm leading-relaxed">Páginas de aterrizaje optimizadas estructuralmente para transformar visitas casuales en ventas y leads cualificados.</p>
+                </div>
+            </div>
+            <!-- Servicio 3 -->
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-6 text-xl">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-softWhite mb-3">Integración WhatsApp</h3>
+                    <p class="text-elegantGray text-sm leading-relaxed">Canales directos configurados para que los usuarios inicien conversaciones con un solo clic, agilizando la gestión comercial.</p>
+                </div>
+            </div>
+            <!-- Servicio 4 -->
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6 text-xl">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-softWhite mb-3">Responsive</h3>
+                    <p class="text-elegantGray text-sm leading-relaxed">Adaptabilidad móvil impecable. Los sitios cargan de forma deslumbrante tanto en smartphones como en pantallas de escritorio.</p>
+                </div>
+            </div>
+            <!-- Servicio 5 -->
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-6 text-xl">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-softWhite mb-3">Hosting y dominio</h3>
+                    <p class="text-elegantGray text-sm leading-relaxed">Gestión integral del despliegue y alojamiento en servidores cloud de alta fiabilidad y con seguridad de vanguardia.</p>
+                </div>
+            </div>
+            <!-- Servicio 6 -->
+            <div class="glass-card p-8 rounded-2xl flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-6 text-xl">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-softWhite mb-3">Optimización rápida</h3>
+                    <p class="text-elegantGray text-sm leading-relaxed">Estructuras de código sumamente limpias que garantizan velocidades de carga ultrarrápidas, favoreciendo el SEO de forma directa.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. PROCESO -->
+    <section id="proceso" class="reveal py-24 px-6 max-w-7xl mx-auto z-10 relative">
+        <div class="text-center max-w-3xl mx-auto mb-20">
+            <span class="text-xs font-bold uppercase tracking-widest text-electricBlue bg-electricBlue/10 px-4 py-1.5 rounded-full">Metodología</span>
+            <h2 class="text-3xl sm:text-4xl font-bold mt-4 text-softWhite">Un Proceso Simple y Transparente</h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-12 relative">
+            <div class="hidden md:block absolute top-16 left-[15%] right-[15%] h-[1px] bg-gradient-to-r from-electricBlue/40 via-modernPurple/40 to-transparent z-0"></div>
+
+            <!-- Paso 1 -->
+            <div class="relative z-10 text-center space-y-4 group">
+                <div class="w-16 h-16 rounded-full bg-darkBg border border-white/10 flex items-center justify-center text-xl font-bold text-softWhite mx-auto shadow-lg group-hover:border-electricBlue group-hover:shadow-electricBlue/20 transition-all duration-300">
+                    1
+                </div>
+                <h3 class="text-xl font-semibold text-softWhite pt-2">Contacto Directo</h3>
+                <p class="text-elegantGray text-sm max-w-xs mx-auto">Analizamos las necesidades de cada marca por canales digitales para trazar los objetivos comerciales clave.</p>
+            </div>
+
+            <!-- Paso 2 -->
+            <div class="relative z-10 text-center space-y-4 group">
+                <div class="w-16 h-16 rounded-full bg-darkBg border border-white/10 flex items-center justify-center text-xl font-bold text-softWhite mx-auto shadow-lg group-hover:border-modernPurple group-hover:shadow-modernPurple/20 transition-all duration-300">
+                    2
+                </div>
+                <h3 class="text-xl font-semibold text-softWhite pt-2">Desarrollo Tecnológico</h3>
+                <p class="text-elegantGray text-sm max-w-xs mx-auto">Estructuramos interfaces de gama alta que combinan un rendimiento superior, interactividad inteligente y conversión.</p>
+            </div>
+
+            <!-- Paso 3 -->
+            <div class="relative z-10 text-center space-y-4 group">
+                <div class="w-16 h-16 rounded-full bg-darkBg border border-white/10 flex items-center justify-center text-xl font-bold text-softWhite mx-auto shadow-lg group-hover:border-emerald-500 group-hover:shadow-emerald-500/20 transition-all duration-300">
+                    3
+                </div>
+                <h3 class="text-xl font-semibold text-softWhite pt-2">Publicación del Sitio</h3>
+                <p class="text-elegantGray text-sm max-w-xs mx-auto">Configuramos el hosting en la nube y el dominio definitivo para desplegar la plataforma a nivel global de manera inmediata.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. CTA FINAL Y SECCIÓN DE CONTACTO -->
+    <section id="contacto" class="reveal py-20 px-6 max-w-5xl mx-auto z-10 relative">
+        <div class="relative rounded-3xl overflow-hidden p-8 sm:p-16 border border-white/10 shadow-2xl text-center space-y-8">
+            <div class="absolute inset-0 bg-gradient-premium opacity-10 z-0"></div>
+            <div class="absolute -top-24 -left-24 w-48 h-48 bg-electricBlue/20 rounded-full filter blur-3xl"></div>
+            <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-modernPurple/20 rounded-full filter blur-3xl"></div>
+
+            <div class="relative z-10 max-w-2xl mx-auto space-y-6">
+                <h2 class="text-3xl sm:text-5xl font-extrabold text-softWhite tracking-tight">
+                    Hagamos que su negocio se vea profesional hoy.
+                </h2>
+                <p class="text-elegantGray text-base sm:text-lg font-light">
+                    Elevamos el estándar de las empresas mediante infraestructuras digitales premium de alto impacto. El futuro de su presencia digital comienza con nosotros.
+                </p>
+                
+                <div class="pt-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <!-- Botón WhatsApp Principal -->
+                    <a href="https://wa.me/50557401981?text=Hola%20%C2%BFPuedo%20crear%20una%20pagina%20web%20para%20mi%20negocio%3F" target="_blank" class="w-full sm:w-auto bg-gradient-premium text-softWhite font-bold px-8 py-4 rounded-full transition-all duration-300 shadow-xl shadow-electricBlue/30 hover:shadow-modernPurple/50 flex items-center justify-center gap-3 hover:scale-105 transform group">
+                        <i class="fab fa-whatsapp text-xl group-hover:animate-bounce"></i> Solicitar mi página
+                    </a>
+
+                    <!-- Botón Correo -->
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=horizonteweb.contactus@gmail.com&su=Solicitud%20de%20p%C3%A1gina%20web&body=Hola,%20me%20interesa%20una%20p%C3%A1gina%20web%20para%20mi%20negocio." target="_blank" class="w-full sm:w-auto bg-white/5 border border-white/10 hover:bg-white/10 text-softWhite font-semibold px-8 py-4 rounded-full transition-all duration-300 flex items-center justify-center gap-2">
+                        <i class="fa-regular fa-envelope"></i> Contáctenos por Correo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. FOOTER -->
+    <footer class="border-t border-white/5 bg-black/40 backdrop-blur-md px-6 py-12 relative z-10">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+            <div class="flex flex-col items-center md:items-start gap-3">
+                <a href="#" class="flex items-center gap-3">
+                    <div class="w-8 h-8 flex items-center justify-center rounded-full border border-white/20 bg-darkBg relative">
+                        <span class="text-sm font-bold text-softWhite pl-[1px]">H</span>
+                        <div class="absolute inset-0 border border-transparent border-t-electricBlue border-r-modernPurple rounded-full"></div>
+                    </div>
+                    <span class="text-lg font-bold tracking-tight">
+                        <span class="text-softWhite">Horizonte</span><span class="text-gradient">Web</span>
+                    </span>
+                </a>
+                <p class="text-xs text-elegantGray mt-1 text-center md:text-left">Agencia digital de desarrollo web corporativo y de alta fidelidad.</p>
+            </div>
+
+            <!-- Contacto Directo Links -->
+            <div class="flex flex-col sm:flex-row items-center gap-6 text-sm text-elegantGray">
+                <a href="https://wa.me/50557401981?text=Hola%20%C2%BFPuedo%20crear%20una%20pagina%20web%20para%20mi%20negocio%3F" target="_blank" class="flex items-center gap-2 hover:text-emerald-400 transition-all duration-300 group px-3 py-1.5 rounded-xl hover:bg-emerald-500/5 border border-transparent hover:border-emerald-500/10">
+                    <i class="fab fa-whatsapp text-lg text-emerald-500 group-hover:scale-110 transition-transform"></i>
+                    <span>+555 57401981</span>
+                </a>
+                
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=horizonteweb.contactus@gmail.com&su=Solicitud%20de%20p%C3%A1gina%20web&body=Hola,%20me%20interesa%20una%20p%C3%A1gina%20web%20para%20mi%20negocio." target="_blank" class="flex items-center gap-2 hover:text-indigo-400 transition-all duration-300 group px-3 py-1.5 rounded-xl hover:bg-indigo-500/5 border border-transparent hover:border-indigo-500/10">
+                    <i class="fa-regular fa-envelope text-base text-indigo-400 group-hover:scale-110 transition-transform"></i>
+                    <span>horizonteweb.contactus@gmail.com</span>
+                </a>
+            </div>
+
+            <!-- Copyright -->
+            <div class="text-xs text-elegantGray/60 font-light text-center md:text-right">
+                &copy; 2026 HorizonteWeb. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- INTERACTION LOGIC -->
+    <script>
+        // Menu Móvil Toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Efecto scroll para Navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('py-3', 'bg-darkBg/90');
+                nav.classList.remove('py-4', 'bg-darkBg/70');
+            } else {
+                nav.classList.add('py-4', 'bg-darkBg/70');
+                nav.classList.remove('py-3', 'bg-darkBg/90');
+            }
+        });
+
+        // LÓGICA DEL CARRUSEL INTERACTIVO
+        let currentSlide = 0;
+        const track = document.getElementById('carouselTrack');
+        const urlBar = document.getElementById('browser-url');
+        const dots = document.querySelectorAll('.carousel-dot');
+        
+        const urls = [
+            "https://horizonteweb.com/demo-restaurante",
+            "https://horizonteweb.com/demo-barberia",
+            "https://horizonteweb.com/demo-gimnasio"
+        ];
+
+        function updateCarousel() {
+            // Desplazar el track al slide correspondiente
+            track.style.transform = `translateX(-${currentSlide * 33.33333}%)`;
+            
+            // Actualizar la barra de dirección falsa simulada
+            urlBar.textContent = urls[currentSlide];
+            
+            // Actualizar los estados visuales de los puntos indicadores (Dots)
+            dots.forEach((dot, index) => {
+                if(index === currentSlide) {
+                    dot.classList.add('bg-electricBlue');
+                    dot.classList.remove('bg-white/20');
+                } else {
+                    dot.classList.remove('bg-electricBlue');
+                    dot.classList.add('bg-white/20');
+                }
+            });
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateCarousel();
+        }
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            currentSlide = (currentSlide + 1) % 3;
+            updateCarousel();
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            currentSlide = (currentSlide - 1 + 3) % 3;
+            updateCarousel();
+        });
+
+        // Animación Reveal on Scroll
+        const reveals = document.querySelectorAll('.reveal');
+        
+        function checkReveal() {
+            const triggerBottom = window.innerHeight / 5 * 4.5;
+            reveals.forEach(reveal => {
+                const revealTop = reveal.getBoundingClientRect().top;
+                if (revealTop < triggerBottom) {
+                    reveal.classList.add('active');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', checkReveal);
+        window.addEventListener('load', checkReveal);
+        setTimeout(checkReveal, 200);
+    </script>
+</body>
+</html>
