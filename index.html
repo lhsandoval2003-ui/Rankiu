@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Rankiu.com</title>
+<title>Rankiu</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="manifest" href="manifest.json">
 <style>
@@ -399,12 +399,21 @@ alert("Foto de perfil actualizada");
 }
 document.getElementById("updatePhotoBtn").addEventListener("click",updateProfilePhoto);
 
-// ESCUCHADOR GLOBAL DE VOTOS ÚNICO
+
+// ESCUCHADOR GLOBAL DE VOTOS ÚNICO (CORREGIDO)
 onSnapshot(collection(db, "votes"), (snapshot) => {
     const postVotes = {};
 
+    // 1. Inicializar todos los contadores de los posts que están actualmente visibles en el DOM
+    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
+        const postId = card.id.replace('post-card-', '');
+        postVotes[postId] = { up: 0, down: 0 };
+    });
+
+    // 2. Contar los votos reales acumulados en la base de datos
     snapshot.docs.forEach(doc => {
         const vote = doc.data();
+        // Si el post no estaba inicializado por alguna razón, lo creamos
         if (!postVotes[vote.postId]) {
             postVotes[vote.postId] = { up: 0, down: 0 };
         }
@@ -412,6 +421,7 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
         if (vote.type === "down") postVotes[vote.postId].down += 1;
     });
 
+    // 3. Renderizar los resultados individuales en la interfaz de usuario
     Object.keys(postVotes).forEach(postId => {
         const upCounter = document.getElementById(`up-counter-${postId}`);
         const downCounter = document.getElementById(`down-counter-${postId}`);
@@ -420,17 +430,20 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
         const ups = postVotes[postId].up;
         const downs = postVotes[postId].down;
 
+        // Mostrar cantidad exacta de likes y dislikes (sin restas mutuas)
         if (upCounter) upCounter.innerText = ups;
         if (downCounter) downCounter.innerText = downs;
 
+        // Lógica de enmarcado dinámico basado en cuál es estrictamente mayor
         if (postCard) {
             postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-800");
+            
             if (ups > downs) {
-                postCard.classList.add("border-green-500");
+                postCard.classList.add("border-green-500"); // Más likes que dislikes
             } else if (downs > ups) {
-                postCard.classList.add("border-red-500");
+                postCard.classList.add("border-red-500");   // Más dislikes que likes
             } else {
-                postCard.classList.add("border-zinc-800");
+                postCard.classList.add("border-zinc-800");   // Empate o sin votos (gris neutro)
             }
         }
     });
