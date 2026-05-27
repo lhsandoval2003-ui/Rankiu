@@ -3,196 +3,364 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Rankiu</title>
+<title>Rankiu - Red Social Premium</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
   body { 
     background: #030303; 
     font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow-x: hidden;
   }
-  .scrollbar::-webkit-scrollbar { width: 6px; }
+  .scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar::-webkit-scrollbar-track { background: transparent; }
   .scrollbar::-webkit-scrollbar-thumb { background: #1f1f23; border-radius: 20px; }
-  .gradient-glow {
-    background: radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.12) 0%, transparent 60%);
+  .scrollbar::-webkit-scrollbar-thumb:hover { background: #22c55e/30; }
+  
+  .glass {
+    background: rgba(9, 9, 11, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .glow-green:hover {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.25);
+  }
+  /* Animación de entrada suave */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 </style>
 </head>
-<body class="text-zinc-100 min-h-screen relative overflow-x-hidden">
+<body class="text-zinc-100 min-h-screen relative pb-16 md:pb-0">
 
-<!-- Fondo estético con Gradient Blobs -->
+<!-- Fondos de gradiente de neón flotantes -->
 <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[120px]"></div>
-    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px]"></div>
+  <div class="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[140px]"></div>
+  <div class="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] bg-green-500/5 rounded-full blur-[140px]"></div>
 </div>
 
-<!-- Nav Bar -->
-<nav class="border-b border-zinc-900 bg-black/60 backdrop-blur-md sticky top-0 z-40">
-  <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-    <div class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 cursor-pointer" onclick="showSection('feed')">rankiu</div>
-    <div class="flex gap-2 items-center">
-      <button onclick="showSection('feed')" class="nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition" id="tab-feed">Feed</button>
-      <button onclick="showSection('chat')" class="nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition" id="tab-chat">Chats</button>
-      <button onclick="showSection('profile')" class="nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition" id="tab-profile">Mi Perfil</button>
-      <div id="navUser" class="ml-2"></div>
+<!-- Menú de Navegación (Glassmorphism) -->
+<nav class="border-b border-zinc-900/80 glass sticky top-0 z-40 transition-all duration-300">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <div class="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 cursor-pointer select-none" onclick="showSection('feed')">
+        rankiu<span class="text-green-500 font-normal text-xs ml-1 px-1.5 py-0.5 bg-green-500/10 rounded-md border border-green-500/20">2.0</span>
+      </div>
     </div>
+    
+    <!-- Pestañas centrales de Navegación -->
+    <div class="flex gap-1 bg-zinc-950/80 p-1 rounded-2xl border border-zinc-900">
+      <button onclick="showSection('feed')" class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200" id="tab-feed">
+        <i class="fa-solid fa-house mr-1.5 text-xs"></i>Feed
+      </button>
+      <button onclick="showSection('chat')" class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200" id="tab-chat">
+        <i class="fa-solid fa-message mr-1.5 text-xs"></i>Chats
+      </button>
+      <button onclick="showSection('profile')" class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200" id="tab-profile">
+        <i class="fa-solid fa-user mr-1.5 text-xs"></i>Perfil
+      </button>
+    </div>
+
+    <div class="flex gap-2 items-center" id="navUser"></div>
   </div>
 </nav>
 
-<div class="max-w-2xl mx-auto px-4 py-6 relative z-10">
-  
-  <!-- SECCIÓN 1: FEED -->
-  <section id="feedSection">
-    <!-- Creador de Posteos -->
-    <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 mb-6 backdrop-blur-sm relative overflow-hidden">
-      <div class="flex justify-between items-center mb-3">
-        <span class="text-sm font-semibold text-zinc-500">¿Qué está pasando hoy?</span>
-        <span id="charCounter" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-1 rounded-md font-mono">0/150</span>
-      </div>
-      <textarea id="postContent" maxlength="150" placeholder="¡Escribe algo corto e interesante!" class="w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-2xl font-semibold transition-all duration-300"></textarea>
-      
-      <div class="flex items-center justify-between border-t border-zinc-900 pt-4 mt-2">
-        <div class="flex items-center gap-3">
-          <!-- Botón de imagen minimalista -->
-          <label for="postImage" class="cursor-pointer flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-green-400 transition rounded-xl w-11 h-11" title="Subir imagen">
-            <i class="fa-regular fa-image text-lg"></i>
-          </label>
-          <input type="file" id="postImage" accept="image/*" class="hidden"/>
-          <span id="imageLabel" class="text-xs text-zinc-500 hidden truncate max-w-[120px]"><i class="fa-solid fa-check text-green-400"></i> Imagen</span>
-        </div>
-        
-        <button id="publishBtn" class="bg-green-500 hover:bg-green-400 text-black font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-green-500/15">Publicar</button>
-      </div>
-    </div>
+<!-- CONTENEDOR PRINCIPAL -->
+<div class="max-w-6xl mx-auto px-4 py-6 relative z-10">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
     
-    <!-- Contenedor de posts -->
-    <div id="postsContainer" class="space-y-4"></div>
-  </section>
-
-  <!-- SECCIÓN 2: CHATS -->
-  <section id="chatSection" class="hidden">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-[650px]">
-      <!-- Lista de usuarios -->
-      <div class="bg-zinc-950/80 border border-zinc-900 rounded-2xl p-4 overflow-y-auto scrollbar flex flex-col h-full">
-        <h2 class="text-xl font-bold mb-4 text-zinc-300">Chats</h2>
-        <div id="usersList" class="space-y-2 flex-1"></div>
-      </div>
-      <!-- Ventana de Chat -->
-      <div id="chatWindow" class="md:col-span-2 bg-zinc-950/80 border border-zinc-900 rounded-2xl flex flex-col h-full overflow-hidden">
-        <div id="chatHeader" class="border-b border-zinc-900 p-4 font-bold flex items-center gap-3 text-zinc-200 bg-zinc-950">
-          <span class="text-zinc-500">Selecciona un usuario para chatear</span>
-        </div>
-        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar bg-zinc-950/20"></div>
+    <!-- COLUMNA IZQUIERDA (CONTENIDO PRINCIPAL) -->
+    <div class="lg:col-span-8 space-y-6">
+      
+      <!-- SECCIÓN 1: FEED -->
+      <section id="feedSection" class="animate-fade-in space-y-6">
         
-        <!-- Barra de Emojis -->
-        <div class="px-4 py-2 border-t border-zinc-900 bg-zinc-950 flex gap-2 overflow-x-auto scrollbar select-none">
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('😀')">😀</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('😂')">😂</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('😍')">😍</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('🔥')">🔥</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('👍')">👍</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('❤️')">❤️</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('🎉')">🎉</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('👀')">👀</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('💀')">💀</button>
-          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('✨')">✨</button>
+        <!-- Filtro del Feed (Todos vs Siguiendo) -->
+        <div class="flex justify-between items-center bg-zinc-950/90 border border-zinc-900 p-2.5 rounded-2xl">
+          <div class="flex gap-2">
+            <button id="filter-all" onclick="setFeedFilter('all')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition">Explorar</button>
+            <button id="filter-following" onclick="setFeedFilter('following')" class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition">Siguiendo</button>
+          </div>
+          <span class="text-xs text-zinc-500 font-medium mr-2" id="feed-stats-label">Cargando comunidad...</span>
+        </div>
+
+        <!-- Creador de Publicaciones Dinámicas (Sin título, max 150 caracteres) -->
+        <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 relative overflow-hidden shadow-xl">
+          <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
+          
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">¿Qué está pasando hoy?</span>
+            <span id="charCounter" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded-md font-mono border border-zinc-800">0 / 150</span>
+          </div>
+
+          <textarea id="postContent" maxlength="150" placeholder="Escribe un pensamiento directo, audaz o divertido..." class="w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-bold transition-all duration-300 text-green-400"></textarea>
+          
+          <div class="flex items-center justify-between border-t border-zinc-900/80 pt-4 mt-2">
+            <div class="flex items-center gap-3">
+              <!-- Selector de imagen estilizado de neón -->
+              <label for="postImage" class="cursor-pointer flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-green-500/40 text-zinc-400 hover:text-green-400 transition-all rounded-xl w-10 h-10 shadow-inner" title="Subir imagen">
+                <i class="fa-regular fa-image text-base"></i>
+              </label>
+              <input type="file" id="postImage" accept="image/*" class="hidden"/>
+              <span id="imageLabel" class="text-xs text-zinc-500 hidden truncate max-w-[150px] bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800">
+                <i class="fa-solid fa-circle-check text-green-400 mr-1"></i> Listo
+              </span>
+            </div>
+            
+            <button id="publishBtn" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold px-6 py-2.5 rounded-xl text-xs transition duration-200 shadow-lg shadow-green-500/20 glow-green uppercase tracking-wider">Publicar</button>
+          </div>
         </div>
         
-        <div class="p-3 bg-zinc-950 border-t border-zinc-900 flex gap-2">
-          <input id="messageInput" placeholder="Escribe un mensaje..." autocomplete="off" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500 text-sm"/>
-          <button id="sendBtn" class="bg-green-500 text-black font-bold px-5 rounded-xl hover:bg-green-400 transition"><i class="fa-solid fa-paper-plane"></i></button>
+        <!-- Feed de Posts Sube en Cascada -->
+        <div id="postsContainer" class="space-y-4">
+          <!-- Esqueleto de carga inicial -->
+          <div class="bg-zinc-950/50 border border-zinc-900 rounded-3xl p-6 space-y-4 animate-pulse">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-full bg-zinc-900"></div>
+              <div class="space-y-2 flex-1"><div class="h-3 bg-zinc-900 rounded w-1/4"></div><div class="h-2 bg-zinc-900 rounded w-1/6"></div></div>
+            </div>
+            <div class="h-6 bg-zinc-900 rounded w-3/4"></div>
+            <div class="h-40 bg-zinc-900 rounded-2xl"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN 2: CHATS -->
+      <section id="chatSection" class="hidden animate-fade-in">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 h-[650px] bg-zinc-950/90 border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+          
+          <!-- Lista de Contactos a la izquierda (Ocupa 4 columnas) -->
+          <div class="md:col-span-4 border-r border-zinc-900 flex flex-col h-full bg-black/40">
+            <div class="p-4 border-b border-zinc-900 bg-zinc-950/40">
+              <h2 class="text-lg font-bold text-zinc-200 flex items-center gap-2">
+                <i class="fa-solid fa-comments text-green-400 text-sm"></i>Mensajes
+              </h2>
+            </div>
+            <div id="usersList" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar"></div>
+          </div>
+
+          <!-- Ventana de Chat a la derecha (Ocupa 8 columnas) -->
+          <div id="chatWindow" class="md:col-span-8 flex flex-col h-full bg-zinc-950/20">
+            <div id="chatHeader" class="border-b border-zinc-900 p-4 font-bold flex items-center gap-3 text-zinc-200 bg-zinc-950/60 backdrop-blur-md">
+              <span class="text-zinc-500 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left md:hidden cursor-pointer" onclick="closeActiveChat()"></i> Selecciona un usuario para chatear</span>
+            </div>
+            
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar">
+              <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
+                <i class="fa-regular fa-paper-plane text-4xl"></i>
+                <p class="text-sm">Tus chats privados están cifrados en Firestore</p>
+              </div>
+            </div>
+            
+            <!-- Barra de Selección Rápida de Emojis -->
+            <div class="px-4 py-2 border-t border-zinc-900 bg-zinc-950/80 flex gap-2 overflow-x-auto scrollbar select-none">
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('😀')">😀</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('😂')">😂</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('😍')">😍</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('🔥')">🔥</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('👍')">👍</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('❤️')">❤️</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('🎉')">🎉</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('👀')">👀</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('💀')">💀</button>
+              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('✨')">✨</button>
+            </div>
+            
+            <!-- Entrada de Mensaje -->
+            <div class="p-3 bg-zinc-950 border-t border-zinc-900 flex gap-2">
+              <input id="messageInput" placeholder="Escribe un mensaje privado..." autocomplete="off" class="flex-1 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/30 text-sm transition-all"/>
+              <button id="sendBtn" class="bg-green-500 text-black font-bold px-5 rounded-2xl hover:bg-green-400 active:scale-95 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SECCIÓN 3: MI PERFIL -->
+      <section id="profileSection" class="hidden animate-fade-in">
+        <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-6 md:p-8 max-w-xl mx-auto text-center backdrop-blur-sm relative overflow-hidden shadow-2xl">
+          <div class="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
+          
+          <div class="relative w-28 h-28 mx-auto mb-4 group">
+            <img id="profileAvatar" class="w-28 h-28 rounded-full object-cover border-4 border-green-500/80 shadow-lg shadow-green-500/10" src="https://i.pravatar.cc/300">
+            <label for="newProfilePhoto" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
+              <i class="fa-solid fa-camera text-white text-xl"></i>
+            </label>
+            <input type="file" id="newProfilePhoto" accept="image/*" class="hidden"/>
+          </div>
+
+          <!-- Campos Editables del Perfil del Usuario -->
+          <div class="space-y-3 max-w-sm mx-auto">
+            <div class="text-left">
+              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre público</label>
+              <input type="text" id="editUsername" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl px-3 py-2 text-center font-bold text-white text-lg focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all" value="" placeholder="Nombre público">
+            </div>
+            
+            <div class="text-left">
+              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Biografía</label>
+              <textarea id="editBio" rows="2" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl p-3 text-center text-sm text-zinc-300 focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all resize-none" placeholder="Cuéntale al mundo quién eres..."></textarea>
+            </div>
+          </div>
+
+          <div class="mt-4 flex justify-center gap-6 py-3 border-t border-b border-zinc-900/80 my-4">
+            <div class="text-center">
+              <div id="followersCount" class="text-xl font-black text-green-400">0</div>
+              <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Seguidores</div>
+            </div>
+            <div class="w-[1px] bg-zinc-900"></div>
+            <div class="text-center">
+              <div id="followingCount" class="text-xl font-black text-emerald-400">0</div>
+              <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Siguiendo</div>
+            </div>
+          </div>
+
+          <button id="saveProfileBtn" onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
+            Guardar Cambios
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- COLUMNA DERECHA - SIDEBAR (Solo visible en pantallas grandes desktop >= lg) -->
+    <div class="hidden lg:block lg:col-span-4 space-y-6">
+      
+      <!-- Mi Mini Card de Perfil -->
+      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg relative overflow-hidden">
+        <div id="miniProfileCard" class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-zinc-900 rounded-full animate-pulse"></div>
+          <div class="space-y-1 flex-1">
+            <div class="h-3 bg-zinc-900 rounded w-1/2"></div>
+            <div class="h-2 bg-zinc-900 rounded w-1/3"></div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- SECCIÓN 3: MI PERFIL -->
-  <section id="profileSection" class="hidden">
-    <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-8 max-w-xl mx-auto text-center backdrop-blur-sm relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-emerald-500"></div>
-      <img id="profileAvatar" class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-green-500 mb-5 shadow-xl shadow-green-500/10" src="https://i.pravatar.cc/300">
-      <h2 id="profileUsername" class="text-3xl font-extrabold mb-1"></h2>
-      <div id="profileBio" class="text-zinc-500 text-sm mb-4"></div>
-      <div class="inline-flex items-center gap-2 bg-zinc-900 px-4 py-2 rounded-full text-sm font-semibold border border-zinc-800">
-        <i class="fa-solid fa-users text-green-400"></i> Seguidores: <span id="followersCount" class="text-green-400">0</span>
-      </div>
-      <div class="mt-8 pt-6 border-t border-zinc-900">
-        <p class="text-zinc-400 text-sm mb-3 text-left font-semibold">Cambiar foto de perfil</p>
-        <div class="flex items-center gap-3">
-          <input type="file" id="newProfilePhoto" accept="image/*" class="w-full text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl p-3"/>
-          <button id="updatePhotoBtn" class="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-3 rounded-xl transition text-sm shrink-0">Subir</button>
+      <!-- Gente Sugerida para Seguir (Quién Seguir) -->
+      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg space-y-4">
+        <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+          <span>Gente a quien seguir</span>
+          <i class="fa-solid fa-user-plus text-green-500/80"></i>
+        </h3>
+        <div id="suggestedUsersList" class="space-y-3">
+          <!-- Esqueleto Sugerencias -->
+          <div class="flex items-center justify-between animate-pulse">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-full bg-zinc-900"></div>
+              <div class="h-2.5 bg-zinc-900 rounded w-20"></div>
+            </div>
+            <div class="w-16 h-7 bg-zinc-900 rounded-lg"></div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
 
+      <!-- Tendencias de Rankiu -->
+      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg space-y-4">
+        <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+          <span>Tendencias</span>
+          <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i>
+        </h3>
+        <div class="space-y-3 text-xs">
+          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
+            <div class="text-zinc-500 font-bold">#1 Tendencia</div>
+            <div class="font-black text-zinc-100 text-sm mt-0.5">Rankiu 2.0</div>
+            <div class="text-zinc-500 mt-1">Nuevos votos táctiles</div>
+          </div>
+          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
+            <div class="text-zinc-500 font-bold">#2 Tendencia</div>
+            <div class="font-black text-zinc-100 text-sm mt-0.5">Diseño Adaptativo</div>
+            <div class="text-zinc-500 mt-1">Estilo oscuro premium</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 </div>
 
-<!-- MODAL DE AUTENTICACIÓN -->
-<div id="authModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50">
+<!-- MODAL DE AUTENTICACIÓN (LOGIN / REGISTRO) -->
+<div id="authModal" class="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50">
   <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative">
     <div class="text-center mb-6">
-      <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">rankiu</h1>
-      <p class="text-zinc-500 text-xs mt-1">Descubre, opina y conecta</p>
-    </div>
-    <div class="flex gap-2 mb-6 bg-zinc-900 p-1.5 rounded-2xl">
-      <button onclick="switchAuth('login')" class="flex-1 rounded-xl py-2 text-sm font-bold transition text-green-400 bg-zinc-950" id="btn-switch-login">Login</button>
-      <button onclick="switchAuth('register')" class="flex-1 rounded-xl py-2 text-sm font-bold transition text-zinc-500" id="btn-switch-register">Registro</button>
+      <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 select-none">rankiu</h1>
+      <p class="text-zinc-500 text-[10px] uppercase tracking-widest mt-1 font-bold">Conecta de verdad</p>
     </div>
     
-    <div id="loginBox">
-      <input id="loginEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
-      <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
-      <button id="loginBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 transition shadow-lg shadow-green-500/10 mb-4 text-sm">Iniciar sesión</button>
-      <div class="text-center">
-        <button id="forgotPasswordBtn" class="text-xs text-zinc-500 hover:text-green-400 transition underline">¿Olvidaste tu contraseña?</button>
+    <div class="flex gap-2 mb-6 bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/60">
+      <button onclick="switchAuth('login')" class="flex-1 rounded-xl py-2.5 text-xs font-bold transition-all" id="btn-switch-login">Login</button>
+      <button onclick="switchAuth('register')" class="flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500" id="btn-switch-register">Registro</button>
+    </div>
+    
+    <!-- Caja de Iniciar Sesión -->
+    <div id="loginBox" class="space-y-3">
+      <input id="loginEmail" placeholder="Email o correo" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      <input type="password" id="loginPassword" placeholder="Contraseña de seguridad" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      <button id="loginBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl hover:from-green-400 hover:to-emerald-400 transition shadow-lg shadow-green-500/15 uppercase tracking-wider text-xs">Iniciar sesión</button>
+      <div class="text-center mt-3">
+        <button id="forgotPasswordBtn" class="text-xs text-zinc-500 hover:text-green-400 transition-all underline">¿Olvidaste tu contraseña?</button>
       </div>
     </div>
     
-    <div id="registerBox" class="hidden">
-      <input id="registerUsername" placeholder="Nombre de usuario" class="w-full mb-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
-      <input id="registerEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
-      <input type="password" id="registerPassword" placeholder="Contraseña" class="w-full mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
-      <label class="block text-xs text-zinc-500 mb-2 font-semibold">Foto de perfil</label>
-      <input type="file" id="registerAvatar" accept="image/*" class="w-full mb-4 text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl p-3"/>
-      <button id="registerBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 transition text-sm">Crear cuenta</button>
+    <!-- Caja de Registro -->
+    <div id="registerBox" class="hidden space-y-3">
+      <input id="registerUsername" placeholder="Nombre único de usuario" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      <input id="registerEmail" placeholder="Correo electrónico" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      <input type="password" id="registerPassword" placeholder="Crea tu contraseña" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      
+      <div class="p-3 bg-zinc-900/50 border border-zinc-800/80 rounded-xl text-center">
+        <label class="block text-[10px] text-zinc-400 mb-2 font-extrabold uppercase tracking-wider">Subir foto de perfil</label>
+        <input type="file" id="registerAvatar" accept="image/*" class="w-full text-xs text-zinc-500"/>
+      </div>
+      
+      <button id="registerBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl hover:from-green-400 hover:to-emerald-400 transition text-xs uppercase tracking-wider">Crear Cuenta Nueva</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL DETALLE DE PERFIL DE OTRAS PERSONAS (Flotante) -->
-<div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity">
-  <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative text-center">
-    <button onclick="closeUserProfile()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-200"><i class="fa-solid fa-xmark text-xl"></i></button>
-    <img id="modalAvatar" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-green-500 mb-4" src="">
-    <h3 id="modalUsername" class="text-2xl font-bold text-white mb-1"></h3>
-    <p id="modalBio" class="text-zinc-400 text-sm mb-4"></p>
+<!-- MODAL DETALLE DE PERFIL DE OTROS -->
+<div id="userProfileModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50">
+  <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative text-center animate-fade-in">
+    <button onclick="closeUserProfile()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
     
-    <div class="flex justify-around items-center bg-zinc-900/60 rounded-2xl py-3 border border-zinc-900 mb-6">
+    <img id="modalAvatar" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-green-500 mb-4 shadow-xl" src="">
+    <h3 id="modalUsername" class="text-2xl font-bold text-white mb-1"></h3>
+    <p id="modalBio" class="text-zinc-400 text-sm mb-4 italic"></p>
+    
+    <div class="flex justify-around items-center bg-zinc-900/40 rounded-2xl py-3 border border-zinc-900/80 mb-6">
       <div>
-        <div id="modalFollowers" class="text-lg font-bold text-green-400">0</div>
-        <div class="text-xs text-zinc-500">Seguidores</div>
+        <div id="modalFollowers" class="text-lg font-black text-green-400">0</div>
+        <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Seguidores</div>
       </div>
     </div>
     
     <div class="flex gap-2">
-      <button id="modalFollowBtn" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-3 rounded-xl transition text-sm"></button>
+      <button id="modalFollowBtn" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider"></button>
       <button id="modalChatBtn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold px-4 rounded-xl transition text-sm"><i class="fa-regular fa-comment-dots text-lg"></i></button>
     </div>
   </div>
 </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
+<!-- CONTENEDOR DE TOASTS (Notificaciones Internas Limpias) -->
+<div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-const firebaseConfig = {
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+// Global values injected or hardcoded
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'rankiu-5da90';
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
   apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
   authDomain: "rankiu-5da90.firebaseapp.com",
   projectId: "rankiu-5da90",
@@ -206,36 +374,85 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Persistencia explícita de sesión
+// Seteamos persistencia
 setPersistence(auth, browserLocalPersistence).catch((error) => console.error("Error de persistencia:", error));
 
+// Helpers de rutas conforme a la REGLA DE RUTAS RESTRINGIDAS (RULE 1)
+function getCol(colName) {
+  return collection(db, 'artifacts', appId, 'public', 'data', colName);
+}
+function getDocRef(colName, docId) {
+  return doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
+}
+
+// Variables de estado
 let currentUser = null;
 let selectedUser = null;
 let allUsers = [];
 let followingSet = new Set();
 let followerCounts = {};
+let followingCounts = {};
 let currentPosts = [];
+let feedFilter = 'all'; // 'all' or 'following'
 
-// Escucha dinámica del textarea de creación de posts (Ajuste estético de letra)
+// Sistema de Notificaciones Flotantes (Toasts)
+function showNotification(message, type = "info") {
+  const container = document.getElementById("toastContainer");
+  const toast = document.createElement("div");
+  toast.className = `p-4 rounded-2xl shadow-xl border text-xs font-bold pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-3`;
+  
+  if (type === "success") {
+    toast.className += " bg-zinc-950 text-green-400 border-green-500/20";
+    toast.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 text-sm"></i> ${message}`;
+  } else if (type === "error") {
+    toast.className += " bg-zinc-950 text-red-400 border-red-500/20";
+    toast.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400 text-sm"></i> ${message}`;
+  } else {
+    toast.className += " bg-zinc-950 text-zinc-300 border-zinc-800";
+    toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-sm"></i> ${message}`;
+  }
+  
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.remove("translate-y-2", "opacity-0");
+  }, 50);
+
+  setTimeout(() => {
+    toast.classList.add("opacity-0", "translate-y-[-10px]");
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// Escucha dinámica del textarea de creación de posts
 const postTextarea = document.getElementById("postContent");
 postTextarea.addEventListener("input", (e) => {
   const len = e.target.value.length;
-  document.getElementById("charCounter").innerText = `${len}/150`;
+  document.getElementById("charCounter").innerText = `${len} / 150`;
   
-  if (len < 50) {
-    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-2xl font-semibold transition-all duration-300 text-green-400";
-  } else if (len < 100) {
-    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-lg font-medium transition-all duration-300 text-zinc-100";
+  const label = document.getElementById("charCounter");
+  if (len >= 130) {
+    label.className = "text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md font-mono border border-red-500/20";
+  } else if (len >= 90) {
+    label.className = "text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-md font-mono border border-yellow-500/20";
   } else {
-    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-sm font-normal transition-all duration-300 text-zinc-300";
+    label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
+  }
+
+  // Escalador Dinámico de Fuente para Posts de Rankiu
+  if (len < 50) {
+    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
+  } else if (len < 100) {
+    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-lg font-bold transition-all duration-300 text-zinc-100";
+  } else {
+    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-sm font-semibold transition-all duration-300 text-zinc-300";
   }
 });
 
-// Cambiar de vista en inputs de archivos
+// Selector de archivos estético
 document.getElementById("postImage").addEventListener("change", (e) => {
   const label = document.getElementById("imageLabel");
   if(e.target.files.length > 0) {
-    label.innerText = e.target.files[0].name;
+    label.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 mr-1"></i> ${e.target.files[0].name}`;
     label.classList.remove("hidden");
   } else {
     label.classList.add("hidden");
@@ -246,20 +463,20 @@ function switchAuth(type){
   if(type === "login"){
     document.getElementById("loginBox").classList.remove("hidden");
     document.getElementById("registerBox").classList.add("hidden");
-    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-green-400 bg-zinc-950";
-    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-zinc-500";
+    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
+    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
   }else{
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("registerBox").classList.remove("hidden");
-    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-zinc-500";
-    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-green-400 bg-zinc-950";
+    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
+    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
   }
 }
 window.switchAuth = switchAuth;
 
-async function uploadImage(file,path){
-  const storageRef = ref(storage,path);
-  await uploadBytes(storageRef,file);
+async function uploadImage(file, path) {
+  const storageRef = ref(storage, `artifacts/${appId}/${path}`);
+  await uploadBytes(storageRef, file);
   return await getDownloadURL(storageRef);
 }
 
@@ -270,81 +487,94 @@ async function register(){
   const avatarFile = document.getElementById("registerAvatar").files[0];
 
   if(!username || !email || !password){
-    alert("Completa todos los campos");
+    showNotification("Completa todos los campos", "error");
     return;
   }
   try{
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    let avatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=" + encodeURIComponent(username);
+    let avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(username)}`;
     if(avatarFile){
       avatarUrl = await uploadImage(avatarFile, "avatars/" + Date.now());
     }
     await updateProfile(userCredential.user,{ displayName: username, photoURL: avatarUrl });
-    await setDoc(doc(db,"users",userCredential.user.uid), {
-      username, email, avatar:avatarUrl, bio:"Nuevo en Rankiu", followers:0, createdAt:Date.now()
+    await setDoc(getDocRef("users", userCredential.user.uid), {
+      username, email, avatar: avatarUrl, bio: "¡Hola! Estoy usando Rankiu.", followers: 0, createdAt: Date.now()
     });
-    alert("Cuenta creada con éxito");
-  }catch(error){ alert(error.message); }
+    showNotification("Cuenta creada con éxito", "success");
+  }catch(error){ showNotification(error.message, "error"); }
 }
 
 async function login(){
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value.trim();
-  if(!email || !password) return alert("Ingresa tus credenciales");
-  try{ await signInWithEmailAndPassword(auth, email, password); }
-  catch(error){ alert(error.message); }
+  if(!email || !password) return showNotification("Ingresa tus credenciales", "error");
+  try{ 
+    await signInWithEmailAndPassword(auth, email, password); 
+    showNotification("Bienvenido a Rankiu", "success");
+  } catch(error){ showNotification("Error de login: " + error.message, "error"); }
 }
 
-async function logout(){ await signOut(auth); }
+async function logout(){ 
+  await signOut(auth); 
+  showNotification("Sesión cerrada", "info");
+}
 
 async function resetPassword() {
-  const email = prompt("Ingresa tu correo para restaurar la contraseña:");
+  const email = prompt("Por favor, ingresa tu correo para enviarte un enlace de restablecimiento:");
   if (!email) return;
   try {
     await sendPasswordResetEmail(auth, email.trim());
-    alert("Correo de recuperación enviado.");
+    showNotification("¡Enlace enviado! Revisa tu bandeja de entrada.", "success");
   } catch(error) {
-    alert("Error: " + error.message);
+    showNotification("Error: " + error.message, "error");
   }
 }
 
-document.getElementById("registerBtn").addEventListener("click",register);
-document.getElementById("loginBtn").addEventListener("click",login);
+document.getElementById("registerBtn").addEventListener("click", register);
+document.getElementById("loginBtn").addEventListener("click", login);
 document.getElementById("forgotPasswordBtn").addEventListener("click", resetPassword);
 
 async function createPost(){
-  if(!currentUser){ alert("Inicia sesión"); return; }
+  if(!currentUser){ showNotification("Inicia sesión para publicar", "error"); return; }
   const content = document.getElementById("postContent").value.trim();
   const imageFile = document.getElementById("postImage").files[0];
 
-  if(!content){ alert("Escribe un mensaje"); return; }
+  if(!content){ showNotification("Por favor, escribe algo", "error"); return; }
   let imageUrl = "";
-  if(imageFile){ imageUrl = await uploadImage(imageFile, "posts/" + Date.now()); }
+  if(imageFile){ 
+    showNotification("Subiendo imagen...", "info");
+    imageUrl = await uploadImage(imageFile, "posts/" + Date.now()); 
+  }
 
-  await addDoc(collection(db,"posts"),{
+  await addDoc(getCol("posts"),{
     content, image:imageUrl, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
   });
+  
   document.getElementById("postContent").value = "";
   document.getElementById("postImage").value = "";
   document.getElementById("imageLabel").classList.add("hidden");
-  document.getElementById("charCounter").innerText = "0/150";
+  document.getElementById("charCounter").innerText = "0 / 150";
+  showNotification("Publicación subida con éxito", "success");
 }
-document.getElementById("publishBtn").addEventListener("click",createPost);
+document.getElementById("publishBtn").addEventListener("click", createPost);
 
 // Lógica de seguidor en tiempo real
 function toggleFollow(authorId) {
-  if(!currentUser) return alert("Inicia sesión para seguir");
+  if(!currentUser) return showNotification("Inicia sesión para seguir personas", "error");
+  if(authorId === currentUser.uid) return showNotification("No te puedes seguir a ti mismo", "error");
+  
   const isFollowing = followingSet.has(authorId);
   const followId = `${currentUser.uid}_${authorId}`;
   
   if (isFollowing) {
-    deleteDoc(doc(db, "followers", followId));
+    deleteDoc(getDocRef("followers", followId))
+      .then(() => showNotification("Dejaste de seguir al usuario", "info"));
   } else {
-    setDoc(doc(db, "followers", followId), {
+    setDoc(getDocRef("followers", followId), {
       followerId: currentUser.uid,
       followingId: authorId,
       createdAt: Date.now()
-    });
+    }).then(() => showNotification("¡Ahora sigues a este usuario!", "success"));
   }
 }
 window.toggleFollow = toggleFollow;
@@ -352,9 +582,10 @@ window.toggleFollow = toggleFollow;
 // Escuchas globales de seguidores
 function listenFollowers() {
   if (!currentUser) return;
-  onSnapshot(collection(db, "followers"), (snapshot) => {
+  onSnapshot(getCol("followers"), (snapshot) => {
     followingSet.clear();
     followerCounts = {};
+    followingCounts = {};
     
     snapshot.docs.forEach(doc => {
       const data = doc.data();
@@ -362,22 +593,29 @@ function listenFollowers() {
         followingSet.add(data.followingId);
       }
       followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
+      followingCounts[data.followerId] = (followingCounts[data.followerId] || 0) + 1;
     });
     
     renderPosts(currentPosts);
     updateProfileStats();
-  });
+    renderSuggestedUsers();
+  }, (err) => console.error("Error en Snapshot followers: ", err));
 }
 
 function updateProfileStats() {
   if (currentUser) {
     const myFollowers = followerCounts[currentUser.uid] || 0;
+    const myFollowing = followingCounts[currentUser.uid] || 0;
+    
     const fCountEl = document.getElementById("followersCount");
+    const fFollowingEl = document.getElementById("followingCount");
+    
     if(fCountEl) fCountEl.innerText = myFollowers;
+    if(fFollowingEl) fFollowingEl.innerText = myFollowing;
   }
 }
 
-// Abrir detalle de otros perfiles
+// Abrir detalle de otros perfiles en modal
 async function viewUserProfile(userId) {
   if (!userId) return;
   const user = allUsers.find(u => u.id === userId);
@@ -385,7 +623,7 @@ async function viewUserProfile(userId) {
   
   document.getElementById("modalAvatar").src = user.avatar || "https://i.pravatar.cc/300";
   document.getElementById("modalUsername").innerText = user.username || "Usuario";
-  document.getElementById("modalBio").innerText = user.bio || "Usuario verificado de Rankiu";
+  document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía todavía.";
   
   const totalFollowers = followerCounts[userId] || 0;
   document.getElementById("modalFollowers").innerText = totalFollowers;
@@ -396,10 +634,18 @@ async function viewUserProfile(userId) {
   } else {
     followBtn.classList.remove("hidden");
     const isFollowing = followingSet.has(userId);
-    followBtn.innerHTML = isFollowing ? '<i class="fa-solid fa-check mr-1"></i> Siguiendo' : '<i class="fa-solid fa-plus mr-1"></i> Seguir';
+    
+    if (isFollowing) {
+      followBtn.innerHTML = '<i class="fa-solid fa-circle-check mr-2"></i> Siguiendo';
+      followBtn.className = "flex-1 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+    } else {
+      followBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Seguir';
+      followBtn.className = "flex-1 bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+    }
+    
     followBtn.onclick = () => {
       toggleFollow(userId);
-      setTimeout(() => viewUserProfile(userId), 200); // Pequeño delay de refresco visual
+      setTimeout(() => viewUserProfile(userId), 300); // Pequeño delay de refresco visual
     };
   }
   
@@ -428,68 +674,112 @@ window.closeUserProfile = closeUserProfile;
 // Función para formatear el tamaño del texto según longitud
 function getFontSize(text) {
   const len = text.length;
-  if(len < 50) return "text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-white";
-  if(len < 100) return "text-lg md:text-xl font-semibold text-zinc-100";
-  return "text-sm md:text-base text-zinc-300";
+  if(len < 50) return "text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-green-100 to-green-400 tracking-tight leading-snug";
+  if(len < 100) return "text-lg md:text-xl font-bold text-zinc-100 leading-normal";
+  return "text-sm md:text-base text-zinc-300 font-medium leading-relaxed";
 }
 
 function renderPosts(posts){
   currentPosts = posts;
   const container = document.getElementById("postsContainer");
+  
+  // Filtrado dinámico local por "Siguiendo"
+  let filteredPosts = posts;
+  if (feedFilter === 'following' && currentUser) {
+    filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
+  }
+  
+  // Actualizar stats
+  document.getElementById("feed-stats-label").innerText = `${filteredPosts.length} Publicaciones encontradas`;
+
+  if (filteredPosts.length === 0) {
+    container.innerHTML = `
+      <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
+        <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
+        <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
+        <p class="text-xs text-zinc-600 mt-1">Escribe tu primer post o empieza a seguir gente.</p>
+      </div>
+    `;
+    return;
+  }
+
   container.innerHTML = "";
-  posts.forEach(post => {
+  filteredPosts.forEach(post => {
     const isFollowing = followingSet.has(post.authorId);
-    const followIcon = isFollowing ? '<i class="fa-solid fa-check text-green-400"></i>' : '<i class="fa-solid fa-plus text-zinc-500 hover:text-green-400"></i>';
+    let followBtnMarkup = '';
     
+    if (post.authorId !== currentUser?.uid) {
+      if (isFollowing) {
+        followBtnMarkup = `
+          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-zinc-900/80 border border-zinc-800 hover:border-red-500/20 text-green-400 hover:text-red-400 transition-all text-xs font-extrabold flex items-center gap-1" title="Siguiendo">
+            <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
+          </button>`;
+      } else {
+        followBtnMarkup = `
+          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500 text-black hover:bg-green-400 transition-all text-xs font-black flex items-center gap-1 shadow-md shadow-green-500/10">
+            <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
+          </button>`;
+      }
+    }
+
     const div = document.createElement("div");
     div.id = `post-card-${post.id}`;
-    div.className = `bg-zinc-950/75 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition duration-300`;
+    div.className = `bg-zinc-950/80 border border-zinc-900/80 rounded-3xl p-5 hover:border-zinc-800 transition duration-300 relative overflow-hidden`;
     
     div.innerHTML = `
-    <div class="flex justify-between items-start">
+    <div class="flex justify-between items-center">
       <div class="flex gap-3 items-center cursor-pointer" onclick="viewUserProfile('${post.authorId}')">
-        <img src="${post.authorAvatar || 'https://i.pravatar.cc/150'}" class="w-11 h-11 rounded-full object-cover">
+        <img src="${post.authorAvatar || 'https://i.pravatar.cc/150'}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
         <div>
-          <div class="font-bold text-sm text-zinc-200 hover:text-green-400 transition">${post.author}</div>
-          <div class="text-xs text-zinc-600">Posteado</div>
+          <div class="font-extrabold text-sm text-zinc-100 hover:text-green-400 transition-colors">${post.author}</div>
+          <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Publicado</div>
         </div>
       </div>
       
-      <!-- Icono Dinámico de Seguir -->
-      ${post.authorId !== currentUser?.uid ? `
-        <button onclick="toggleFollow('${post.authorId}')" class="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-center justify-center hover:bg-zinc-800 transition text-sm">
-          ${followIcon}
-        </button>
-      ` : ''}
+      ${followBtnMarkup}
     </div>
     
     <!-- Contenido dinámico adaptativo -->
-    <p class="mt-4 leading-relaxed whitespace-pre-wrap select-all ${getFontSize(post.content)}">${post.content}</p>
+    <p class="mt-4 leading-relaxed whitespace-pre-wrap select-all select-none ${getFontSize(post.content)}">${post.content}</p>
     
-    ${post.image? `<img src="${post.image}" class="mt-4 rounded-2xl w-full max-h-[380px] object-cover border border-zinc-900">`: ''}
+    ${post.image? `<img src="${post.image}" class="mt-4 rounded-2xl w-full max-h-[380px] object-cover border border-zinc-900 shadow-md">`: ''}
 
-    <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/40 pb-4">
-      <div class="flex items-center bg-zinc-900/80 rounded-xl border border-zinc-800/80">
-        <button class="px-3.5 py-2.5 upvoteBtn text-zinc-500 hover:text-green-500 transition text-sm" data-id="${post.id}">▲</button>
-        <span id="up-counter-${post.id}" class="font-bold text-green-400 text-xs">0</span>
-        <span class="text-zinc-800 mx-1">|</span>
-        <span id="down-counter-${post.id}" class="font-bold text-red-500 text-xs">0</span>
-        <button class="px-3.5 py-2.5 downvoteBtn text-zinc-500 hover:text-red-500 transition text-sm" data-id="${post.id}">▼</button>
+    <!-- Panel de Upvotes / Downvotes Premium Rediseñado -->
+    <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
+      <div class="flex items-center bg-zinc-900/50 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
+        
+        <!-- Botón Upvote -->
+        <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-zinc-500 hover:text-green-400 hover:bg-green-500/10 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150" data-id="${post.id}">
+          <i class="fa-solid fa-circle-arrow-up text-lg"></i>
+          <span id="up-counter-${post.id}" class="text-xs font-extrabold text-zinc-400">0</span>
+        </button>
+        
+        <div class="w-[1px] h-6 bg-zinc-800"></div>
+        
+        <!-- Botón Downvote -->
+        <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150" data-id="${post.id}">
+          <i class="fa-solid fa-circle-arrow-down text-lg"></i>
+          <span id="down-counter-${post.id}" class="text-xs font-extrabold text-zinc-400">0</span>
+        </button>
+        
       </div>
     </div>
 
-    <!-- Sección Comentarios Minimalista -->
+    <!-- Caja de Comentarios de la Publicación -->
     <div class="mt-4">
       <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
       <div class="flex gap-2">
-        <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-zinc-700 text-white"/>
-        <button class="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}"><i class="fa-solid fa-paper-plane"></i></button>
+        <input id="comment-input-${post.id}" placeholder="Escribe un comentario público..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-green-500/50 text-white placeholder-zinc-600 transition-all"/>
+        <button class="bg-zinc-900 border border-zinc-800 hover:border-green-500/30 text-green-400 font-bold px-4 py-2 rounded-xl text-xs commentBtn active:scale-95 transition-all" data-id="${post.id}">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
       </div>
     </div>
     `;
     container.appendChild(div);
 
-    const commentsQuery = query(collection(db, "comments"), where("postId", "==", post.id));
+    // Snapshot para comentarios
+    const commentsQuery = query(getCol("comments"), where("postId", "==", post.id));
     onSnapshot(commentsQuery, (commentSnapshot) => {
         const commentListContainer = document.getElementById(`comments-list-${post.id}`);
         if (commentListContainer) {
@@ -498,7 +788,7 @@ function renderPosts(posts){
             sortedDocs.forEach(comment => {
                 const commentDiv = document.createElement("div");
                 commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
-                commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer hover:text-green-400 transition" onclick="viewUserProfile('${comment.authorId}')">${comment.author}:</strong> <span class="text-zinc-300 ml-1">${comment.text}</span>`;
+                commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer hover:text-green-400 transition-colors" onclick="viewUserProfile('${comment.authorId}')">${comment.author}:</strong> <span class="text-zinc-300 ml-1">${comment.text}</span>`;
                 commentListContainer.appendChild(commentDiv);
             });
         }
@@ -506,19 +796,21 @@ function renderPosts(posts){
   });
 }
 
-// Clics globales
+// Único controlador de eventos global para clicks dinámicos
 document.addEventListener("click", async (event) => {
     const target = event.target;
 
+    // Comentar Post
     if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
         const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
-        if(!currentUser) return alert("Inicia sesión para comentar");
+        if(!currentUser) return showNotification("Debes iniciar sesión para comentar", "error");
+        
         const postId = btn.dataset.id;
         const input = document.getElementById(`comment-input-${postId}`);
         const text = input.value.trim();
         if(!text) return;
 
-        await addDoc(collection(db, "comments"), {
+        await addDoc(getCol("comments"), {
             postId,
             text,
             author: currentUser.displayName,
@@ -526,24 +818,35 @@ document.addEventListener("click", async (event) => {
             createdAt: Date.now()
         });
         input.value = "";
+        showNotification("Comentario publicado", "success");
     }
 
-    if (target.classList.contains("upvoteBtn")) {
-        if(!currentUser) return alert("Inicia sesión para votar");
-        const voteId = `${currentUser.uid}_${target.dataset.id}`;
-        await setDoc(doc(db, "votes", voteId), {
-            postId: target.dataset.id,
+    // Upvote (Voto Positivo)
+    if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
+        const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
+        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
+        
+        const postId = btn.dataset.id;
+        const voteId = `${currentUser.uid}_${postId}`;
+        
+        await setDoc(getDocRef("votes", voteId), {
+            postId: postId,
             userId: currentUser.uid,
             type: "up",
             createdAt: Date.now()
         });
     }
 
-    if (target.classList.contains("downvoteBtn")) {
-        if(!currentUser) return alert("Inicia sesión para votar");
-        const voteId = `${currentUser.uid}_${target.dataset.id}`;
-        await setDoc(doc(db, "votes", voteId), {
-            postId: target.dataset.id,
+    // Downvote (Voto Negativo)
+    if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
+        const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
+        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
+        
+        const postId = btn.dataset.id;
+        const voteId = `${currentUser.uid}_${postId}`;
+        
+        await setDoc(getDocRef("votes", voteId), {
+            postId: postId,
             userId: currentUser.uid,
             type: "down",
             createdAt: Date.now()
@@ -551,12 +854,52 @@ document.addEventListener("click", async (event) => {
     }
 });
 
+// Render de la barra de sugerencias (Quién seguir) en desktop
+function renderSuggestedUsers() {
+  const container = document.getElementById("suggestedUsersList");
+  if (!container) return;
+  
+  // Filtrar para no recomendarse a sí mismo o a quienes ya sigue
+  const suggestions = allUsers.filter(u => u.id !== currentUser?.uid && !followingSet.has(u.id)).slice(0, 4);
+  
+  if (suggestions.length === 0) {
+    container.innerHTML = `<p class="text-xs text-zinc-500">Ya sigues a todos los miembros de Rankiu.</p>`;
+    return;
+  }
+  
+  container.innerHTML = "";
+  suggestions.forEach(user => {
+    const div = document.createElement("div");
+    div.className = "flex items-center justify-between p-2 rounded-2xl bg-zinc-900/30 border border-zinc-900 hover:border-zinc-800 transition";
+    div.innerHTML = `
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="viewUserProfile('${user.id}')">
+        <img src="${user.avatar || 'https://i.pravatar.cc/150'}" class="w-8 h-8 rounded-full object-cover">
+        <div class="text-xs font-black text-zinc-200 truncate max-w-[100px]">${user.username}</div>
+      </div>
+      <button onclick="toggleFollow('${user.id}')" class="px-3 py-1 bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-black font-extrabold text-[10px] rounded-lg transition-all border border-green-500/20">
+        Seguir
+      </button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// Filtro de Feed dinámico
+function setFeedFilter(filter) {
+  feedFilter = filter;
+  document.getElementById("filter-all").className = filter === 'all' ? "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition" : "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
+  document.getElementById("filter-following").className = filter === 'following' ? "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition" : "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
+  renderPosts(currentPosts);
+}
+window.setFeedFilter = setFeedFilter;
+
 async function loadUsers(){
   try {
-    const q = query(collection(db, "users"));
+    const q = query(getCol("users"));
     const querySnapshot = await getDocs(q);
     allUsers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderUsers();
+    renderSuggestedUsers();
   } catch(e) { console.error("Error cargando usuarios: ", e); }
 }
 
@@ -566,14 +909,14 @@ function renderUsers(){
   allUsers.forEach(user => {
     if(currentUser && user.id === currentUser.uid) return;
     const div = document.createElement("div");
-    div.className = `flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-900 rounded-xl p-3 cursor-pointer hover:border-zinc-800 transition`;
+    div.className = `flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-900 rounded-2xl p-3 cursor-pointer hover:border-zinc-800 transition-all duration-200`;
     div.onclick = () => {
       selectedUser = user;
       listenMessages();
     };
     div.innerHTML = `
     <img src="${user.avatar || 'https://i.pravatar.cc/150'}" class="w-10 h-10 rounded-full object-cover">
-    <div class="font-bold text-sm text-zinc-300">${user.username}</div>
+    <div class="font-extrabold text-sm text-zinc-300 truncate">${user.username}</div>
     `;
     container.appendChild(div);
   });
@@ -587,19 +930,18 @@ function insertEmoji(emoji) {
 window.insertEmoji = insertEmoji;
 
 async function sendMessage(){
-  if(!selectedUser){ alert("Selecciona un usuario"); return; }
+  if(!selectedUser){ showNotification("Selecciona un usuario primero", "error"); return; }
   const input = document.getElementById("messageInput");
   const text = input.value.trim();
   if(!text) return;
 
-  await addDoc(collection(db,"messages"),{
+  await addDoc(getCol("messages"),{
     from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
   });
   input.value = "";
 }
-document.getElementById("sendBtn").addEventListener("click",sendMessage);
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
-// Escuchar si hay "Enter" en el input del chat
 document.getElementById("messageInput").addEventListener("keydown", (e) => {
   if (e.key === "Enter") sendMessage();
 });
@@ -607,49 +949,100 @@ document.getElementById("messageInput").addEventListener("keydown", (e) => {
 function listenMessages(){
   if(!selectedUser) return;
   document.getElementById("chatHeader").innerHTML = `
-    <img src="${selectedUser.avatar || 'https://i.pravatar.cc/150'}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
-    <span class="text-white hover:text-green-400 cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">${selectedUser.username}</span>
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer mr-1" onclick="closeActiveChat()"></i>
+      <img src="${selectedUser.avatar || 'https://i.pravatar.cc/150'}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
+      <span class="text-white hover:text-green-400 cursor-pointer transition" onclick="viewUserProfile('${selectedUser.id}')">${selectedUser.username}</span>
+    </div>
   `;
-  const q = query(collection(db,"messages"), orderBy("createdAt","asc"));
+  const q = query(getCol("messages"), orderBy("createdAt","asc"));
   onSnapshot(q,(snapshot)=>{
     const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
     .filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
 
     const container = document.getElementById("chatMessages");
     container.innerHTML = "";
+    
+    if (messages.length === 0) {
+      container.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-zinc-600">
+          <p class="text-xs">Di hola para empezar una conversación privada con ${selectedUser.username}.</p>
+        </div>`;
+    }
+
     messages.forEach(msg => {
       const mine = msg.from === currentUser.uid;
       const div = document.createElement("div");
       div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
-      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${msg.text}</div>`;
+      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold shadow-md shadow-green-500/10' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${msg.text}</div>`;
       container.appendChild(div);
     });
-    // Auto Scroll hacia abajo
     container.scrollTop = container.scrollHeight;
   });
 }
 
+function closeActiveChat() {
+  selectedUser = null;
+  document.getElementById("chatHeader").innerHTML = `<span class="text-zinc-500 text-sm">Selecciona un usuario para chatear</span>`;
+  document.getElementById("chatMessages").innerHTML = `
+    <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
+      <i class="fa-regular fa-paper-plane text-4xl"></i>
+      <p class="text-sm">Tus chats privados están cifrados en Firestore</p>
+    </div>`;
+}
+window.closeActiveChat = closeActiveChat;
+
+// Lógica para guardar edición de Nombre y Bio
+async function saveProfileChanges() {
+  if (!currentUser) return;
+  const newName = document.getElementById("editUsername").value.trim();
+  const newBio = document.getElementById("editBio").value.trim();
+  
+  if (!newName) return showNotification("El nombre de usuario no puede estar vacío", "error");
+  
+  try {
+    showNotification("Guardando perfil...", "info");
+    
+    // 1. Actualizar perfil auth de Firebase
+    await updateProfile(currentUser, { displayName: newName });
+    
+    // 2. Actualizar registro en Firestore
+    await setDoc(getDocRef("users", currentUser.uid), {
+      username: newName,
+      bio: newBio
+    }, { merge: true });
+    
+    showNotification("¡Perfil actualizado con éxito!", "success");
+    renderProfile();
+    updateNavbar();
+    await loadUsers();
+  } catch(err) {
+    showNotification("Error: " + err.message, "error");
+  }
+}
+window.saveProfileChanges = saveProfileChanges;
+
+// Mostrar secciones
 function showSection(section){
   document.getElementById("feedSection").classList.add("hidden");
   document.getElementById("profileSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
   
-  // Clases activas de pestañas
   document.querySelectorAll(".nav-tab").forEach(btn => {
-    btn.className = "nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition text-zinc-400";
+    btn.className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-400 hover:text-white";
   });
   
   if(section === "feed") {
     document.getElementById("feedSection").classList.remove("hidden");
-    document.getElementById("tab-feed").className = "nav-tab border-green-500/30 text-green-400 bg-zinc-950 px-4 py-2 rounded-xl text-sm font-semibold transition border";
+    document.getElementById("tab-feed").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-black text-green-400 bg-zinc-900 border border-zinc-800";
   }
   if(section === "profile") {
     document.getElementById("profileSection").classList.remove("hidden");
-    document.getElementById("tab-profile").className = "nav-tab border-green-500/30 text-green-400 bg-zinc-950 px-4 py-2 rounded-xl text-sm font-semibold transition border";
+    document.getElementById("tab-profile").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-black text-green-400 bg-zinc-900 border border-zinc-800";
   }
   if(section === "chat") {
     document.getElementById("chatSection").classList.remove("hidden");
-    document.getElementById("tab-chat").className = "nav-tab border-green-500/30 text-green-400 bg-zinc-950 px-4 py-2 rounded-xl text-sm font-semibold transition border";
+    document.getElementById("tab-chat").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-black text-green-400 bg-zinc-900 border border-zinc-800";
   }
 }
 window.showSection = showSection;
@@ -658,24 +1051,42 @@ function updateNavbar(){
   const nav = document.getElementById("navUser");
   if(currentUser){
     nav.innerHTML = `
-    <div class="flex items-center gap-2 cursor-pointer" onclick="showSection('profile')">
-      <img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-9 h-9 rounded-full object-cover border-2 border-green-500">
-      <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-xs font-bold px-3 py-1.5 rounded-lg transition">Salir</button>
+    <div class="flex items-center gap-2">
+      <img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-8 h-8 rounded-full object-cover border border-green-500 cursor-pointer hidden sm:block" onclick="showSection('profile')">
+      <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider">Salir</button>
     </div>
     `;
-    setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click",logout); },100);
-  }else{ nav.innerHTML = `<div class="text-zinc-500 text-xs">Invitado</div>`; }
+    setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click", logout); }, 100);
+    
+    // Carga de Mini Perfil en Sidebar Desktop
+    const miniCard = document.getElementById("miniProfileCard");
+    if(miniCard) {
+      miniCard.innerHTML = `
+        <img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
+        <div class="truncate flex-1">
+          <div class="font-extrabold text-sm text-zinc-200">${currentUser.displayName || 'Usuario'}</div>
+          <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Mi Perfil Activo</div>
+        </div>
+      `;
+    }
+  }else{ 
+    nav.innerHTML = `<div class="text-zinc-500 text-xs">Invitado</div>`; 
+  }
 }
 
+// Rellenar perfil en pestaña de Configuración
 function renderProfile(){
   if(!currentUser) return;
   document.getElementById("profileAvatar").src = currentUser.photoURL || 'https://i.pravatar.cc/300';
-  document.getElementById("profileUsername").innerText = currentUser.displayName || 'Sin nombre';
-  document.getElementById("profileBio").innerText = "Usuario verificado de Rankiu";
+  document.getElementById("editUsername").value = currentUser.displayName || '';
+  
+  // Buscar Bio en el array local de todos los usuarios
+  const myData = allUsers.find(u => u.id === currentUser.uid);
+  document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
 }
 
-const postsQuery = query(collection(db,"posts"), orderBy("createdAt","desc"));
-onSnapshot(postsQuery,(snapshot)=>{
+const postsQuery = query(getCol("posts"), orderBy("createdAt","desc"));
+onSnapshot(postsQuery, (snapshot)=>{
   const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
   renderPosts(posts);
 });
@@ -683,26 +1094,25 @@ onSnapshot(postsQuery,(snapshot)=>{
 async function updateProfilePhoto(){
   if(!currentUser) return;
   const file = document.getElementById("newProfilePhoto").files[0];
-  if(!file){ alert("Selecciona una imagen"); return; }
+  if(!file){ showNotification("Por favor, selecciona una foto", "error"); return; }
   try{
+    showNotification("Actualizando avatar...", "info");
     const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
     await updateProfile(currentUser,{ photoURL:imageUrl });
-    await setDoc(doc(db,"users",currentUser.uid), { avatar:imageUrl }, { merge:true });
+    await setDoc(getDocRef("users", currentUser.uid), { avatar:imageUrl }, { merge:true });
+    
     document.getElementById("profileAvatar").src = imageUrl;
     updateNavbar();
-    alert("Foto de perfil actualizada");
-  }catch(error){ alert(error.message); }
+    showNotification("Avatar de perfil actualizado", "success");
+    await loadUsers();
+  }catch(error){ showNotification(error.message, "error"); }
 }
-document.getElementById("updatePhotoBtn").addEventListener("click",updateProfilePhoto);
+document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
 
-// ESCUCHADOR GLOBAL DE VOTOS ÚNICO
-onSnapshot(collection(db, "votes"), (snapshot) => {
+// ESCUCHADOR GLOBAL DE VOTOS (Iluminación Táctil Neon de Upvotes/Downvotes)
+onSnapshot(getCol("votes"), (snapshot) => {
     const postVotes = {};
-
-    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
-        const postId = card.id.replace('post-card-', '');
-        postVotes[postId] = { up: 0, down: 0 };
-    });
+    const myVotes = {}; // Registrar qué ha votado el usuario activo
 
     snapshot.docs.forEach(doc => {
         const vote = doc.data();
@@ -714,40 +1124,62 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
         } else if (vote.type === "down") {
             postVotes[vote.postId].down += 1;
         }
+        
+        // Registrar voto personal
+        if (currentUser && vote.userId === currentUser.uid) {
+          myVotes[vote.postId] = vote.type;
+        }
     });
 
-    Object.keys(postVotes).forEach(postId => {
+    // Actualizar dinámicamente cada tarjeta de post en el DOM
+    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
+        const postId = card.id.replace('post-card-', '');
+        const votes = postVotes[postId] || { up: 0, down: 0 };
+        
         const upCounter = document.getElementById(`up-counter-${postId}`);
         const downCounter = document.getElementById(`down-counter-${postId}`);
-        const postCard = document.getElementById(`post-card-${postId}`);
         
-        const ups = postVotes[postId].up;
-        const downs = postVotes[postId].down;
+        const upBtn = document.getElementById(`up-btn-${postId}`);
+        const downBtn = document.getElementById(`down-btn-${postId}`);
 
-        if (upCounter) upCounter.innerText = ups;
-        if (downCounter) downCounter.innerText = downs;
+        if (upCounter) upCounter.innerText = votes.up;
+        if (downCounter) downCounter.innerText = votes.down;
 
-        if (postCard) {
-            postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-900");
-            if (ups > downs) {
-                postCard.classList.add("border-green-500/50");
-            } else if (downs > ups) {
-                postCard.classList.add("border-red-500/50");
-            } else {
-                postCard.classList.add("border-zinc-900");
-            }
+        // Resetear estilos previos de botones antes de encender el estado activo
+        if (upBtn) {
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-zinc-500 hover:text-green-400 hover:bg-green-500/10 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
+        }
+        if (downBtn) {
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
+        }
+
+        // Encender color de neón si el usuario ha votado
+        if (myVotes[postId] === "up" && upBtn) {
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/15 border border-green-500/30 shadow-md shadow-green-500/10 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
+        } else if (myVotes[postId] === "down" && downBtn) {
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/15 border border-red-500/30 shadow-md shadow-red-500/10 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
+        }
+
+        // Iluminar el borde de la publicación de forma elegante
+        card.classList.remove("border-green-500/40", "border-red-500/40", "border-zinc-900/80");
+        if (votes.up > votes.down) {
+            card.classList.add("border-green-500/40");
+        } else if (votes.down > votes.up) {
+            card.classList.add("border-red-500/40");
+        } else {
+            card.classList.add("border-zinc-900/80");
         }
     });
 });
 
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async (user)=>{
   currentUser = user;
   updateNavbar();
   if(user){
     document.getElementById("authModal").classList.add("hidden");
-    showSection("feed"); // Iniciar en el feed por defecto
-    renderProfile();
+    showSection("feed");
     await loadUsers();
+    renderProfile();
     listenFollowers();
   }else{
     document.getElementById("authModal").classList.remove("hidden");
