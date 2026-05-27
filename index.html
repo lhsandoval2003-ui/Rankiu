@@ -6,106 +6,199 @@
 <title>Rankiu</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
-body { background: #050505; }
-.scrollbar::-webkit-scrollbar { width: 6px; }
-.scrollbar::-webkit-scrollbar-thumb { background: #222; border-radius: 20px; }
+  body { 
+    background: #030303; 
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .scrollbar::-webkit-scrollbar { width: 6px; }
+  .scrollbar::-webkit-scrollbar-thumb { background: #1f1f23; border-radius: 20px; }
+  .gradient-glow {
+    background: radial-gradient(circle at 50% 50%, rgba(34, 197, 94, 0.12) 0%, transparent 60%);
+  }
 </style>
 </head>
-<body class="text-white min-h-screen">
+<body class="text-zinc-100 min-h-screen relative overflow-x-hidden">
 
-<nav class="border-b border-zinc-800 bg-black/80 sticky top-0 z-50">
-<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-<div class="text-3xl font-bold text-green-400">rankiu</div>
-<div class="flex gap-3 items-center">
-<button onclick="showSection('feed')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800 transition">Feed</button>
-<button onclick="showSection('profile')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800 transition">Perfil</button>
-<button onclick="showSection('chat')" class="bg-zinc-900 px-4 py-2 rounded-xl hover:bg-zinc-800 transition">Chat</button>
-<div id="navUser"></div>
+<!-- Fondo estético con Gradient Blobs -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-green-500/5 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[120px]"></div>
 </div>
-</div>
+
+<!-- Nav Bar -->
+<nav class="border-b border-zinc-900 bg-black/60 backdrop-blur-md sticky top-0 z-40">
+  <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 cursor-pointer" onclick="showSection('feed')">rankiu</div>
+    <div class="flex gap-2 items-center">
+      <button onclick="showSection('feed')" class="nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition" id="tab-feed">Feed</button>
+      <button onclick="showSection('chat')" class="nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition" id="tab-chat">Chats</button>
+      <button onclick="showSection('profile')" class="nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition" id="tab-profile">Mi Perfil</button>
+      <div id="navUser" class="ml-2"></div>
+    </div>
+  </div>
 </nav>
 
-<div class="max-w-7xl mx-auto px-4 py-6">
-<section id="feedSection">
-<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-5 mb-6">
-<h2 class="text-2xl font-bold mb-4">Crear publicación</h2>
-<input id="postTitle" placeholder="Título" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none focus:border-green-500"/>
-<textarea id="postContent" placeholder="¿Qué quieres compartir?" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-4 h-32 resize-none text-white focus:outline-none focus:border-green-500"></textarea>
-<input type="file" id="postImage" accept="image/*" class="w-full mt-4 text-zinc-400"/>
-<button id="publishBtn" class="mt-4 bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl transition">Publicar</button>
-</div>
-<div id="postsContainer" class="space-y-5"></div>
-</section>
+<div class="max-w-2xl mx-auto px-4 py-6 relative z-10">
+  
+  <!-- SECCIÓN 1: FEED -->
+  <section id="feedSection">
+    <!-- Creador de Posteos -->
+    <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 mb-6 backdrop-blur-sm relative overflow-hidden">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm font-semibold text-zinc-500">¿Qué está pasando hoy?</span>
+        <span id="charCounter" class="text-xs text-zinc-500 bg-zinc-900 px-2 py-1 rounded-md font-mono">0/150</span>
+      </div>
+      <textarea id="postContent" maxlength="150" placeholder="¡Escribe algo corto e interesante!" class="w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-2xl font-semibold transition-all duration-300"></textarea>
+      
+      <div class="flex items-center justify-between border-t border-zinc-900 pt-4 mt-2">
+        <div class="flex items-center gap-3">
+          <!-- Botón de imagen minimalista -->
+          <label for="postImage" class="cursor-pointer flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-green-400 transition rounded-xl w-11 h-11" title="Subir imagen">
+            <i class="fa-regular fa-image text-lg"></i>
+          </label>
+          <input type="file" id="postImage" accept="image/*" class="hidden"/>
+          <span id="imageLabel" class="text-xs text-zinc-500 hidden truncate max-w-[120px]"><i class="fa-solid fa-check text-green-400"></i> Imagen</span>
+        </div>
+        
+        <button id="publishBtn" class="bg-green-500 hover:bg-green-400 text-black font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-green-500/15">Publicar</button>
+      </div>
+    </div>
+    
+    <!-- Contenedor de posts -->
+    <div id="postsContainer" class="space-y-4"></div>
+  </section>
 
-<section id="profileSection" class="hidden">
-<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 max-w-xl mx-auto text-center">
-<img id="profileAvatar" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-green-500 mb-5" src="https://i.pravatar.cc/300">
-<h2 id="profileUsername" class="text-3xl font-bold mb-3"></h2>
-<div id="profileBio" class="text-zinc-400"></div>
-<div class="mt-6">Seguidores: <span id="followersCount">0</span></div>
-<div class="mt-6">
-<input type="file" id="newProfilePhoto" accept="image/*" class="w-full mb-4 text-zinc-400"/>
-<button id="updatePhotoBtn" class="bg-green-500 hover:bg-green-400 text-black font-bold px-6 py-3 rounded-xl transition">Actualizar foto de perfil</button>
-</div>
-</div>
-</section>
+  <!-- SECCIÓN 2: CHATS -->
+  <section id="chatSection" class="hidden">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-[650px]">
+      <!-- Lista de usuarios -->
+      <div class="bg-zinc-950/80 border border-zinc-900 rounded-2xl p-4 overflow-y-auto scrollbar flex flex-col h-full">
+        <h2 class="text-xl font-bold mb-4 text-zinc-300">Chats</h2>
+        <div id="usersList" class="space-y-2 flex-1"></div>
+      </div>
+      <!-- Ventana de Chat -->
+      <div id="chatWindow" class="md:col-span-2 bg-zinc-950/80 border border-zinc-900 rounded-2xl flex flex-col h-full overflow-hidden">
+        <div id="chatHeader" class="border-b border-zinc-900 p-4 font-bold flex items-center gap-3 text-zinc-200 bg-zinc-950">
+          <span class="text-zinc-500">Selecciona un usuario para chatear</span>
+        </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar bg-zinc-950/20"></div>
+        
+        <!-- Barra de Emojis -->
+        <div class="px-4 py-2 border-t border-zinc-900 bg-zinc-950 flex gap-2 overflow-x-auto scrollbar select-none">
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('😀')">😀</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('😂')">😂</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('😍')">😍</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('🔥')">🔥</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('👍')">👍</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('❤️')">❤️</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('🎉')">🎉</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('👀')">👀</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('💀')">💀</button>
+          <button class="emoji-btn hover:scale-125 transition" onclick="insertEmoji('✨')">✨</button>
+        </div>
+        
+        <div class="p-3 bg-zinc-950 border-t border-zinc-900 flex gap-2">
+          <input id="messageInput" placeholder="Escribe un mensaje..." autocomplete="off" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500 text-sm"/>
+          <button id="sendBtn" class="bg-green-500 text-black font-bold px-5 rounded-xl hover:bg-green-400 transition"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<section id="chatSection" class="hidden">
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-4 h-[700px] overflow-y-auto scrollbar">
-<h2 class="text-2xl font-bold mb-4">Usuarios</h2>
-<div id="usersList" class="space-y-3"></div>
-</div>
-<div class="md:col-span-2 bg-zinc-950 border border-zinc-800 rounded-3xl flex flex-col h-[700px]">
-<div id="chatHeader" class="border-b border-zinc-800 p-4 text-xl font-bold">Selecciona usuario</div>
-<div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar"></div>
-<div class="p-4 border-t border-zinc-800 flex gap-3">
-<input id="messageInput" placeholder="Escribe mensaje..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none"/>
-<button id="sendBtn" class="bg-green-500 text-black font-bold px-6 rounded-xl hover:bg-green-400 transition">Enviar</button>
-</div>
-</div>
-</div>
-</section>
+  <!-- SECCIÓN 3: MI PERFIL -->
+  <section id="profileSection" class="hidden">
+    <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-8 max-w-xl mx-auto text-center backdrop-blur-sm relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-500 to-emerald-500"></div>
+      <img id="profileAvatar" class="w-28 h-28 rounded-full mx-auto object-cover border-4 border-green-500 mb-5 shadow-xl shadow-green-500/10" src="https://i.pravatar.cc/300">
+      <h2 id="profileUsername" class="text-3xl font-extrabold mb-1"></h2>
+      <div id="profileBio" class="text-zinc-500 text-sm mb-4"></div>
+      <div class="inline-flex items-center gap-2 bg-zinc-900 px-4 py-2 rounded-full text-sm font-semibold border border-zinc-800">
+        <i class="fa-solid fa-users text-green-400"></i> Seguidores: <span id="followersCount" class="text-green-400">0</span>
+      </div>
+      <div class="mt-8 pt-6 border-t border-zinc-900">
+        <p class="text-zinc-400 text-sm mb-3 text-left font-semibold">Cambiar foto de perfil</p>
+        <div class="flex items-center gap-3">
+          <input type="file" id="newProfilePhoto" accept="image/*" class="w-full text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl p-3"/>
+          <button id="updatePhotoBtn" class="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-3 rounded-xl transition text-sm shrink-0">Subir</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
 </div>
 
-<div id="authModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-<div class="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 w-full max-w-md">
-<div class="flex gap-3 mb-6">
-<button onclick="switchAuth('login')" class="flex-1 bg-zinc-900 rounded-xl py-3 hover:bg-zinc-800 transition">Login</button>
-<button onclick="switchAuth('register')" class="flex-1 bg-zinc-900 rounded-xl py-3 hover:bg-zinc-800 transition">Registro</button>
+<!-- MODAL DE AUTENTICACIÓN -->
+<div id="authModal" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50">
+  <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative">
+    <div class="text-center mb-6">
+      <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500">rankiu</h1>
+      <p class="text-zinc-500 text-xs mt-1">Descubre, opina y conecta</p>
+    </div>
+    <div class="flex gap-2 mb-6 bg-zinc-900 p-1.5 rounded-2xl">
+      <button onclick="switchAuth('login')" class="flex-1 rounded-xl py-2 text-sm font-bold transition text-green-400 bg-zinc-950" id="btn-switch-login">Login</button>
+      <button onclick="switchAuth('register')" class="flex-1 rounded-xl py-2 text-sm font-bold transition text-zinc-500" id="btn-switch-register">Registro</button>
+    </div>
+    
+    <div id="loginBox">
+      <input id="loginEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
+      <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
+      <button id="loginBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 transition shadow-lg shadow-green-500/10 mb-4 text-sm">Iniciar sesión</button>
+      <div class="text-center">
+        <button id="forgotPasswordBtn" class="text-xs text-zinc-500 hover:text-green-400 transition underline">¿Olvidaste tu contraseña?</button>
+      </div>
+    </div>
+    
+    <div id="registerBox" class="hidden">
+      <input id="registerUsername" placeholder="Nombre de usuario" class="w-full mb-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
+      <input id="registerEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
+      <input type="password" id="registerPassword" placeholder="Contraseña" class="w-full mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-white focus:outline-none focus:border-green-500 text-sm"/>
+      <label class="block text-xs text-zinc-500 mb-2 font-semibold">Foto de perfil</label>
+      <input type="file" id="registerAvatar" accept="image/*" class="w-full mb-4 text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl p-3"/>
+      <button id="registerBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 transition text-sm">Crear cuenta</button>
+    </div>
+  </div>
 </div>
-<div id="loginBox">
-<input id="loginEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none"/>
-<input type="password" id="loginPassword" placeholder="Contraseña" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none"/>
-<button id="loginBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 transition mb-4">Iniciar sesión</button>
-<div class="text-center">
-<button id="forgotPasswordBtn" class="text-sm text-zinc-400 hover:text-green-400 transition underline">¿Olvidaste tu contraseña?</button>
-</div>
-</div>
-<div id="registerBox" class="hidden">
-<input id="registerUsername" placeholder="Usuario" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none"/>
-<input id="registerEmail" placeholder="Email" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none"/>
-<input type="password" id="registerPassword" placeholder="Contraseña" class="w-full mb-3 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none"/>
-<input type="file" id="registerAvatar" accept="image/*" class="w-full mb-4 text-zinc-400"/>
-<button id="registerBtn" class="w-full bg-green-500 text-black font-bold py-4 rounded-xl hover:bg-green-400 transition">Crear cuenta</button>
-</div>
-</div>
+
+<!-- MODAL DETALLE DE PERFIL DE OTRAS PERSONAS (Flotante) -->
+<div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 transition-opacity">
+  <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative text-center">
+    <button onclick="closeUserProfile()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-200"><i class="fa-solid fa-xmark text-xl"></i></button>
+    <img id="modalAvatar" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-green-500 mb-4" src="">
+    <h3 id="modalUsername" class="text-2xl font-bold text-white mb-1"></h3>
+    <p id="modalBio" class="text-zinc-400 text-sm mb-4"></p>
+    
+    <div class="flex justify-around items-center bg-zinc-900/60 rounded-2xl py-3 border border-zinc-900 mb-6">
+      <div>
+        <div id="modalFollowers" class="text-lg font-bold text-green-400">0</div>
+        <div class="text-xs text-zinc-500">Seguidores</div>
+      </div>
+    </div>
+    
+    <div class="flex gap-2">
+      <button id="modalFollowBtn" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-bold py-3 rounded-xl transition text-sm"></button>
+      <button id="modalChatBtn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold px-4 rounded-xl transition text-sm"><i class="fa-regular fa-comment-dots text-lg"></i></button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
 const firebaseConfig = {
-apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
-authDomain: "rankiu-5da90.firebaseapp.com",
-projectId: "rankiu-5da90",
-storageBucket: "rankiu-5da90.appspot.com",
-messagingSenderId: "365366406441",
-appId: "1:365366406441:web:4e4a068b57d93d21061b38"
+  apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
+  authDomain: "rankiu-5da90.firebaseapp.com",
+  projectId: "rankiu-5da90",
+  storageBucket: "rankiu-5da90.appspot.com",
+  messagingSenderId: "365366406441",
+  appId: "1:365366406441:web:4e4a068b57d93d21061b38"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -113,74 +206,106 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Forzar explícitamente a Firebase a recordar la sesión en el navegador actual
+// Persistencia explícita de sesión
 setPersistence(auth, browserLocalPersistence).catch((error) => console.error("Error de persistencia:", error));
 
 let currentUser = null;
 let selectedUser = null;
 let allUsers = [];
+let followingSet = new Set();
+let followerCounts = {};
+let currentPosts = [];
+
+// Escucha dinámica del textarea de creación de posts (Ajuste estético de letra)
+const postTextarea = document.getElementById("postContent");
+postTextarea.addEventListener("input", (e) => {
+  const len = e.target.value.length;
+  document.getElementById("charCounter").innerText = `${len}/150`;
+  
+  if (len < 50) {
+    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-2xl font-semibold transition-all duration-300 text-green-400";
+  } else if (len < 100) {
+    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-lg font-medium transition-all duration-300 text-zinc-100";
+  } else {
+    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-600 focus:ring-0 focus:outline-none h-28 resize-none text-sm font-normal transition-all duration-300 text-zinc-300";
+  }
+});
+
+// Cambiar de vista en inputs de archivos
+document.getElementById("postImage").addEventListener("change", (e) => {
+  const label = document.getElementById("imageLabel");
+  if(e.target.files.length > 0) {
+    label.innerText = e.target.files[0].name;
+    label.classList.remove("hidden");
+  } else {
+    label.classList.add("hidden");
+  }
+});
 
 function switchAuth(type){
-if(type === "login"){
-document.getElementById("loginBox").classList.remove("hidden");
-document.getElementById("registerBox").classList.add("hidden");
-}else{
-document.getElementById("loginBox").classList.add("hidden");
-document.getElementById("registerBox").classList.remove("hidden");
-}
+  if(type === "login"){
+    document.getElementById("loginBox").classList.remove("hidden");
+    document.getElementById("registerBox").classList.add("hidden");
+    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-green-400 bg-zinc-950";
+    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-zinc-500";
+  }else{
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("registerBox").classList.remove("hidden");
+    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-zinc-500";
+    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2 text-sm font-bold transition text-green-400 bg-zinc-950";
+  }
 }
 window.switchAuth = switchAuth;
 
 async function uploadImage(file,path){
-const storageRef = ref(storage,path);
-await uploadBytes(storageRef,file);
-return await getDownloadURL(storageRef);
+  const storageRef = ref(storage,path);
+  await uploadBytes(storageRef,file);
+  return await getDownloadURL(storageRef);
 }
 
 async function register(){
-const username = document.getElementById("registerUsername").value.trim();
-const email = document.getElementById("registerEmail").value.trim();
-const password = document.getElementById("registerPassword").value.trim();
-const avatarFile = document.getElementById("registerAvatar").files[0];
+  const username = document.getElementById("registerUsername").value.trim();
+  const email = document.getElementById("registerEmail").value.trim();
+  const password = document.getElementById("registerPassword").value.trim();
+  const avatarFile = document.getElementById("registerAvatar").files[0];
 
-if(!username || !email || !password){
-alert("Completa todos los campos");
-return;
-}
-try{
-const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-let avatarUrl = "https://i.pravatar.cc/300";
-if(avatarFile){
-avatarUrl = await uploadImage(avatarFile, "avatars/" + Date.now());
-}
-await updateProfile(userCredential.user,{ displayName: username, photoURL: avatarUrl });
-await setDoc(doc(db,"users",userCredential.user.uid), {
-username, email, avatar:avatarUrl, bio:"Nuevo en Rankiu", followers:0, createdAt:Date.now()
-});
-alert("Cuenta creada con éxito");
-}catch(error){ alert(error.message); }
+  if(!username || !email || !password){
+    alert("Completa todos los campos");
+    return;
+  }
+  try{
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    let avatarUrl = "https://api.dicebear.com/7.x/bottts/svg?seed=" + encodeURIComponent(username);
+    if(avatarFile){
+      avatarUrl = await uploadImage(avatarFile, "avatars/" + Date.now());
+    }
+    await updateProfile(userCredential.user,{ displayName: username, photoURL: avatarUrl });
+    await setDoc(doc(db,"users",userCredential.user.uid), {
+      username, email, avatar:avatarUrl, bio:"Nuevo en Rankiu", followers:0, createdAt:Date.now()
+    });
+    alert("Cuenta creada con éxito");
+  }catch(error){ alert(error.message); }
 }
 
 async function login(){
-const email = document.getElementById("loginEmail").value.trim();
-const password = document.getElementById("loginPassword").value.trim();
-if(!email || !password) return alert("Ingresa tus credenciales");
-try{ await signInWithEmailAndPassword(auth, email, password); }
-catch(error){ alert(error.message); }
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
+  if(!email || !password) return alert("Ingresa tus credenciales");
+  try{ await signInWithEmailAndPassword(auth, email, password); }
+  catch(error){ alert(error.message); }
 }
 
 async function logout(){ await signOut(auth); }
 
-// NUEVA FUNCIÓN: Recuperación de contraseña por correo electrónico
 async function resetPassword() {
-const email = prompt("Por favor, ingresa tu correo electrónico para enviarte un enlace de restablecimiento:");
-if (!email) return;
-try {
-await sendPasswordResetEmail(auth, email.trim());
-alert("¡Correo de recuperación enviado! Revisa tu bandeja de entrada o spam.");
-} catch(error) {
-alert("Error al enviar el correo: " + error.message);
-}
+  const email = prompt("Ingresa tu correo para restaurar la contraseña:");
+  if (!email) return;
+  try {
+    await sendPasswordResetEmail(auth, email.trim());
+    alert("Correo de recuperación enviado.");
+  } catch(error) {
+    alert("Error: " + error.message);
+  }
 }
 
 document.getElementById("registerBtn").addEventListener("click",register);
@@ -188,88 +313,207 @@ document.getElementById("loginBtn").addEventListener("click",login);
 document.getElementById("forgotPasswordBtn").addEventListener("click", resetPassword);
 
 async function createPost(){
-if(!currentUser){ alert("Inicia sesión"); return; }
-const title = document.getElementById("postTitle").value.trim();
-const content = document.getElementById("postContent").value.trim();
-const imageFile = document.getElementById("postImage").files[0];
+  if(!currentUser){ alert("Inicia sesión"); return; }
+  const content = document.getElementById("postContent").value.trim();
+  const imageFile = document.getElementById("postImage").files[0];
 
-if(!title || !content){ alert("Completa todos los campos"); return; }
-let imageUrl = "";
-if(imageFile){ imageUrl = await uploadImage(imageFile, "posts/" + Date.now()); }
+  if(!content){ alert("Escribe un mensaje"); return; }
+  let imageUrl = "";
+  if(imageFile){ imageUrl = await uploadImage(imageFile, "posts/" + Date.now()); }
 
-await addDoc(collection(db,"posts"),{
-title, content, image:imageUrl, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
-});
-document.getElementById("postTitle").value = "";
-document.getElementById("postContent").value = "";
-document.getElementById("postImage").value = "";
+  await addDoc(collection(db,"posts"),{
+    content, image:imageUrl, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
+  });
+  document.getElementById("postContent").value = "";
+  document.getElementById("postImage").value = "";
+  document.getElementById("imageLabel").classList.add("hidden");
+  document.getElementById("charCounter").innerText = "0/150";
 }
 document.getElementById("publishBtn").addEventListener("click",createPost);
 
-function renderPosts(posts){
-const container = document.getElementById("postsContainer");
-container.innerHTML = "";
-posts.forEach(post => {
-const div = document.createElement("div");
-div.id = `post-card-${post.id}`;
-div.className = `bg-zinc-950 border border-zinc-800 rounded-3xl p-5 transition-all duration-300`;
-div.innerHTML = `
-<div class="flex gap-4 items-center">
-<img src="${post.authorAvatar || 'https://i.pravatar.cc/150'}" class="w-14 h-14 rounded-full object-cover">
-<div>
-<div class="font-bold text-lg">${post.author}</div>
-</div>
-</div>
-<h2 class="text-2xl font-bold mt-5">${post.title}</h2>
-<p class="text-zinc-300 mt-3 whitespace-pre-wrap">${post.content}</p>
-${post.image? `<img src="${post.image}" class="mt-5 rounded-2xl w-full max-h-[500px] object-cover">`: ''}
+// Lógica de seguidor en tiempo real
+function toggleFollow(authorId) {
+  if(!currentUser) return alert("Inicia sesión para seguir");
+  const isFollowing = followingSet.has(authorId);
+  const followId = `${currentUser.uid}_${authorId}`;
+  
+  if (isFollowing) {
+    deleteDoc(doc(db, "followers", followId));
+  } else {
+    setDoc(doc(db, "followers", followId), {
+      followerId: currentUser.uid,
+      followingId: authorId,
+      createdAt: Date.now()
+    });
+  }
+}
+window.toggleFollow = toggleFollow;
 
-<div class="mt-5 flex gap-4 items-center border-b border-zinc-900 pb-4">
-  <div class="flex items-center bg-zinc-900 rounded-xl p-1 border border-zinc-800 gap-2">
-    <button class="px-3 py-2 upvoteBtn text-zinc-500 hover:text-green-500 transition text-xl" data-id="${post.id}">▲</button>
-    <span id="up-counter-${post.id}" class="font-bold text-green-500">0</span>
-    <span class="text-zinc-600">|</span>
-    <span id="down-counter-${post.id}" class="font-bold text-red-500">0</span>
-    <button class="px-3 py-2 downvoteBtn text-zinc-500 hover:text-red-500 transition text-xl" data-id="${post.id}">▼</button>
-  </div>
-  <button class="bg-zinc-900 px-5 py-3 rounded-xl followBtn" data-id="${post.authorId}">➕ Seguir</button>
-</div>
-
-<div class="mt-4">
-  <h3 class="text-sm font-semibold text-zinc-400 mb-2">Comentarios</h3>
-  <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-40 overflow-y-auto scrollbar text-sm"></div>
-  <div class="flex gap-2">
-    <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-zinc-700 text-white"/>
-    <button class="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-xl text-sm commentBtn" data-id="${post.id}">Enviar</button>
-  </div>
-</div>
-`;
-container.appendChild(div);
-
-const commentsQuery = query(collection(db, "comments"), where("postId", "==", post.id));
-onSnapshot(commentsQuery, (commentSnapshot) => {
-    const commentListContainer = document.getElementById(`comments-list-${post.id}`);
-    if (commentListContainer) {
-        commentListContainer.innerHTML = "";
-        const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
-        sortedDocs.forEach(comment => {
-            const commentDiv = document.createElement("div");
-            commentDiv.className = "bg-zinc-900/50 p-3 rounded-xl border border-zinc-900";
-            commentDiv.innerHTML = `<strong>${comment.author}:</strong> <span class="text-zinc-300">${comment.text}</span>`;
-            commentListContainer.appendChild(commentDiv);
-        });
-    }
-});
-});
+// Escuchas globales de seguidores
+function listenFollowers() {
+  if (!currentUser) return;
+  onSnapshot(collection(db, "followers"), (snapshot) => {
+    followingSet.clear();
+    followerCounts = {};
+    
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.followerId === currentUser.uid) {
+        followingSet.add(data.followingId);
+      }
+      followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
+    });
+    
+    renderPosts(currentPosts);
+    updateProfileStats();
+  });
 }
 
-// CORREGIDO: Único EventListener global limpio sin duplicaciones de sintaxis
+function updateProfileStats() {
+  if (currentUser) {
+    const myFollowers = followerCounts[currentUser.uid] || 0;
+    const fCountEl = document.getElementById("followersCount");
+    if(fCountEl) fCountEl.innerText = myFollowers;
+  }
+}
+
+// Abrir detalle de otros perfiles
+async function viewUserProfile(userId) {
+  if (!userId) return;
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+  
+  document.getElementById("modalAvatar").src = user.avatar || "https://i.pravatar.cc/300";
+  document.getElementById("modalUsername").innerText = user.username || "Usuario";
+  document.getElementById("modalBio").innerText = user.bio || "Usuario verificado de Rankiu";
+  
+  const totalFollowers = followerCounts[userId] || 0;
+  document.getElementById("modalFollowers").innerText = totalFollowers;
+  
+  const followBtn = document.getElementById("modalFollowBtn");
+  if (userId === currentUser?.uid) {
+    followBtn.classList.add("hidden");
+  } else {
+    followBtn.classList.remove("hidden");
+    const isFollowing = followingSet.has(userId);
+    followBtn.innerHTML = isFollowing ? '<i class="fa-solid fa-check mr-1"></i> Siguiendo' : '<i class="fa-solid fa-plus mr-1"></i> Seguir';
+    followBtn.onclick = () => {
+      toggleFollow(userId);
+      setTimeout(() => viewUserProfile(userId), 200); // Pequeño delay de refresco visual
+    };
+  }
+  
+  const chatBtn = document.getElementById("modalChatBtn");
+  if (userId === currentUser?.uid) {
+    chatBtn.classList.add("hidden");
+  } else {
+    chatBtn.classList.remove("hidden");
+    chatBtn.onclick = () => {
+      selectedUser = user;
+      closeUserProfile();
+      showSection("chat");
+      listenMessages();
+    };
+  }
+  
+  document.getElementById("userProfileModal").style.display = "flex";
+}
+window.viewUserProfile = viewUserProfile;
+
+function closeUserProfile() {
+  document.getElementById("userProfileModal").style.display = "none";
+}
+window.closeUserProfile = closeUserProfile;
+
+// Función para formatear el tamaño del texto según longitud
+function getFontSize(text) {
+  const len = text.length;
+  if(len < 50) return "text-2xl md:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-white";
+  if(len < 100) return "text-lg md:text-xl font-semibold text-zinc-100";
+  return "text-sm md:text-base text-zinc-300";
+}
+
+function renderPosts(posts){
+  currentPosts = posts;
+  const container = document.getElementById("postsContainer");
+  container.innerHTML = "";
+  posts.forEach(post => {
+    const isFollowing = followingSet.has(post.authorId);
+    const followIcon = isFollowing ? '<i class="fa-solid fa-check text-green-400"></i>' : '<i class="fa-solid fa-plus text-zinc-500 hover:text-green-400"></i>';
+    
+    const div = document.createElement("div");
+    div.id = `post-card-${post.id}`;
+    div.className = `bg-zinc-950/75 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition duration-300`;
+    
+    div.innerHTML = `
+    <div class="flex justify-between items-start">
+      <div class="flex gap-3 items-center cursor-pointer" onclick="viewUserProfile('${post.authorId}')">
+        <img src="${post.authorAvatar || 'https://i.pravatar.cc/150'}" class="w-11 h-11 rounded-full object-cover">
+        <div>
+          <div class="font-bold text-sm text-zinc-200 hover:text-green-400 transition">${post.author}</div>
+          <div class="text-xs text-zinc-600">Posteado</div>
+        </div>
+      </div>
+      
+      <!-- Icono Dinámico de Seguir -->
+      ${post.authorId !== currentUser?.uid ? `
+        <button onclick="toggleFollow('${post.authorId}')" class="w-9 h-9 rounded-xl bg-zinc-900/60 border border-zinc-800 flex items-center justify-center hover:bg-zinc-800 transition text-sm">
+          ${followIcon}
+        </button>
+      ` : ''}
+    </div>
+    
+    <!-- Contenido dinámico adaptativo -->
+    <p class="mt-4 leading-relaxed whitespace-pre-wrap select-all ${getFontSize(post.content)}">${post.content}</p>
+    
+    ${post.image? `<img src="${post.image}" class="mt-4 rounded-2xl w-full max-h-[380px] object-cover border border-zinc-900">`: ''}
+
+    <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/40 pb-4">
+      <div class="flex items-center bg-zinc-900/80 rounded-xl border border-zinc-800/80">
+        <button class="px-3.5 py-2.5 upvoteBtn text-zinc-500 hover:text-green-500 transition text-sm" data-id="${post.id}">▲</button>
+        <span id="up-counter-${post.id}" class="font-bold text-green-400 text-xs">0</span>
+        <span class="text-zinc-800 mx-1">|</span>
+        <span id="down-counter-${post.id}" class="font-bold text-red-500 text-xs">0</span>
+        <button class="px-3.5 py-2.5 downvoteBtn text-zinc-500 hover:text-red-500 transition text-sm" data-id="${post.id}">▼</button>
+      </div>
+    </div>
+
+    <!-- Sección Comentarios Minimalista -->
+    <div class="mt-4">
+      <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
+      <div class="flex gap-2">
+        <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-zinc-700 text-white"/>
+        <button class="bg-green-500 hover:bg-green-400 text-black font-bold px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+    `;
+    container.appendChild(div);
+
+    const commentsQuery = query(collection(db, "comments"), where("postId", "==", post.id));
+    onSnapshot(commentsQuery, (commentSnapshot) => {
+        const commentListContainer = document.getElementById(`comments-list-${post.id}`);
+        if (commentListContainer) {
+            commentListContainer.innerHTML = "";
+            const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
+            sortedDocs.forEach(comment => {
+                const commentDiv = document.createElement("div");
+                commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
+                commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer hover:text-green-400 transition" onclick="viewUserProfile('${comment.authorId}')">${comment.author}:</strong> <span class="text-zinc-300 ml-1">${comment.text}</span>`;
+                commentListContainer.appendChild(commentDiv);
+            });
+        }
+    });
+  });
+}
+
+// Clics globales
 document.addEventListener("click", async (event) => {
     const target = event.target;
 
-    if (target.classList.contains("commentBtn")) {
+    if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
+        const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
         if(!currentUser) return alert("Inicia sesión para comentar");
-        const postId = target.dataset.id;
+        const postId = btn.dataset.id;
         const input = document.getElementById(`comment-input-${postId}`);
         const text = input.value.trim();
         if(!text) return;
@@ -305,130 +549,153 @@ document.addEventListener("click", async (event) => {
             createdAt: Date.now()
         });
     }
-
-    if (target.classList.contains("followBtn")) {
-        if(!currentUser) return alert("Inicia sesión para seguir");
-        await addDoc(collection(db, "followers"), {
-            followerId: currentUser.uid, followingId: target.dataset.id
-        });
-        alert("Ahora sigues a este usuario");
-    }
 });
 
 async function loadUsers(){
-try {
-const q = query(collection(db, "users"));
-const querySnapshot = await getDocs(q);
-allUsers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-renderUsers();
-} catch(e) { console.error("Error cargando usuarios: ", e); }
+  try {
+    const q = query(collection(db, "users"));
+    const querySnapshot = await getDocs(q);
+    allUsers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderUsers();
+  } catch(e) { console.error("Error cargando usuarios: ", e); }
 }
 
 function renderUsers(){
-const container = document.getElementById("usersList");
-container.innerHTML = "";
-allUsers.forEach(user => {
-if(currentUser && user.id === currentUser.uid) return;
-const div = document.createElement("div");
-div.className = `flex items-center gap-3 bg-zinc-900 rounded-2xl p-3 cursor-pointer hover:bg-zinc-800 transition`;
-div.onclick = () => {
-selectedUser = user;
-listenMessages();
-};
-div.innerHTML = `
-<img src="${user.avatar || 'https://i.pravatar.cc/150'}" class="w-12 h-12 rounded-full object-cover">
-<div class="font-bold">${user.username}</div>
-`;
-container.appendChild(div);
-});
+  const container = document.getElementById("usersList");
+  container.innerHTML = "";
+  allUsers.forEach(user => {
+    if(currentUser && user.id === currentUser.uid) return;
+    const div = document.createElement("div");
+    div.className = `flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-900 rounded-xl p-3 cursor-pointer hover:border-zinc-800 transition`;
+    div.onclick = () => {
+      selectedUser = user;
+      listenMessages();
+    };
+    div.innerHTML = `
+    <img src="${user.avatar || 'https://i.pravatar.cc/150'}" class="w-10 h-10 rounded-full object-cover">
+    <div class="font-bold text-sm text-zinc-300">${user.username}</div>
+    `;
+    container.appendChild(div);
+  });
 }
 
-async function sendMessage(){
-if(!selectedUser){ alert("Selecciona un usuario"); return; }
-const input = document.getElementById("messageInput");
-const text = input.value.trim();
-if(!text) return;
+function insertEmoji(emoji) {
+  const input = document.getElementById("messageInput");
+  input.value += emoji;
+  input.focus();
+}
+window.insertEmoji = insertEmoji;
 
-await addDoc(collection(db,"messages"),{
-from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
-});
-input.value = "";
+async function sendMessage(){
+  if(!selectedUser){ alert("Selecciona un usuario"); return; }
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if(!text) return;
+
+  await addDoc(collection(db,"messages"),{
+    from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
+  });
+  input.value = "";
 }
 document.getElementById("sendBtn").addEventListener("click",sendMessage);
 
-function listenMessages(){
-if(!selectedUser) return;
-document.getElementById("chatHeader").innerText = selectedUser.username;
-const q = query(collection(db,"messages"), orderBy("createdAt","asc"));
-onSnapshot(q,(snapshot)=>{
-const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
-.filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
+// Escuchar si hay "Enter" en el input del chat
+document.getElementById("messageInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
 
-const container = document.getElementById("chatMessages");
-container.innerHTML = "";
-messages.forEach(msg => {
-const mine = msg.from === currentUser.uid;
-const div = document.createElement("div");
-div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
-div.innerHTML = `<div class="max-w-[70%] px-4 py-3 rounded-2xl ${mine ? 'bg-green-500 text-black' : 'bg-zinc-800'}">${msg.text}</div>`;
-container.appendChild(div);
-});
-});
+function listenMessages(){
+  if(!selectedUser) return;
+  document.getElementById("chatHeader").innerHTML = `
+    <img src="${selectedUser.avatar || 'https://i.pravatar.cc/150'}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
+    <span class="text-white hover:text-green-400 cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">${selectedUser.username}</span>
+  `;
+  const q = query(collection(db,"messages"), orderBy("createdAt","asc"));
+  onSnapshot(q,(snapshot)=>{
+    const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
+    .filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
+
+    const container = document.getElementById("chatMessages");
+    container.innerHTML = "";
+    messages.forEach(msg => {
+      const mine = msg.from === currentUser.uid;
+      const div = document.createElement("div");
+      div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
+      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${msg.text}</div>`;
+      container.appendChild(div);
+    });
+    // Auto Scroll hacia abajo
+    container.scrollTop = container.scrollHeight;
+  });
 }
 
 function showSection(section){
-document.getElementById("feedSection").classList.add("hidden");
-document.getElementById("profileSection").classList.add("hidden");
-document.getElementById("chatSection").classList.add("hidden");
-if(section === "feed") document.getElementById("feedSection").classList.remove("hidden");
-if(section === "profile") document.getElementById("profileSection").classList.remove("hidden");
-if(section === "chat") document.getElementById("chatSection").classList.remove("hidden");
+  document.getElementById("feedSection").classList.add("hidden");
+  document.getElementById("profileSection").classList.add("hidden");
+  document.getElementById("chatSection").classList.add("hidden");
+  
+  // Clases activas de pestañas
+  document.querySelectorAll(".nav-tab").forEach(btn => {
+    btn.className = "nav-tab bg-zinc-950/80 border border-zinc-900 px-4 py-2 rounded-xl text-sm font-semibold hover:border-zinc-700 hover:text-green-400 transition text-zinc-400";
+  });
+  
+  if(section === "feed") {
+    document.getElementById("feedSection").classList.remove("hidden");
+    document.getElementById("tab-feed").className = "nav-tab border-green-500/30 text-green-400 bg-zinc-950 px-4 py-2 rounded-xl text-sm font-semibold transition border";
+  }
+  if(section === "profile") {
+    document.getElementById("profileSection").classList.remove("hidden");
+    document.getElementById("tab-profile").className = "nav-tab border-green-500/30 text-green-400 bg-zinc-950 px-4 py-2 rounded-xl text-sm font-semibold transition border";
+  }
+  if(section === "chat") {
+    document.getElementById("chatSection").classList.remove("hidden");
+    document.getElementById("tab-chat").className = "nav-tab border-green-500/30 text-green-400 bg-zinc-950 px-4 py-2 rounded-xl text-sm font-semibold transition border";
+  }
 }
 window.showSection = showSection;
 
 function updateNavbar(){
-const nav = document.getElementById("navUser");
-if(currentUser){
-nav.innerHTML = `
-<div class="flex items-center gap-3">
-<img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-12 h-12 rounded-full object-cover border-2 border-green-500">
-<div class="font-bold">${currentUser.displayName || 'Usuario'}</div>
-<button id="logoutBtn" class="bg-red-500 hover:bg-red-600 text-black font-bold px-4 py-2 rounded-xl transition">Salir</button>
-</div>
-`;
-setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click",logout); },100);
-}else{ nav.innerHTML = `<div class="text-zinc-500">Invitado</div>`; }
+  const nav = document.getElementById("navUser");
+  if(currentUser){
+    nav.innerHTML = `
+    <div class="flex items-center gap-2 cursor-pointer" onclick="showSection('profile')">
+      <img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-9 h-9 rounded-full object-cover border-2 border-green-500">
+      <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-xs font-bold px-3 py-1.5 rounded-lg transition">Salir</button>
+    </div>
+    `;
+    setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click",logout); },100);
+  }else{ nav.innerHTML = `<div class="text-zinc-500 text-xs">Invitado</div>`; }
 }
 
 function renderProfile(){
-if(!currentUser) return;
-document.getElementById("profileAvatar").src = currentUser.photoURL || 'https://i.pravatar.cc/300';
-document.getElementById("profileUsername").innerText = currentUser.displayName || 'Sin nombre';
-document.getElementById("profileBio").innerText = "Usuario verificado de Rankiu";
+  if(!currentUser) return;
+  document.getElementById("profileAvatar").src = currentUser.photoURL || 'https://i.pravatar.cc/300';
+  document.getElementById("profileUsername").innerText = currentUser.displayName || 'Sin nombre';
+  document.getElementById("profileBio").innerText = "Usuario verificado de Rankiu";
 }
 
 const postsQuery = query(collection(db,"posts"), orderBy("createdAt","desc"));
 onSnapshot(postsQuery,(snapshot)=>{
-const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
-renderPosts(posts);
+  const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
+  renderPosts(posts);
 });
 
 async function updateProfilePhoto(){
-if(!currentUser) return;
-const file = document.getElementById("newProfilePhoto").files[0];
-if(!file){ alert("Selecciona una imagen"); return; }
-try{
-const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
-await updateProfile(currentUser,{ photoURL:imageUrl });
-await setDoc(doc(db,"users",currentUser.uid), { avatar:imageUrl }, { merge:true });
-document.getElementById("profileAvatar").src = imageUrl;
-updateNavbar();
-alert("Foto de perfil actualizada");
-}catch(error){ alert(error.message); }
+  if(!currentUser) return;
+  const file = document.getElementById("newProfilePhoto").files[0];
+  if(!file){ alert("Selecciona una imagen"); return; }
+  try{
+    const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
+    await updateProfile(currentUser,{ photoURL:imageUrl });
+    await setDoc(doc(db,"users",currentUser.uid), { avatar:imageUrl }, { merge:true });
+    document.getElementById("profileAvatar").src = imageUrl;
+    updateNavbar();
+    alert("Foto de perfil actualizada");
+  }catch(error){ alert(error.message); }
 }
 document.getElementById("updatePhotoBtn").addEventListener("click",updateProfilePhoto);
 
-
+// ESCUCHADOR GLOBAL DE VOTOS ÚNICO
 onSnapshot(collection(db, "votes"), (snapshot) => {
     const postVotes = {};
 
@@ -439,11 +706,9 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
 
     snapshot.docs.forEach(doc => {
         const vote = doc.data();
-        
         if (!postVotes[vote.postId]) {
             postVotes[vote.postId] = { up: 0, down: 0 };
         }
-        
         if (vote.type === "up") {
             postVotes[vote.postId].up += 1;
         } else if (vote.type === "down") {
@@ -463,29 +728,30 @@ onSnapshot(collection(db, "votes"), (snapshot) => {
         if (downCounter) downCounter.innerText = downs;
 
         if (postCard) {
-            postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-800");
-            
+            postCard.classList.remove("border-green-500", "border-red-500", "border-zinc-900");
             if (ups > downs) {
-                postCard.classList.add("border-green-500");
+                postCard.classList.add("border-green-500/50");
             } else if (downs > ups) {
-                postCard.classList.add("border-red-500");
+                postCard.classList.add("border-red-500/50");
             } else {
-                postCard.classList.add("border-zinc-800");
+                postCard.classList.add("border-zinc-900");
             }
         }
     });
 });
 
 onAuthStateChanged(auth,async(user)=>{
-currentUser = user;
-updateNavbar();
-if(user){
-document.getElementById("authModal").classList.add("hidden");
-renderProfile();
-await loadUsers();
-}else{
-document.getElementById("authModal").classList.remove("hidden");
-}
+  currentUser = user;
+  updateNavbar();
+  if(user){
+    document.getElementById("authModal").classList.add("hidden");
+    showSection("feed"); // Iniciar en el feed por defecto
+    renderProfile();
+    await loadUsers();
+    listenFollowers();
+  }else{
+    document.getElementById("authModal").classList.remove("hidden");
+  }
 });
 </script>
 </body>
