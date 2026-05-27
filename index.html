@@ -38,7 +38,7 @@
     animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Animaciones físicas del sistema de votos de Rankiu */
+  /* Animaciones físicas de los votos en Rankiu */
   @keyframes slideUpArrow {
     0% { transform: translateY(0); opacity: 1; }
     40% { transform: translateY(-16px); opacity: 0; }
@@ -111,7 +111,7 @@
           <span class="text-xs text-zinc-500 font-medium mr-2" id="feed-stats-label">Cargando comunidad...</span>
         </div>
 
-        <!-- Creador de Publicaciones Dinámicas (Sin título, max 150 caracteres) -->
+        <!-- Creador de Publicaciones Dinámicas (Sin título, max 150 caracteres, sin fotos) -->
         <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 relative overflow-hidden shadow-xl">
           <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
           
@@ -122,23 +122,12 @@
 
           <textarea id="postContent" maxlength="150" placeholder="Escribe un pensamiento directo, audaz o divertido..." class="w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-bold transition-all duration-300 text-green-400"></textarea>
           
-          <div class="flex items-center justify-between border-t border-zinc-900/80 pt-4 mt-2">
-            <div class="flex items-center gap-3">
-              <!-- Selector de imagen estilizado de neón -->
-              <label for="postImage" class="cursor-pointer flex items-center justify-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-green-500/40 text-zinc-400 hover:text-green-400 transition-all rounded-xl w-10 h-10 shadow-inner" title="Subir imagen">
-                <i class="fa-regular fa-image text-base"></i>
-              </label>
-              <input type="file" id="postImage" accept="image/*" class="hidden"/>
-              <span id="imageLabel" class="text-xs text-zinc-500 hidden truncate max-w-[150px] bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-800">
-                <i class="fa-solid fa-circle-check text-green-400 mr-1"></i> Listo
-              </span>
-            </div>
-            
+          <div class="flex items-center justify-end border-t border-zinc-900/80 pt-4 mt-2">
             <button id="publishBtn" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold px-6 py-2.5 rounded-xl text-xs transition duration-200 shadow-lg shadow-green-500/20 glow-green uppercase tracking-wider">Publicar</button>
           </div>
         </div>
         
-        <!-- Feed de Posts Sube en Cascada -->
+        <!-- Feed de Posts -->
         <div id="postsContainer" class="space-y-4">
           <!-- Esqueleto de carga inicial -->
           <div class="bg-zinc-950/50 border border-zinc-900 rounded-3xl p-6 space-y-4 animate-pulse">
@@ -146,8 +135,7 @@
               <div class="w-12 h-12 rounded-full bg-zinc-900"></div>
               <div class="space-y-2 flex-1"><div class="h-3 bg-zinc-900 rounded w-1/4"></div><div class="h-2 bg-zinc-900 rounded w-1/6"></div></div>
             </div>
-            <div class="h-6 bg-zinc-900 rounded w-3/4"></div>
-            <div class="h-40 bg-zinc-900 rounded-2xl"></div>
+            <div class="h-16 bg-zinc-900 rounded w-3/4"></div>
           </div>
         </div>
       </section>
@@ -156,7 +144,7 @@
       <section id="chatSection" class="hidden animate-fade-in">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4 h-[650px] bg-zinc-950/90 border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
           
-          <!-- Lista de Contactos a la izquierda (Ocupa 4 columnas) -->
+          <!-- Lista de Contactos a la izquierda -->
           <div class="md:col-span-4 border-r border-zinc-900 flex flex-col h-full bg-black/40">
             <div class="p-4 border-b border-zinc-900 bg-zinc-950/40">
               <h2 class="text-lg font-bold text-zinc-200 flex items-center gap-2">
@@ -166,7 +154,7 @@
             <div id="usersList" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar"></div>
           </div>
 
-          <!-- Ventana de Chat a la derecha (Ocupa 8 columnas) -->
+          <!-- Ventana de Chat a la derecha -->
           <div id="chatWindow" class="md:col-span-8 flex flex-col h-full bg-zinc-950/20">
             <div id="chatHeader" class="border-b border-zinc-900 p-4 font-bold flex items-center gap-3 text-zinc-200 bg-zinc-950/60 backdrop-blur-md">
               <span class="text-zinc-500 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left md:hidden cursor-pointer" onclick="closeActiveChat()"></i> Selecciona un usuario para chatear</span>
@@ -209,7 +197,7 @@
           <div class="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
           
           <div class="relative w-28 h-28 mx-auto mb-4 group">
-            <img id="profileAvatar" class="w-28 h-28 rounded-full object-cover border-4 border-green-500/80 shadow-lg shadow-green-500/10" src="https://i.pravatar.cc/300">
+            <img id="profileAvatar" class="w-28 h-28 rounded-full object-cover border-4 border-green-500/80 shadow-lg shadow-green-500/10" src="">
             <label for="newProfilePhoto" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
               <i class="fa-solid fa-camera text-white text-xl"></i>
             </label>
@@ -249,7 +237,7 @@
 
     </div>
 
-    <!-- COLUMNA DERECHA - SIDEBAR (Solo visible en pantallas grandes desktop >= lg) -->
+    <!-- COLUMNA DERECHA - SIDEBAR (Desktop) -->
     <div class="hidden lg:block lg:col-span-4 space-y-6">
       
       <!-- Mi Mini Card de Perfil -->
@@ -378,16 +366,16 @@
   </div>
 </div>
 
-<!-- CONTENEDOR DE TOASTS (Notificaciones Internas Limpias) -->
+<!-- CONTENEDOR DE TOASTS (Notificaciones Internas) -->
 <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-// Global values injected or hardcoded
+// Valores globales de la aplicación
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'rankiu-5da90';
 const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
   apiKey: "AIzaSyBX-Ynms8abEJESVUDGk75bzrPyrbrFnxg",
@@ -504,7 +492,7 @@ const SoundFX = {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(580, this.ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(850, this.ctx.currentTime + 0.09);
-      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.07, this.ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
       osc.start();
       osc.stop(this.ctx.currentTime + 0.09);
@@ -520,7 +508,7 @@ let followingSet = new Set();
 let followerCounts = {};
 let followingCounts = {};
 let currentPosts = [];
-let feedFilter = 'all'; // 'all' or 'following'
+let feedFilter = 'all'; 
 
 // Monitos Estilo WhatsApp de Colores (SVG Base64 Directo)
 const DefaultAvatars = [
@@ -531,6 +519,14 @@ const DefaultAvatars = [
   { id: 'orange', color: '#f59e0b', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="%23f59e0b"/><circle cx="50" cy="38" r="18" fill="%23ffffff" opacity="0.85"/><path d="M50 62c-15 0-28 8-28 18v6h56v-6c0-10-13-18-28-18z" fill="%23ffffff" opacity="0.85"/></svg>' }
 ];
 let selectedDefaultAvatarUrl = DefaultAvatars[0].url;
+
+// Retorna el avatar de colores si no hay uno configurado o si es una URL aleatoria antigua
+function getUserAvatar(avatarUrl) {
+  if (!avatarUrl || avatarUrl === "" || avatarUrl.includes("i.pravatar.cc") || avatarUrl.includes("placeholder")) {
+    return DefaultAvatars[0].url; // Monito verde azulado por defecto
+  }
+  return avatarUrl;
+}
 
 // Inyectando visualmente los selectores de monitos en el registro
 function renderDefaultAvatarSelector() {
@@ -611,18 +607,7 @@ postTextarea.addEventListener("input", (e) => {
   }
 });
 
-// Selector de archivos estético
-document.getElementById("postImage").addEventListener("change", (e) => {
-  const label = document.getElementById("imageLabel");
-  if(e.target.files.length > 0) {
-    label.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 mr-1"></i> ${e.target.files[0].name}`;
-    label.classList.remove("hidden");
-  } else {
-    label.classList.add("hidden");
-  }
-});
-
-function switchAuth(type){
+function switchAuth(type) {
   SoundFX.playClick();
   if(type === "login"){
     document.getElementById("loginBox").classList.remove("hidden");
@@ -644,7 +629,8 @@ async function uploadImage(file, path) {
   return await getDownloadURL(storageRef);
 }
 
-async function register(){
+// Registro
+async function register() {
   const username = document.getElementById("registerUsername").value.trim();
   const email = document.getElementById("registerEmail").value.trim();
   const password = document.getElementById("registerPassword").value.trim();
@@ -656,7 +642,7 @@ async function register(){
   }
   try{
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    // Si no cargó una foto pesonalizada, usamos el monito seleccionado estilo WhatsApp
+    // Si no cargó una foto personalizada, usamos el monito seleccionado estilo WhatsApp
     let avatarUrl = selectedDefaultAvatarUrl;
     if(avatarFile){
       showNotification("Subiendo foto de perfil...", "info");
@@ -703,25 +689,18 @@ document.getElementById("registerBtn").addEventListener("click", register);
 document.getElementById("loginBtn").addEventListener("click", login);
 document.getElementById("forgotPasswordBtn").addEventListener("click", resetPassword);
 
-async function createPost(){
+// Crear Post (Solo Texto)
+async function createPost() {
   if(!currentUser){ showNotification("Inicia sesión para publicar", "error"); return; }
   const content = document.getElementById("postContent").value.trim();
-  const imageFile = document.getElementById("postImage").files[0];
 
   if(!content){ showNotification("Por favor, escribe algo", "error"); return; }
-  let imageUrl = "";
-  if(imageFile){ 
-    showNotification("Subiendo imagen...", "info");
-    imageUrl = await uploadImage(imageFile, "posts/" + Date.now()); 
-  }
 
   await addDoc(getCol("posts"),{
-    content, image:imageUrl, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
+    content, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
   });
   
   document.getElementById("postContent").value = "";
-  document.getElementById("postImage").value = "";
-  document.getElementById("imageLabel").classList.add("hidden");
   document.getElementById("charCounter").innerText = "0 / 150";
   SoundFX.playSuccess();
   showNotification("Publicación subida con éxito", "success");
@@ -792,11 +771,27 @@ function updateProfileStats() {
 // Abrir detalle de otros perfiles en modal
 async function viewUserProfile(userId) {
   if (!userId) return;
-  const user = allUsers.find(u => u.id === userId);
-  if (!user) return;
+  let user = allUsers.find(u => u.id === userId);
+  
+  // Si no está cargado en memoria, lo buscamos de forma directa y asíncrona
+  if (!user) {
+    try {
+      const userDoc = await getDoc(getDocRef("users", userId));
+      if (userDoc.exists()) {
+        user = { id: userDoc.id, ...userDoc.data() };
+      }
+    } catch(e) {
+      console.error("Error al buscar usuario en el modal", e);
+    }
+  }
+
+  if (!user) {
+    showNotification("No se pudo cargar el perfil del usuario", "error");
+    return;
+  }
   
   SoundFX.playClick();
-  document.getElementById("modalAvatar").src = user.avatar || "https://i.pravatar.cc/300";
+  document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
   document.getElementById("modalUsername").innerText = user.username || "Usuario";
   document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía todavía.";
   
@@ -812,10 +807,10 @@ async function viewUserProfile(userId) {
     
     if (isFollowing) {
       followBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Siguiendo';
-      followBtn.className = "flex-1 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+      followBtn.className = "flex-grow bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
     } else {
       followBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Seguir';
-      followBtn.className = "flex-1 bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+      followBtn.className = "flex-grow bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
     }
     
     followBtn.onclick = () => {
@@ -855,7 +850,8 @@ function getFontSize(text) {
   return "text-sm md:text-base text-zinc-300 font-medium leading-relaxed";
 }
 
-function renderPosts(posts){
+// Renderizar posts en feed
+function renderPosts(posts) {
   currentPosts = posts;
   const container = document.getElementById("postsContainer");
   
@@ -900,15 +896,15 @@ function renderPosts(posts){
 
     const div = document.createElement("div");
     div.id = `post-card-${post.id}`;
-    // Por defecto inicia en un gris de alta calidad antes de que el snapshot de votos calcule su enmarcado neón
-    div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden`;
+    div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
     
     div.innerHTML = `
     <div class="flex justify-between items-center">
-      <div class="flex gap-3 items-center cursor-pointer" onclick="viewUserProfile('${post.authorId}')">
-        <img src="${post.authorAvatar || 'https://i.pravatar.cc/150'}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
+      <!-- Clic sobre el nombre del autor ahora abre su perfil correctamente -->
+      <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
+        <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900 group-hover:ring-green-500/40 transition">
         <div>
-          <div class="font-extrabold text-sm text-zinc-100 hover:text-green-400 transition-colors">${post.author}</div>
+          <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">${post.author}</div>
           <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Publicado</div>
         </div>
       </div>
@@ -918,14 +914,12 @@ function renderPosts(posts){
     
     <!-- Contenido dinámico adaptativo -->
     <p class="mt-4 leading-relaxed whitespace-pre-wrap select-all select-none ${getFontSize(post.content)}">${post.content}</p>
-    
-    ${post.image? `<img src="${post.image}" class="mt-4 rounded-2xl w-full max-h-[380px] object-cover border border-zinc-900 shadow-md">`: ''}
 
-    <!-- Panel de Upvotes / Downvotes Premium Rediseñado (Siempre con Color Vibrante) -->
+    <!-- Panel de Votos Estilo Gaming Premium -->
     <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
       <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
         
-        <!-- Botón Upvote Permanente -->
+        <!-- Botón Upvote -->
         <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150" data-id="${post.id}">
           <i class="fa-solid fa-circle-arrow-up text-lg transition-transform" id="up-icon-${post.id}"></i>
           <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
@@ -933,7 +927,7 @@ function renderPosts(posts){
         
         <div class="w-[1px] h-6 bg-zinc-800"></div>
         
-        <!-- Botón Downvote Permanente -->
+        <!-- Botón Downvote -->
         <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150" data-id="${post.id}">
           <i class="fa-solid fa-circle-arrow-down text-lg transition-transform" id="down-icon-${post.id}"></i>
           <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
@@ -942,7 +936,7 @@ function renderPosts(posts){
       </div>
     </div>
 
-    <!-- Caja de Comentarios de la Publicación -->
+    <!-- Caja de Comentarios -->
     <div class="mt-4">
       <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
       <div class="flex gap-2">
@@ -973,7 +967,7 @@ function renderPosts(posts){
   });
 }
 
-// Único controlador de eventos global para clicks dinámicos
+// Único controlador de eventos global para clics dinámicos
 document.addEventListener("click", async (event) => {
     const target = event.target;
 
@@ -1008,7 +1002,7 @@ document.addEventListener("click", async (event) => {
         const voteId = `${currentUser.uid}_${postId}`;
         const icon = document.getElementById(`up-icon-${postId}`);
         
-        // Ejecución física de sonido y animación táctil
+        // Animación física y de audio
         SoundFX.playVoteUp();
         if (icon) {
           icon.classList.add("animate-upvote-arrow");
@@ -1034,7 +1028,7 @@ document.addEventListener("click", async (event) => {
         const voteId = `${currentUser.uid}_${postId}`;
         const icon = document.getElementById(`down-icon-${postId}`);
 
-        // Ejecución física de sonido y animación táctil
+        // Animación física y de audio
         SoundFX.playVoteDown();
         if (icon) {
           icon.classList.add("animate-downvote-arrow");
@@ -1052,12 +1046,11 @@ document.addEventListener("click", async (event) => {
     }
 });
 
-// Render de la barra de sugerencias (Quién seguir) en desktop
+// Recomendar gente para seguir
 function renderSuggestedUsers() {
   const container = document.getElementById("suggestedUsersList");
   if (!container) return;
   
-  // Filtrar para no recomendarse a sí mismo o a quienes ya sigue
   const suggestions = allUsers.filter(u => u.id !== currentUser?.uid && !followingSet.has(u.id)).slice(0, 4);
   
   if (suggestions.length === 0) {
@@ -1071,7 +1064,7 @@ function renderSuggestedUsers() {
     div.className = "flex items-center justify-between p-2 rounded-2xl bg-zinc-900/30 border border-zinc-900 hover:border-zinc-800 transition";
     div.innerHTML = `
       <div class="flex items-center gap-2.5 cursor-pointer" onclick="viewUserProfile('${user.id}')">
-        <img src="${user.avatar || 'https://i.pravatar.cc/150'}" class="w-8 h-8 rounded-full object-cover">
+        <img src="${getUserAvatar(user.avatar)}" class="w-8 h-8 rounded-full object-cover">
         <div class="text-xs font-black text-zinc-200 truncate max-w-[100px]">${user.username}</div>
       </div>
       <button onclick="toggleFollow('${user.id}')" class="px-3 py-1 bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-black font-extrabold text-[10px] rounded-lg transition-all border border-green-500/20">
@@ -1082,7 +1075,6 @@ function renderSuggestedUsers() {
   });
 }
 
-// Filtro de Feed dinámico
 function setFeedFilter(filter) {
   feedFilter = filter;
   SoundFX.playClick();
@@ -1092,18 +1084,21 @@ function setFeedFilter(filter) {
 }
 window.setFeedFilter = setFeedFilter;
 
-async function loadUsers(){
-  try {
-    const q = query(getCol("users"));
-    const querySnapshot = await getDocs(q);
-    allUsers = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+// Escuchador global en tiempo real de los usuarios en Firestore
+function listenUsers() {
+  const q = query(getCol("users"));
+  onSnapshot(q, (snapshot) => {
+    allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderUsers();
     renderSuggestedUsers();
-  } catch(e) { console.error("Error cargando usuarios: ", e); }
+    updateNavbar();
+    renderProfile();
+  }, (err) => console.error("Error al sincronizar usuarios: ", err));
 }
 
-function renderUsers(){
+function renderUsers() {
   const container = document.getElementById("usersList");
+  if (!container) return;
   container.innerHTML = "";
   allUsers.forEach(user => {
     if(currentUser && user.id === currentUser.uid) return;
@@ -1115,7 +1110,7 @@ function renderUsers(){
       listenMessages();
     };
     div.innerHTML = `
-    <img src="${user.avatar || 'https://i.pravatar.cc/150'}" class="w-10 h-10 rounded-full object-cover">
+    <img src="${getUserAvatar(user.avatar)}" class="w-10 h-10 rounded-full object-cover">
     <div class="font-extrabold text-sm text-zinc-300 truncate">${user.username}</div>
     `;
     container.appendChild(div);
@@ -1153,7 +1148,7 @@ function listenMessages(){
   document.getElementById("chatHeader").innerHTML = `
     <div class="flex items-center gap-3">
       <i class="fa-solid fa-arrow-left md:hidden cursor-pointer mr-1" onclick="closeActiveChat()"></i>
-      <img src="${selectedUser.avatar || 'https://i.pravatar.cc/150'}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
+      <img src="${getUserAvatar(selectedUser.avatar)}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
       <span class="text-white hover:text-green-400 cursor-pointer transition" onclick="viewUserProfile('${selectedUser.id}')">${selectedUser.username}</span>
     </div>
   `;
@@ -1195,7 +1190,7 @@ function closeActiveChat() {
 }
 window.closeActiveChat = closeActiveChat;
 
-// Lógica para guardar edición de Nombre y Bio
+// Guardar cambios del perfil propio
 async function saveProfileChanges() {
   if (!currentUser) return;
   const newName = document.getElementById("editUsername").value.trim();
@@ -1205,11 +1200,7 @@ async function saveProfileChanges() {
   
   try {
     showNotification("Guardando perfil...", "info");
-    
-    // 1. Actualizar perfil auth de Firebase
     await updateProfile(currentUser, { displayName: newName });
-    
-    // 2. Actualizar registro en Firestore
     await setDoc(getDocRef("users", currentUser.uid), {
       username: newName,
       bio: newBio
@@ -1217,16 +1208,13 @@ async function saveProfileChanges() {
     
     SoundFX.playSuccess();
     showNotification("¡Perfil actualizado con éxito!", "success");
-    renderProfile();
-    updateNavbar();
-    await loadUsers();
   } catch(err) {
     showNotification("Error: " + err.message, "error");
   }
 }
 window.saveProfileChanges = saveProfileChanges;
 
-// Mostrar secciones
+// Navegación de pestañas
 function showSection(section){
   SoundFX.playClick();
   document.getElementById("feedSection").classList.add("hidden");
@@ -1257,17 +1245,17 @@ function updateNavbar(){
   if(currentUser){
     nav.innerHTML = `
     <div class="flex items-center gap-2">
-      <img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-8 h-8 rounded-full object-cover border border-green-500 cursor-pointer hidden sm:block" onclick="showSection('profile')">
+      <img src="${getUserAvatar(currentUser.photoURL)}" class="w-8 h-8 rounded-full object-cover border border-green-500 cursor-pointer hidden sm:block" onclick="showSection('profile')">
       <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider">Salir</button>
     </div>
     `;
     setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click", logout); }, 100);
     
-    // Carga de Mini Perfil en Sidebar Desktop
+    // Mini Card
     const miniCard = document.getElementById("miniProfileCard");
     if(miniCard) {
       miniCard.innerHTML = `
-        <img src="${currentUser.photoURL || 'https://i.pravatar.cc/150'}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
+        <img src="${getUserAvatar(currentUser.photoURL)}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
         <div class="truncate flex-1">
           <div class="font-extrabold text-sm text-zinc-200">${currentUser.displayName || 'Usuario'}</div>
           <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Mi Perfil Activo</div>
@@ -1279,13 +1267,11 @@ function updateNavbar(){
   }
 }
 
-// Rellenar perfil en pestaña de Configuración
 function renderProfile(){
   if(!currentUser) return;
-  document.getElementById("profileAvatar").src = currentUser.photoURL || 'https://i.pravatar.cc/300';
+  document.getElementById("profileAvatar").src = getUserAvatar(currentUser.photoURL);
   document.getElementById("editUsername").value = currentUser.displayName || '';
   
-  // Buscar Bio en el array local de todos los usuarios
   const myData = allUsers.find(u => u.id === currentUser.uid);
   document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
 }
@@ -1310,15 +1296,14 @@ async function updateProfilePhoto(){
     updateNavbar();
     SoundFX.playSuccess();
     showNotification("Avatar de perfil actualizado", "success");
-    await loadUsers();
   }catch(error){ showNotification(error.message, "error"); }
 }
 document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
 
-// ESCUCHADOR GLOBAL DE VOTOS (Iluminación Táctil Neon de Upvotes/Downvotes & Borde de Tarjeta Reactivo)
+// ESCUCHADOR GLOBAL DE VOTOS REVOLUCIONARIO
 onSnapshot(getCol("votes"), (snapshot) => {
     const postVotes = {};
-    const myVotes = {}; // Registrar qué ha votado el usuario activo
+    const myVotes = {}; 
 
     snapshot.docs.forEach(doc => {
         const vote = doc.data();
@@ -1331,27 +1316,24 @@ onSnapshot(getCol("votes"), (snapshot) => {
             postVotes[vote.postId].down += 1;
         }
         
-        // Registrar voto personal
         if (currentUser && vote.userId === currentUser.uid) {
           myVotes[vote.postId] = vote.type;
         }
     });
 
-    // Actualizar dinámicamente cada tarjeta de post en el DOM
     document.querySelectorAll('[id^="post-card-"]').forEach(card => {
         const postId = card.id.replace('post-card-', '');
         const votes = postVotes[postId] || { up: 0, down: 0 };
         
         const upCounter = document.getElementById(`up-counter-${postId}`);
         const downCounter = document.getElementById(`down-counter-${postId}`);
-        
         const upBtn = document.getElementById(`up-btn-${postId}`);
         const downBtn = document.getElementById(`down-btn-${postId}`);
 
         if (upCounter) upCounter.innerText = votes.up;
         if (downCounter) downCounter.innerText = votes.down;
 
-        // Resetear estilos base con color permanente de alta gama (vibrantes por defecto)
+        // Resetear estilos base con color permanente vibrante
         if (upBtn) {
           upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 hover:border-green-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
         }
@@ -1359,15 +1341,14 @@ onSnapshot(getCol("votes"), (snapshot) => {
           downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
         }
 
-        // Encender color de neón intenso y sólido si el usuario ha votado
+        // Iluminación intensa si votó
         if (myVotes[postId] === "up" && upBtn) {
           upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 shadow-lg shadow-green-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
         } else if (myVotes[postId] === "down" && downBtn) {
           downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 shadow-lg shadow-red-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
         }
 
-        // Iluminar el borde de la publicación de forma elegante en tiempo real
-        // Verde si dominan votos positivos, rojo si dominan negativos, gris neutro si hay empate
+        // Color de marco reactivo
         card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
         if (votes.up > votes.down) {
             card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
@@ -1379,15 +1360,52 @@ onSnapshot(getCol("votes"), (snapshot) => {
     });
 });
 
+// ESCUCHADOR DE NOTIFICACIONES DE MENSAJES EN TIEMPO REAL
+let appLoadTime = Date.now();
+let notifiedMessages = new Set();
+
+function listenIncomingMessages() {
+  if (!currentUser) return;
+  const q = query(getCol("messages"));
+  onSnapshot(q, (snapshot) => {
+    snapshot.docs.forEach(doc => {
+      const msg = doc.data();
+      const msgId = doc.id;
+      
+      // Filtramos mensajes dirigidos a mí que no sean míos y no estén notificados todavía
+      if (msg.to === currentUser.uid && msg.from !== currentUser.uid && !notifiedMessages.has(msgId)) {
+        notifiedMessages.add(msgId);
+        
+        // Comprobar si estamos en el chat con ese usuario específico
+        const isCurrentActiveChat = (selectedUser && selectedUser.id === msg.from && !document.getElementById("chatSection").classList.contains("hidden"));
+        
+        if (msg.createdAt) {
+          const msgTime = msg.createdAt.seconds ? msg.createdAt.seconds * 1000 : msg.createdAt;
+          
+          if (msgTime > appLoadTime) {
+            SoundFX.playMessage();
+            if (!isCurrentActiveChat) {
+              const sender = allUsers.find(u => u.id === msg.from);
+              const senderName = sender ? sender.username : "Alguien";
+              showNotification(`Nuevo mensaje de ${senderName}: "${msg.text}"`, "success");
+            }
+          }
+        }
+      }
+    });
+  }, (err) => console.error("Error al recibir mensajes: ", err));
+}
+
+// Escucha de estado de autenticación
 onAuthStateChanged(auth, async (user)=>{
   currentUser = user;
   updateNavbar();
   if(user){
     document.getElementById("authModal").classList.add("hidden");
     showSection("feed");
-    await loadUsers();
-    renderProfile();
+    listenUsers();
     listenFollowers();
+    listenIncomingMessages();
   }else{
     document.getElementById("authModal").classList.remove("hidden");
   }
