@@ -974,29 +974,77 @@ document.addEventListener("click", async (event) => {
         showNotification("Comentario publicado", "success");
     }
 
-    if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
-        const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
-        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-        
-        const postId = btn.dataset.id;
-        const voteId = `${currentUser.uid}_${postId}`;
-        const icon = document.getElementById(`up-icon-${postId}`);
-        
-        SoundFX.playVoteUp();
-        if (icon) {
-          icon.classList.add("animate-upvote-arrow");
-          icon.addEventListener("animationend", () => {
-            icon.classList.remove("animate-upvote-arrow");
-          }, { once: true });
-        }
-        
-        await setDoc(getDocRef("votes", voteId), {
+    // Reemplaza los bloques de votación (Upvote y Downvote) dentro de tu document.addEventListener("click") con esto:
+
+if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
+    const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
+    if(!currentUser) return showNotification("Inicia sesión para votar", "error");
+    
+    const postId = btn.dataset.id;
+    const voteId = `${currentUser.uid}_${postId}`;
+    const icon = document.getElementById(`up-icon-${postId}`);
+    
+    SoundFX.playVoteUp();
+    if (icon) {
+      icon.classList.add("animate-upvote-arrow");
+      icon.addEventListener("animationend", () => {
+        icon.classList.remove("animate-upvote-arrow");
+      }, { once: true });
+    }
+    
+    // Nueva Lógica: Verificar si ya existía un upvote activo para quitarlo
+    const voteRef = getDocRef("votes", voteId);
+    const voteSnap = await getDoc(voteRef);
+    
+    if (voteSnap.exists() && voteSnap.data().type === "up") {
+        // Si ya era un upvote, lo removemos (Retirar voto)
+        await deleteDoc(voteRef);
+        showNotification("Voto retirado", "info");
+    } else {
+        // Si no existía o era un downvote, lo registramos como upvote
+        await setDoc(voteRef, {
             postId: postId,
             userId: currentUser.uid,
             type: "up",
             createdAt: Date.now()
         });
     }
+}
+
+if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
+    const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
+    if(!currentUser) return showNotification("Inicia sesión para votar", "error");
+    
+    const postId = btn.dataset.id;
+    const voteId = `${currentUser.uid}_${postId}`;
+    const icon = document.getElementById(`down-icon-${postId}`);
+
+    SoundFX.playVoteDown();
+    if (icon) {
+      icon.classList.add("animate-downvote-arrow");
+      icon.addEventListener("animationend", () => {
+        icon.classList.remove("animate-downvote-arrow");
+      }, { once: true });
+    }
+    
+    // Nueva Lógica: Verificar si ya existía un downvote activo para quitarlo
+    const voteRef = getDocRef("votes", voteId);
+    const voteSnap = await getDoc(voteRef);
+    
+    if (voteSnap.exists() && voteSnap.data().type === "down") {
+        // Si ya era un downvote, lo removemos (Retirar voto)
+        await deleteDoc(voteRef);
+        showNotification("Voto retirado", "info");
+    } else {
+        // Si no existía o era un upvote, lo registramos como downvote
+        await setDoc(voteRef, {
+            postId: postId,
+            userId: currentUser.uid,
+            type: "down",
+            createdAt: Date.now()
+        });
+    }
+}
 
     if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
         const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
@@ -1252,6 +1300,19 @@ const postsQuery = query(getCol("posts"), orderBy("createdAt","desc"));
 onSnapshot(postsQuery, (snapshot)=>{
   const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
   renderPosts(posts);
+  function renderPosts(posts) {
+  currentPosts = posts;
+  const container = document.getElementById("postsContainer");
+  
+  // ... (Todo tu código interno de renderPosts se mantiene exactamente igual) ...
+  
+  // AL FINAL de la función renderPosts, justo después de cerrar el forEach de los posts:
+  // Forzamos la aplicación de estilos usando los datos que ya tenemos en caché
+  if (typeof cachedVotesSnapshot !== 'undefined' && cachedVotesSnapshot) {
+     applyVotesStyles(cachedVotesSnapshot);
+  }
+}
+
 });
 
 async function updateProfilePhoto(){
@@ -1272,7 +1333,11 @@ async function updateProfilePhoto(){
 }
 document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
 
-onSnapshot(getCol("votes"), (snapshot) => {
+// Declaramos una variable global para almacenar el último estado de los votos detectados
+let cachedVotesSnapshot = null;
+
+function applyVotesStyles(snapshot) {
+    if (!snapshot) return;
     const postVotes = {};
     const myVotes = {}; 
 
@@ -1317,6 +1382,50 @@ onSnapshot(getCol("votes"), (snapshot) => {
           downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 shadow-lg shadow-red-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
         }
 
+        // Limpieza de clases previas para evitar acumulación de bordes rotos
+        card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
+        
+        if (votes.up > votes.down) {
+            card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
+        } else if (votes.down > votes.up) {
+            card.classList.add("border-red-500", "shadow-[0_0_15px_rgba(239,68,68,0.15)]");
+        } else {
+            card.classList.add("border-zinc-900");
+        }
+    });
+}
+
+// Mantenemos la escucha en tiempo real activa actualizando nuestra caché
+onSnapshot(getCol("votes"), (snapshot) => {
+    cachedVotesSnapshot = snapshot;
+    applyVotesStyles(snapshot);
+});
+
+    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
+        const postId = card.id.replace('post-card-', '');
+        const votes = postVotes[postId] || { up: 0, down: 0 };
+        
+        const upCounter = document.getElementById(`up-counter-${postId}`);
+        const downCounter = document.getElementById(`down-counter-${postId}`);
+        const upBtn = document.getElementById(`up-btn-${postId}`);
+        const downBtn = document.getElementById(`down-btn-${postId}`);
+
+        if (upCounter) upCounter.innerText = votes.up;
+        if (downCounter) downCounter.innerText = votes.down;
+
+        if (upBtn) {
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 hover:border-green-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
+        }
+        if (downBtn) {
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
+        }
+
+        if (myVotes[postId] === "up" && upBtn) {
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 shadow-lg shadow-green-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
+        } else if (myVotes[postId] === "down" && downBtn) {
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 shadow-lg shadow-red-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
+        }
+
         card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
         if (votes.up > votes.down) {
             card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
@@ -1326,7 +1435,6 @@ onSnapshot(getCol("votes"), (snapshot) => {
             card.classList.add("border-zinc-900");
         }
     });
-});
 
 let appLoadTime = Date.now();
 let notifiedMessages = new Set();
