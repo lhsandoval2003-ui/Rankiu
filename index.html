@@ -898,6 +898,17 @@ function renderPosts(posts) {
         </div>
       </div>
       
+      <div class="flex items-center gap-2">
+        ${followBtnMarkup}
+        ${currentUser && post.authorId === currentUser.uid ? `
+          <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 transition-colors p-2 rounded-xl hover:bg-red-500/10 active:scale-95 duration-150" title="Eliminar publicación">
+            <i class="fa-solid fa-trash text-sm"></i>
+          </button>
+        ` : ''}
+      </div>
+    </div>
+    
+    <p class="mt-4 leading-relaxed whitespace-pre-wrap select-all select-none ${getFontSize(post.content)}">${post.content}</p>
       ${followBtnMarkup}
     </div>
     
@@ -950,7 +961,29 @@ function renderPosts(posts) {
   });
 }
 
-document.addEventListener("click", async (event) => {
+document.addEventLidocument.addEventListener("click", async (event) => {
+    const target = event.target;
+
+    // --- NUEVA FUNCIÓN: ELIMINAR POST ---
+    if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
+        const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
+        const postId = btn.dataset.id;
+
+        const deAcuerdo = confirm("¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.");
+        if (!deAcuerdo) return;
+
+        try {
+            const postRef = getDocRef("posts", postId);
+            await deleteDoc(postRef);
+            showNotification("Publicación eliminada correctamente", "success");
+        } catch (error) {
+            console.error("Error al eliminar el post:", error);
+            showNotification("No se pudo eliminar la publicación", "error");
+        }
+        return; // Detiene la ejecución aquí ya que encontramos el botón correcto
+    }
+
+    if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {stener("click", async (event) => {
     const target = event.target;
 
     if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
