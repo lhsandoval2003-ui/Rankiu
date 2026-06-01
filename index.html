@@ -708,7 +708,7 @@ document.getElementById("publishBtn").addEventListener("click", createPost);
 function toggleFollow(authorId) {
   if(!currentUser) return showNotification("Inicia sesión para seguir personas", "error");
   if(authorId === currentUser.uid) return showNotification("No te puedes seguir a ti mismo", "error");
-  
+ 
   const isFollowing = followingSet.has(authorId);
   const followId = `${currentUser.uid}_${authorId}`;
   
@@ -1172,8 +1172,8 @@ document.getElementById("publishBtn").onclick = async () => {
   }
 };
 
-document.addEventLidocument.addEventListener("click", async (event) => {
-    const target = event.target;
+document.addEventLidocument.addEventListener ("click", async (event)) => {
+    const target = event.target;}
 
     // --- NUEVA FUNCIÓN: ELIMINAR POST ---
     if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
