@@ -225,7 +225,7 @@
             </div>
           </div>
 
-          <button id="saveProfileBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
+          <button id="saveProfileBtn" onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
             Guardar Cambios
           </button>
         </div>
@@ -273,17 +273,8 @@
           <span>Tendencias</span>
           <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i>
         </h3>
-        <div class="space-y-3 text-xs">
-          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
-            <div class="text-zinc-500 font-bold">#1 Tendencia</div>
-            <div class="font-black text-zinc-100 text-sm mt-0.5">Rankiu</div>
-            <div class="text-zinc-500 mt-1">Votos de Reputación</div>
-          </div>
-          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
-            <div class="text-zinc-500 font-bold">#2 Tendencia</div>
-            <div class="font-black text-zinc-100 text-sm mt-0.5">Física de Votos</div>
-            <div class="text-zinc-500 mt-1">Animaciones fluidas</div>
-          </div>
+        <div id="trendsContainer" class="space-y-3 text-xs">
+          <div class="text-zinc-500 font-medium italic p-2">Analizando tendencias...</div>
         </div>
       </div>
 
@@ -390,8 +381,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Diccionario de malas palabras a censurar
 const BAD_WORDS = ["mierda", "puta", "puto", "marico", "pendejo", "pendeja", "culero", "culera", "gonorrea", "hijueputa", "cabron", "cabrona", "perra", "perro", "chinga", "verga", "carajo", "malparido"];
 
+// Función para censurar texto manteniendo las letras de los extremos
 function filterBadWords(text) {
   if (!text) return "";
   let filtered = text;
@@ -405,6 +398,7 @@ function filterBadWords(text) {
   return filtered;
 }
 
+// Forzar formato estilo Instagram en los inputs de username
 function cleanUsernameInput(val) {
   return val.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '');
 }
@@ -595,6 +589,7 @@ function showNotification(message, type = "info") {
     toast.className += " bg-zinc-950 text-zinc-300 border-zinc-800";
     toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-sm"></i> ${message}`;
   }
+  
   container.appendChild(toast);
   setTimeout(() => { toast.classList.remove("translate-y-2", "opacity-0"); }, 50);
   setTimeout(() => {
@@ -616,6 +611,7 @@ if (postTextarea) {
     } else {
       label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
     }
+    
     if (len < 50) {
       e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
     } else if (len < 100) {
@@ -633,11 +629,11 @@ function switchAuth(type) {
     document.getElementById("loginBox").classList.remove("hidden");
     document.getElementById("registerBox").classList.add("hidden");
     document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
-    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
+    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-white";
   }else{
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("registerBox").classList.remove("hidden");
-    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
+    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-white";
     document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
   }
 }
@@ -647,838 +643,895 @@ function showRecoverFlow() {
   SoundFX.playClick();
   document.getElementById("loginBox").classList.add("hidden");
   document.getElementById("recoverBox").classList.remove("hidden");
-  document.getElementById("authToggleContainer").classList.add("hidden");
 }
 window.showRecoverFlow = showRecoverFlow;
 
 function hideRecoverFlow() {
-  document.getElementById("loginBox").classList.remove("hidden");
+  SoundFX.playClick();
   document.getElementById("recoverBox").classList.add("hidden");
-  document.getElementById("authToggleContainer").classList.remove("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
 }
 window.hideRecoverFlow = hideRecoverFlow;
 
-function showSection(secId) {
+function showSection(sect) {
   SoundFX.playClick();
   document.getElementById("feedSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
   document.getElementById("profileSection").classList.add("hidden");
   
-  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-300";
-  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-300";
-  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-300";
-
-  if (secId === 'feed') {
+  document.getElementById("tab-feed").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-400 hover:text-zinc-100";
+  document.getElementById("tab-chat").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-400 hover:text-zinc-100";
+  document.getElementById("tab-profile").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-400 hover:text-zinc-100";
+  
+  if (sect === 'feed') {
     document.getElementById("feedSection").classList.remove("hidden");
-    document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-zinc-900 text-green-400 border border-zinc-800/60 shadow-lg shadow-green-500/5";
-  } else if (secId === 'chat') {
+    document.getElementById("tab-feed").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-400 border border-green-500/20";
+  } else if (sect === 'chat') {
     document.getElementById("chatSection").classList.remove("hidden");
-    document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-zinc-900 text-green-400 border border-zinc-800/60 shadow-lg shadow-green-500/5";
-    renderUsersList();
-  } else if (secId === 'profile') {
+    document.getElementById("tab-chat").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-400 border border-green-500/20";
+  } else if (sect === 'profile') {
     document.getElementById("profileSection").classList.remove("hidden");
-    document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-zinc-900 text-green-400 border border-zinc-800/60 shadow-lg shadow-green-500/5";
-    loadMyProfileData();
+    document.getElementById("tab-profile").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-gradient-to-r from-green-500/10 to-emerald-500/10 text-green-400 border border-green-500/20";
+    if (currentUser) {
+      loadMyProfileData();
+    }
   }
 }
 window.showSection = showSection;
 
-// --- CONTROLADOR DE INICIO DE SESIÓN ---
-const loginBtn = document.getElementById("loginBtn");
-if (loginBtn) {
-  loginBtn.onclick = async () => {
-    SoundFX.playClick();
-    const email = document.getElementById("loginEmail").value.trim();
-    const pass = document.getElementById("loginPassword").value;
-    if(!email || !pass) {
-      showNotification("Completa todos los campos del login.", "error");
-      return;
-    }
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-      SoundFX.playSuccess();
-      showNotification("¡Sesión iniciada correctamente!", "success");
-    } catch(err) {
-      console.error(err);
-      showNotification("Credenciales incorrectas o inválidas.", "error");
-    }
-  };
-}
-
-// --- CONTROLADOR DE REGISTRO INTEGRADO CON VALIDACIÓN DE USUARIO ÚNICO ---
-const registerBtn = document.getElementById("registerBtn");
-if (registerBtn) {
-  registerBtn.onclick = async () => {
-    SoundFX.playClick();
-    
-    let username = document.getElementById("registerUsername").value.trim();
-    const fullName = document.getElementById("registerFullName").value.trim();
-    const email = document.getElementById("registerEmail").value.trim();
-    const password = document.getElementById("registerPassword").value;
-
-    username = cleanUsernameInput(username);
-
-    if (!username || !fullName || !email || !password) {
-      showNotification("Por favor, completa todos los campos obligatorios.", "error");
-      return;
-    }
-
-    if (username.length < 3) {
-      showNotification("El nombre de usuario debe tener al menos 3 caracteres.", "error");
-      return;
-    }
-
-    try {
-      // Bloqueo de duplicados: Verificar si el username ya existe en Firestore
-      const usersRef = getCol("users");
-      const q = query(usersRef, where("username", "==", username));
-      const querySnapshot = await getDocs(q);
-      
-      if (!querySnapshot.empty) {
-        showNotification("El nombre de usuario ya está en uso. Elige otro.", "error");
-        return; 
-      }
-
-      // Proceder con la creación en Firebase Auth si el username es único
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      // Guardar el perfil en Firestore
-      await setDoc(getDocRef("users", user.uid), {
-        uid: user.uid,
-        username: username,
-        fullName: fullName,
-        email: email,
-        bio: "¡Hola! Estoy usando Rankiu.",
-        avatarUrl: selectedDefaultAvatarUrl,
-        createdAt: serverTimestamp()
-      });
-
-      SoundFX.playSuccess();
-      showNotification("¡Cuenta creada con éxito!", "success");
-      document.getElementById("authModal").classList.add("hidden");
-      
-    } catch (error) {
-      console.error("Error en registro:", error);
-      let errMsg = "Error al crear la cuenta.";
-      if (error.code === "auth/email-already-in-use") errMsg = "El correo ya está registrado.";
-      if (error.code === "auth/weak-password") errMsg = "La contraseña es muy débil.";
-      showNotification(errMsg, "error");
-    }
-  };
-}
-
-// --- CONTROLADOR DE RECUPERACIÓN VINCULADO EXCLUSIVAMENTE AL CORREO ---
-const recoverSendBtn = document.getElementById("recoverSendBtn");
-if (recoverSendBtn) {
-  recoverSendBtn.onclick = async () => {
-    SoundFX.playClick();
-    
-    const email = document.getElementById("recoverEmail").value.trim();
-    
-    if (!email) {
-      showNotification("Por favor, ingresa tu correo electrónico.", "error");
-      return;
-    }
-
-    try {
-      // Validar si el correo existe previamente en la colección de usuarios de la app
-      const usersRef = getCol("users");
-      const q = query(usersRef, where("email", "==", email));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        showNotification("El correo ingresado no pertenece a ninguna cuenta activa.", "error");
-        return;
-      }
-
-      // Procede con el envío seguro solo si es un correo legítimo
-      await sendPasswordResetEmail(auth, email);
-      SoundFX.playSuccess();
-      showNotification("Enlace enviado. Revisa tu bandeja de entrada.", "success");
-      hideRecoverFlow();
-      
-    } catch (error) {
-      console.error("Error al recuperar cuenta:", error);
-      showNotification("No se pudo enviar el enlace de recuperación.", "error");
-    }
-  };
-}
-
-function updateNavbar() {
-  const navUser = document.getElementById("navUser");
-  if(!navUser) return;
-  if(currentUser) {
-    const dbUser = allUsers.find(u => u.id === currentUser.uid);
-    const name = dbUser ? dbUser.fullName : (currentUser.displayName || "Usuario");
-    const av = dbUser ? getUserAvatar(dbUser.avatarUrl) : DefaultAvatars[0].url;
-    const nick = dbUser ? `@${dbUser.username}` : "";
-    
-    navUser.innerHTML = `
-      <div class="flex items-center gap-2.5 bg-zinc-900/40 border border-zinc-900 px-3 py-1.5 rounded-xl cursor-pointer" onclick="showSection('profile')">
-        <img class="w-6 h-6 rounded-full object-cover border border-green-500/30" src="${av}">
-        <div class="hidden md:block text-left">
-          <div class="text-xs font-black text-zinc-200 max-w-[100px] truncate">${name}</div>
-          <div class="text-[9px] text-zinc-500 font-bold tracking-tight">${nick}</div>
-        </div>
-      </div>
-      <button id="logoutBtn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-400 hover:text-red-400 p-2.5 rounded-xl transition text-xs" title="Cerrar sesión"><i class="fa-solid fa-power-off"></i></button>
-    `;
-    const logout = document.getElementById("logoutBtn");
-    if(logout) logout.onclick = () => { SoundFX.playClick(); signOut(auth); };
-  } else {
-    navUser.innerHTML = `
-      <button onclick="document.getElementById('authModal').classList.remove('hidden')" class="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold px-5 py-2 rounded-xl text-xs transition uppercase tracking-wider shadow-lg shadow-green-500/10 glow-green">Acceder</button>
-    `;
-  }
-}
-
-function loadMyProfileData() {
-  if(!currentUser) return;
-  const dbUser = allUsers.find(u => u.id === currentUser.uid);
-  if(!dbUser) return;
-  
-  document.getElementById("profileAvatar").src = getUserAvatar(dbUser.avatarUrl);
-  document.getElementById("editUsername").value = dbUser.username || "";
-  document.getElementById("editFullName").value = dbUser.fullName || "";
-  document.getElementById("editBio").value = dbUser.bio || "";
-  
-  document.getElementById("followersCount").innerText = followerCounts[currentUser.uid] || 0;
-  document.getElementById("followingCount").innerText = followingCounts[currentUser.uid] || 0;
-  document.getElementById("userReputationPoints").innerText = calculateUserReputation(currentUser.uid);
-  
-  renderMyPosts();
-}
-
-async function saveProfileChanges() {
-  if(!currentUser) return;
-  SoundFX.playClick();
-  
-  let username = document.getElementById("editUsername").value.trim();
-  const fullName = document.getElementById("editFullName").value.trim();
-  const bio = document.getElementById("editBio").value.trim();
-  
-  username = cleanUsernameInput(username);
-  
-  if(!username || !fullName) {
-    showNotification("El nombre de usuario y el nombre completo no pueden estar vacíos.", "error");
-    return;
-  }
-  
-  try {
-    const usersRef = getCol("users");
-    const q = query(usersRef, where("username", "==", username));
-    const querySnapshot = await getDocs(q);
-    
-    // Validar duplicidad excluyendo nuestro propio UID actual
-    let isDuplicated = false;
-    querySnapshot.forEach(doc => {
-      if(doc.id !== currentUser.uid) {
-        isDuplicated = true;
-      }
-    });
-    
-    if(isDuplicated) {
-      showNotification("Ese nombre de usuario ya está tomado.", "error");
-      return;
-    }
-    
-    const userRef = getDocRef("users", currentUser.uid);
-    await setDoc(userRef, { username, fullName, bio }, { merge: true });
-    
-    SoundFX.playSuccess();
-    showNotification("¡Perfil actualizado con éxito!", "success");
-    updateNavbar();
-    renderMiniProfileCard();
-    
-  } catch(e) {
-    console.error(e);
-    showNotification("Error al guardar cambios de perfil.", "error");
-  }
-}
-window.saveProfileChanges = saveProfileChanges;
-
-const saveProfileBtn = document.getElementById("saveProfileBtn");
-if(saveProfileBtn) {
-  saveProfileBtn.onclick = saveProfileChanges;
-}
-
-const newPhotoInput = document.getElementById("newProfilePhoto");
-if(newPhotoInput) {
-  newPhotoInput.onchange = async (e) => {
-    if(!currentUser || !e.target.files || e.target.files.length === 0) return;
-    showNotification("Subiendo imagen de perfil...", "info");
-    const file = e.target.files[0];
-    try {
-      const storageRef = ref(storage, `artifacts/${appId}/avatars/${currentUser.uid}_${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const downloadUrl = await getDownloadURL(storageRef);
-      
-      await setDoc(getDocRef("users", currentUser.uid), { avatarUrl: downloadUrl }, { merge: true });
-      document.getElementById("profileAvatar").src = downloadUrl;
-      SoundFX.playSuccess();
-      showNotification("¡Foto de perfil actualizada!", "success");
-      updateNavbar();
-      renderMiniProfileCard();
-    } catch(err) {
-      console.error(err);
-      showNotification("Error al cargar la foto.", "error");
-    }
-  };
-}
-
-function listenUsers() {
-  onSnapshot(query(getCol("users")), (snapshot) => {
-    allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    updateNavbar();
-    renderMiniProfileCard();
-    renderSuggestedUsers();
-    if(!document.getElementById("chatSection").classList.contains("hidden")) {
-      renderUsersList();
-    }
-    if(!document.getElementById("profileSection").classList.contains("hidden")) {
-      const repLabel = document.getElementById("userReputationPoints");
-      if(repLabel && currentUser) repLabel.innerText = calculateUserReputation(currentUser.uid);
-    }
-    listenPosts();
-  });
-}
-
-function listenFollowers() {
-  onSnapshot(query(getCol("followers")), (snapshot) => {
-    followingSet.clear();
-    followerCounts = {};
-    followingCounts = {};
-    
-    snapshot.docs.forEach(doc => {
-      const follow = doc.data();
-      const follower = follow.followerUid;
-      const followed = follow.followedUid;
-      
-      if(currentUser && follower === currentUser.uid) {
-        followingSet.add(followed);
-      }
-      followerCounts[followed] = (followerCounts[followed] || 0) + 1;
-      followingCounts[follower] = (followingCounts[follower] || 0) + 1;
-    });
-    
-    if(!document.getElementById("profileSection").classList.contains("hidden") && currentUser) {
-      document.getElementById("followersCount").innerText = followerCounts[currentUser.uid] || 0;
-      document.getElementById("followingCount").innerText = followingCounts[currentUser.uid] || 0;
-    }
-    renderSuggestedUsers();
-    renderPostsList();
-  });
-}
-
-function renderMiniProfileCard() {
-  const card = document.getElementById("miniProfileCard");
-  if(!card || !currentUser) return;
-  const dbUser = allUsers.find(u => u.id === currentUser.uid);
-  if(!dbUser) return;
-  
-  const rep = calculateUserReputation(currentUser.uid);
-  
-  card.innerHTML = `
-    <div class="flex items-center gap-4 cursor-pointer" onclick="showSection('profile')">
-      <img class="w-12 h-12 rounded-full object-cover border-2 border-green-500/40 shadow-md" src="${getUserAvatar(dbUser.avatarUrl)}">
-      <div class="flex-1 min-w-0">
-        <h4 class="font-extrabold text-sm text-zinc-200 truncate">${dbUser.fullName}</h4>
-        <p class="text-xs text-zinc-500 truncate font-medium">@${dbUser.username}</p>
-      </div>
-      <div class="text-right bg-zinc-900/60 border border-zinc-900 px-2.5 py-1 rounded-xl">
-        <div class="text-xs font-black text-green-400">${rep}</div>
-        <div class="text-[8px] text-zinc-500 font-bold uppercase tracking-tight">Rep</div>
-      </div>
-    </div>
-  `;
-}
-
-function renderSuggestedUsers() {
-  const list = document.getElementById("suggestedUsersList");
-  if(!list) return;
-  if(!currentUser) { list.innerHTML = "<p class='text-xs text-zinc-600 text-center py-2'>Inicia sesión para ver sugerencias</p>"; return; }
-  
-  const suggestions = allUsers.filter(u => u.id !== currentUser.uid && !followingSet.has(u.id)).slice(0, 4);
-  
-  if(suggestions.length === 0) {
-    list.innerHTML = "<p class='text-xs text-zinc-600 text-center py-2'>Estás siguiendo a toda la comunidad ✨</p>";
-    return;
-  }
-  
-  list.innerHTML = "";
-  suggestions.forEach(u => {
-    const div = document.createElement("div");
-    div.className = "flex items-center justify-between p-2 bg-zinc-900/20 hover:bg-zinc-900/40 rounded-xl border border-zinc-900/50 transition duration-150 group";
-    
-    div.innerHTML = `
-      <div class="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1" onclick="openUserProfile('${u.id}')">
-        <img class="w-9 h-9 rounded-full object-cover border border-zinc-800 group-hover:border-green-500/40 transition" src="${getUserAvatar(u.avatarUrl)}">
-        <div class="min-w-0">
-          <div class="text-xs font-bold text-zinc-200 truncate">${u.fullName}</div>
-          <div class="text-[10px] text-zinc-500 font-semibold truncate">@${u.username}</div>
-        </div>
-      </div>
-      <button class="bg-zinc-100 hover:bg-white text-black font-extrabold px-3 py-1.5 rounded-lg text-[10px] transition uppercase tracking-wider" onclick="followUser('${u.id}')">Seguir</button>
-    `;
-    list.appendChild(div);
-  });
-}
-
-async function followUser(userId) {
-  if(!currentUser) return;
-  SoundFX.playClick();
-  try {
-    const followId = `${currentUser.uid}_${userId}`;
-    await setDoc(getDocRef("followers", followId), {
-      followerUid: currentUser.uid,
-      followedUid: userId,
-      createdAt: serverTimestamp()
-    });
-    showNotification("¡Ahora sigues a este usuario!", "success");
-  } catch(e) { console.error(e); }
-}
-window.followUser = followUser;
-
-async function unfollowUser(userId) {
-  if(!currentUser) return;
-  SoundFX.playClick();
-  try {
-    const followId = `${currentUser.uid}_${userId}`;
-    await deleteDoc(getDocRef("followers", followId));
-    showNotification("Dejaste de seguir a este usuario.", "info");
-    const modal = document.getElementById("userProfileModal");
-    if(!modal.classList.contains("hidden")) {
-      openUserProfile(userId);
-    }
-  } catch(e) { console.error(e); }
-}
-window.unfollowUser = unfollowUser;
-
-const publishBtn = document.getElementById("publishBtn");
-if(publishBtn) {
-  publishBtn.onclick = async () => {
-    if(!currentUser) { showNotification("Debes iniciar sesión para publicar.", "error"); return; }
-    SoundFX.playClick();
-    const txt = document.getElementById("postContent").value.trim();
-    if(!txt) return;
-    
-    try {
-      await addDoc(getCol("posts"), {
-        uid: currentUser.uid,
-        text: txt,
-        createdAt: serverTimestamp()
-      });
-      document.getElementById("postContent").value = "";
-      document.getElementById("charCounter").innerText = "0 / 150";
-      document.getElementById("charCounter").className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
-      SoundFX.playSuccess();
-      showNotification("¡Pensamiento publicado con éxito!", "success");
-    } catch(err) { console.error(err); }
-  };
-}
-
-function listenPosts() {
-  onSnapshot(query(getCol("posts"), orderBy("createdAt", "desc")), (snapshot) => {
-    currentPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    
-    const label = document.getElementById("feed-stats-label");
-    if(label) label.innerText = `${currentPosts.length} publicaciones globales`;
-    
-    listenVotes();
-  });
-}
-
-function listenVotes() {
-  if (cachedVotesSnapshot) {
-    cachedVotesSnapshot(); 
-  }
-  cachedVotesSnapshot = onSnapshot(query(getCol("votes")), (snapshot) => {
-    cachedGlobalVotes = snapshot.docs.map(doc => doc.data());
-    renderPostsList();
-    if(!document.getElementById("profileSection").classList.contains("hidden")) {
-      renderMyPosts();
-    }
-  });
-}
-
-function calculateUserReputation(userId) {
-  let rep = 0;
-  const userPostsIds = currentPosts.filter(p => p.uid === userId).map(p => p.id);
-  
-  cachedGlobalVotes.forEach(v => {
-    if(userPostsIds.includes(v.postId)) {
-      if(v.type === 'up') rep += 1;
-      if(v.type === 'down') rep -= 1;
-    }
-  });
-  return rep;
-}
-
 function setFeedFilter(filter) {
-  feedFilter = filter;
   SoundFX.playClick();
-  
+  feedFilter = filter;
   const btnAll = document.getElementById("filter-all");
   const btnFol = document.getElementById("filter-following");
-  
-  if(filter === 'all') {
+  if (filter === 'all') {
     btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
     btnFol.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
   } else {
     btnFol.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
     btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
   }
-  renderPostsList();
+  renderPosts(currentPosts);
 }
 window.setFeedFilter = setFeedFilter;
 
-// --- RENDERIZADO CON LA ESTÉTICA HÍBRIDA ORIGINAL DE LOS POSTS COMPLETAMENTE PRESERVADA ---
-function renderPostsList() {
-  const container = document.getElementById("postsContainer");
-  if(!container) return;
-  
-  let postsToRender = currentPosts;
-  if(feedFilter === 'following') {
-    postsToRender = currentPosts.filter(p => followingSet.has(p.uid) || p.uid === (currentUser ? currentUser.uid : ''));
+async function loadMyProfileData() {
+  if(!currentUser) return;
+  const snap = await getDoc(getDocRef("users", currentUser.uid));
+  if(snap.exists()){
+    const d = snap.data();
+    document.getElementById("editUsername").value = d.username || "";
+    document.getElementById("editFullName").value = d.fullName || "";
+    document.getElementById("editBio").value = d.bio || "";
+    document.getElementById("profileAvatar").src = getUserAvatar(d.avatarUrl);
+    
+    document.getElementById("followersCount").innerText = followerCounts[currentUser.uid] || 0;
+    document.getElementById("followingCount").innerText = followingCounts[currentUser.uid] || 0;
+    document.getElementById("userReputationPoints").innerText = calculateReputationPoints(currentUser.uid);
+    
+    renderMyPosts();
   }
-  
-  if(postsToRender.length === 0) {
-    container.innerHTML = `
-      <div class="text-center py-12 text-zinc-600 bg-zinc-950/20 border border-zinc-900 rounded-3xl space-y-2">
-        <i class="fa-solid fa-cube text-3xl text-zinc-700"></i>
-        <p class="text-sm font-medium">No hay publicaciones disponibles para mostrar aquí.</p>
-      </div>
-    `;
-    return;
-  }
-  
-  container.innerHTML = "";
-  postsToRender.forEach(post => {
-    const user = allUsers.find(u => u.id === post.uid);
-    if(!user) return;
-    
-    const postVotes = cachedGlobalVotes.filter(v => v.postId === post.id);
-    const upvotes = postVotes.filter(v => v.type === 'up').length;
-    const downvotes = postVotes.filter(v => v.type === 'down').length;
-    const score = upvotes - downvotes;
-    
-    const myVote = currentUser ? postVotes.find(v => v.userUid === currentUser.uid) : null;
-    
-    const card = document.createElement("div");
-    card.className = "bg-zinc-950/70 border border-zinc-900 hover:border-zinc-800 rounded-3xl p-5 md:p-6 flex gap-4 transition duration-200 shadow-lg relative animate-fade-in";
-    
-    const censoredText = filterBadWords(post.text);
-    
-    let scoreColorClass = "text-zinc-400";
-    if(score > 0) scoreColorClass = "text-green-400 font-black";
-    if(score < 0) scoreColorClass = "text-red-400 font-black";
-    
-    const upArrowColor = (myVote && myVote.type === 'up') ? 'text-green-400 scale-110' : 'text-zinc-600 hover:text-zinc-400';
-    const downArrowColor = (myVote && myVote.type === 'down') ? 'text-red-400 scale-110' : 'text-zinc-600 hover:text-zinc-400';
-    
-    card.innerHTML = `
-      <div class="flex flex-col items-center gap-1 bg-zinc-900/30 border border-zinc-900/60 p-1.5 rounded-2xl h-fit select-none min-w-[40px]">
-        <button onclick="vote('${post.id}', 'up', this)" class="p-1 transition-all ${upArrowColor}"><i class="fa-solid fa-circle-chevron-up text-lg"></i></button>
-        <span class="text-sm font-mono tracking-tighter ${scoreColorClass}">${score}</span>
-        <button onclick="vote('${post.id}', 'down', this)" class="p-1 transition-all ${downArrowColor}"><i class="fa-solid fa-circle-chevron-down text-lg"></i></button>
-      </div>
-      
-      <div class="flex-1 min-w-0 space-y-2">
-        <div class="flex items-center gap-2.5 cursor-pointer" onclick="openUserProfile('${user.id}')">
-          <img class="w-10 h-10 rounded-full object-cover border border-zinc-900" src="${getUserAvatar(user.avatarUrl)}">
-          <div class="min-w-0">
-            <span class="block text-xs font-black text-zinc-100 hover:underline truncate">${user.fullName}</span>
-            <span class="block text-[10px] text-zinc-500 font-medium truncate">@${user.username}</span>
-          </div>
-        </div>
-        
-        <p class="text-md font-bold text-zinc-200 leading-snug break-words whitespace-pre-wrap">${censoredText}</p>
-      </div>
-    `;
-    container.appendChild(card);
+}
+
+function calculateReputationPoints(uid) {
+  let score = 0;
+  cachedGlobalVotes.forEach(v => {
+    if (v.postAuthorId === uid) {
+      if (v.type === 'up') score += 10;
+      if (v.type === 'down') score -= 5;
+    }
   });
+  return score;
 }
 
 function renderMyPosts() {
   const container = document.getElementById("myPostsContainer");
-  if(!container || !currentUser) return;
+  if(!container) return;
+  container.innerHTML = "";
   
-  const myPosts = currentPosts.filter(p => p.uid === currentUser.uid);
-  
-  if(myPosts.length === 0) {
-    container.innerHTML = "<p class='text-xs text-zinc-600 text-center py-6 bg-zinc-950/40 border border-zinc-900 rounded-2xl'>Aún no has publicado nada.</p>";
+  const mine = currentPosts.filter(p => p.authorId === currentUser.uid);
+  if (mine.length === 0) {
+    container.innerHTML = `<div class="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-8 text-center text-zinc-600 text-xs">No has publicado nada todavía. Da tu primer paso audaz.</div>`;
     return;
   }
   
-  container.innerHTML = "";
-  myPosts.forEach(post => {
-    const postVotes = cachedGlobalVotes.filter(v => v.postId === post.id);
-    const score = postVotes.filter(v => v.type === 'up').length - postVotes.filter(v => v.type === 'down').length;
+  mine.forEach(post => {
+    const card = document.createElement("div");
+    card.className = "bg-zinc-950/80 border border-zinc-900 rounded-2xl p-4 flex flex-col justify-between relative";
     
-    const div = document.createElement("div");
-    div.className = "p-4 bg-zinc-950/60 border border-zinc-900 rounded-2xl flex justify-between items-center gap-4 text-xs";
-    div.innerHTML = `
-      <p class="font-bold text-zinc-300 break-words flex-1 min-w-0">${filterBadWords(post.text)}</p>
-      <div class="flex items-center gap-3 shrink-0">
-        <span class="font-mono bg-zinc-900 border border-zinc-800 px-2 py-1 rounded-md text-zinc-400 font-bold">Rep: ${score}</span>
-        <button onclick="deletePost('${post.id}')" class="text-zinc-600 hover:text-red-400 transition p-1"><i class="fa-regular fa-trash-can text-sm"></i></button>
+    const upVotes = cachedGlobalVotes.filter(v => v.postId === post.id && v.type === 'up').length;
+    const downVotes = cachedGlobalVotes.filter(v => v.postId === post.id && v.type === 'down').length;
+    const rep = (upVotes * 10) - (downVotes * 5);
+    
+    const formattedDate = post.createdAt ? new Date(post.createdAt.seconds ? post.createdAt.seconds * 1000 : post.createdAt).toLocaleDateString() : "Reciente";
+    
+    card.innerHTML = `
+      <div class="flex justify-between items-start">
+        <p class="text-zinc-100 font-bold text-sm flex-1 pr-4 break-words">${filterBadWords(post.text)}</p>
+        <button class="text-zinc-600 hover:text-red-400 text-xs transition" id="del-btn-${post.id}"><i class="fa-regular fa-trash-can"></i></button>
+      </div>
+      <div class="flex justify-between items-center mt-4 border-t border-zinc-900/60 pt-2 text-[11px] text-zinc-500 font-semibold">
+        <span>${formattedDate}</span>
+        <span class="bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800 text-zinc-400">Rep: <b class="${rep >= 0 ? 'text-green-400' : 'text-red-400'}">${rep}</b></span>
       </div>
     `;
+    container.appendChild(card);
+    
+    const del = card.querySelector(`#del-btn-${post.id}`);
+    if(del){
+      del.onclick = async () => {
+        if(confirm("¿Estás seguro de eliminar esta publicación de forma permanente?")){
+          SoundFX.playVoteDown();
+          await deleteDoc(getDocRef("posts", post.id));
+          showNotification("Publicación removida con éxito", "info");
+        }
+      };
+    }
+  });
+}
+
+// Lógica de carga masiva de fotos de perfil alternativas
+const photoInp = document.getElementById("newProfilePhoto");
+if(photoInp){
+  photoInp.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if(!file || !currentUser) return;
+    try {
+      showNotification("Subiendo imagen de perfil...", "info");
+      const storageRef = ref(storage, `artifacts/${appId}/profiles/${currentUser.uid}_${Date.now()}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadUrl = await getDownloadURL(snapshot.ref);
+      
+      await setDoc(getDocRef("users", currentUser.uid), { avatarUrl: downloadUrl }, { merge: true });
+      document.getElementById("profileAvatar").src = downloadUrl;
+      showNotification("Foto actualizada correctamente", "success");
+      SoundFX.playSuccess();
+    } catch (err) {
+      showNotification("Error al procesar archivo multimedia", "error");
+    }
+  });
+}
+
+async function saveProfileChanges() {
+  if(!currentUser) return;
+  const username = cleanUsernameInput(document.getElementById("editUsername").value);
+  const fullName = document.getElementById("editFullName").value.trim();
+  const bio = document.getElementById("editBio").value.trim();
+  
+  if(!username) {
+    showNotification("El nombre de usuario es obligatorio.", "error");
+    return;
+  }
+  
+  try {
+    // Comprobar si otra persona ya tiene este nombre de usuario
+    const qUser = query(getCol("users"), where("username", "==", username));
+    const snapshot = await getDocs(qUser);
+    let duplicate = false;
+    snapshot.forEach(doc => {
+      if (doc.id !== currentUser.uid) {
+        duplicate = true;
+      }
+    });
+    
+    if (duplicate) {
+      showNotification("Ese @username ya está reservado por otra cuenta", "error");
+      return;
+    }
+    
+    await setDoc(getDocRef("users", currentUser.uid), {
+      username: username,
+      fullName: fullName,
+      bio: bio
+    }, { merge: true });
+    
+    showNotification("Perfil sincronizado con éxito", "success");
+    SoundFX.playSuccess();
+  } catch (e) {
+    showNotification("Error de escritura en la base de datos", "error");
+  }
+}
+window.saveProfileChanges = saveProfileChanges;
+
+// Extraer hashtags y renderizar panel de tendencias
+function updateTrendsPanel(posts) {
+  const trendsContainer = document.getElementById("trendsContainer");
+  if (!trendsContainer) return;
+  
+  const hashtagCounts = {};
+  
+  posts.forEach(post => {
+    if (post.text) {
+      // Expresión regular para extraer hashtags con caracteres alfanuméricos españoles
+      const hashtags = post.text.match(/#[A-Za-z0-9áéíóúÁÉÍÓÚñÑ_]+/g);
+      if (hashtags) {
+        // Eliminar duplicados en el mismo post para contar por post o contar absolutos
+        const uniqueInPost = Array.from(new Set(hashtags.map(h => h.toLowerCase())));
+        uniqueInPost.forEach(tag => {
+          hashtagCounts[tag] = (hashtagCounts[tag] || 0) + 1;
+        });
+      }
+    }
+  });
+  
+  // Convertir a array y ordenar por popularidad
+  const sortedTrends = Object.entries(hashtagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5); // Tomar el top 5
+    
+  if (sortedTrends.length === 0) {
+    trendsContainer.innerHTML = `
+      <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
+        <div class="text-zinc-500 font-bold">#1 Tendencia</div>
+        <div class="font-black text-zinc-100 text-sm mt-0.5">Rankiu</div>
+        <div class="text-zinc-500 mt-1">Votos de Reputación</div>
+      </div>
+      <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
+        <div class="text-zinc-500 font-bold">#2 Tendencia</div>
+        <div class="font-black text-zinc-100 text-sm mt-0.5">Física de Votos</div>
+        <div class="text-zinc-500 mt-1">Animaciones fluidas</div>
+      </div>
+    `;
+    return;
+  }
+  
+  trendsContainer.innerHTML = "";
+  sortedTrends.forEach(([tag, count], index) => {
+    const item = document.createElement("div");
+    item.className = "p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition";
+    item.onclick = () => {
+      const textarea = document.getElementById("postContent");
+      if (textarea) {
+        textarea.value += " " + tag;
+        textarea.dispatchEvent(new Event('input'));
+        showNotification(`Añadido ${tag} a tu borrador`, "info");
+      }
+    };
+    item.innerHTML = `
+      <div class="text-zinc-500 font-bold">#${index + 1} en Tendencias</div>
+      <div class="font-black text-green-400 text-sm mt-0.5">${tag}</div>
+      <div class="text-zinc-500 mt-1">${count} ${count === 1 ? 'publicación' : 'publicaciones'}</div>
+    `;
+    trendsContainer.appendChild(item);
+  });
+}
+
+function renderPosts(posts) {
+  const container = document.getElementById("postsContainer");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  // Filtrar según pestañas
+  let filtered = posts;
+  if (feedFilter === 'following' && currentUser) {
+    filtered = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
+  }
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="bg-zinc-950/40 border border-zinc-900 rounded-3xl p-12 text-center text-zinc-500">
+        <i class="fa-regular fa-folder-open text-3xl mb-3 block text-zinc-700"></i>
+        <p class="text-sm font-bold">No hay publicaciones en este feed radial</p>
+        <p class="text-xs text-zinc-600 mt-1">Sé el primero en emitir una opinión contundente.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  filtered.forEach(post => {
+    const user = allUsers.find(u => u.id === post.authorId);
+    const username = user ? `@${user.username}` : "@anonimo";
+    const fullName = user ? user.fullName : "Usuario de Rankiu";
+    const avatarUrl = user ? getUserAvatar(user.avatarUrl) : DefaultAvatars[0].url;
+    
+    const postVotes = cachedGlobalVotes.filter(v => v.postId === post.id);
+    const upVotes = postVotes.filter(v => v.type === 'up').length;
+    const downVotes = postVotes.filter(v => v.type === 'down').length;
+    const netReputation = (upVotes * 10) - (downVotes * 5);
+    
+    const myVote = currentUser ? postVotes.find(v => v.userId === currentUser.uid) : null;
+    
+    const div = document.createElement("div");
+    div.className = "bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 md:p-6 shadow-xl relative transition-all duration-300 hover:border-zinc-800/80 animate-fade-in";
+    
+    // Resaltar posts con alta reputación de manera cibernética
+    if (netReputation >= 50) {
+      div.className += " ring-1 ring-green-500/20 shadow-green-500/5";
+    }
+    
+    // Formatear texto del post para resaltar visualmente los hashtags
+    let processedText = filterBadWords(post.text);
+    processedText = processedText.replace(/(#[A-Za-z0-9áéíóúÁÉÍÓÚñÑ_]+)/g, '<span class="text-green-400 font-extrabold hover:underline">$1</span>');
+    
+    div.innerHTML = `
+      <div class="flex items-start gap-4">
+        <img class="w-11 h-11 rounded-full object-cover border border-zinc-800 shadow-md cursor-pointer hover:scale-105 transition" src="${avatarUrl}" id="avatar-click-${post.id}">
+        
+        <div class="flex-1 space-y-2 min-w-0">
+          <div class="flex items-center justify-between">
+            <div class="cursor-pointer min-w-0" id="user-click-${post.id}">
+              <span class="block font-bold text-zinc-100 text-sm truncate hover:text-green-400 transition">${fullName}</span>
+              <span class="block text-xs font-semibold text-zinc-600 truncate">${username}</span>
+            </div>
+            <span class="text-[10px] text-zinc-600 font-mono">${post.createdAt ? new Date(post.createdAt.seconds ? post.createdAt.seconds * 1000 : post.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Ahora'}</span>
+          </div>
+          
+          <p class="text-zinc-200 text-md font-bold tracking-tight leading-relaxed break-words whitespace-pre-wrap">${processedText}</p>
+          
+          <div class="flex items-center justify-between border-t border-zinc-900/60 pt-3 mt-4">
+            <div class="flex items-center gap-1 bg-zinc-900/60 rounded-xl p-1 border border-zinc-800/40">
+              <button class="w-8 h-8 flex items-center justify-center rounded-lg transition" id="upvote-${post.id}">
+                <i class="fa-solid fa-arrow-up text-sm ${myVote && myVote.type === 'up' ? 'text-green-400 scale-110' : 'text-zinc-600 hover:text-green-500'}"></i>
+              </button>
+              
+              <span class="px-2 font-mono text-xs font-black min-w-[24px] text-center ${netReputation >= 0 ? 'text-green-400' : 'text-red-400'}">${netReputation}</span>
+              
+              <button class="w-8 h-8 flex items-center justify-center rounded-lg transition" id="downvote-${post.id}">
+                <i class="fa-solid fa-arrow-down text-sm ${myVote && myVote.type === 'down' ? 'text-red-400 scale-110' : 'text-zinc-600 hover:text-red-500'}"></i>
+              </button>
+            </div>
+            
+            <div class="text-[10px] uppercase font-extrabold tracking-wider text-zinc-600 flex gap-3">
+              <span>▲ ${upVotes}</span>
+              <span>▼ ${downVotes}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    container.appendChild(div);
+    
+    // Adjuntar clics de perfil de usuario
+    const openProf = () => openUserProfileModal(post.authorId);
+    const avC = div.querySelector(`#avatar-click-${post.id}`);
+    const usC = div.querySelector(`#user-click-${post.id}`);
+    if(avC) avC.onclick = openProf;
+    if(usC) usC.onclick = openProf;
+    
+    // Adjuntar control de votos por ID única
+    const upBtn = div.querySelector(`#upvote-${post.id}`);
+    const downBtn = div.querySelector(`#downvote-${post.id}`);
+    
+    if(upBtn) upBtn.onclick = () => handleVote(post.id, 'up', post.authorId, myVote, upBtn.querySelector('i'));
+    if(downBtn) downBtn.onclick = () => handleVote(post.id, 'down', post.authorId, myVote, downBtn.querySelector('i'));
+  });
+}
+
+async function handleVote(postId, voteType, postAuthorId, currentVote, iconEl) {
+  if (!currentUser) {
+    showNotification("Debes iniciar sesión para votar reputaciones", "error");
+    return;
+  }
+  
+  if (voteType === 'up') {
+    SoundFX.playVoteUp();
+    if(iconEl) iconEl.classList.add('animate-upvote-arrow');
+  } else {
+    SoundFX.playVoteDown();
+    if(iconEl) iconEl.classList.add('animate-downvote-arrow');
+  }
+  
+  const voteDocId = `${currentUser.uid}_${postId}`;
+  const vRef = getDocRef("votes", voteDocId);
+  
+  if (currentVote && currentVote.type === voteType) {
+    await deleteDoc(vRef);
+  } else {
+    await setDoc(vRef, {
+      userId: currentUser.uid,
+      postId: postId,
+      postAuthorId: postAuthorId,
+      type: voteType,
+      timestamp: serverTimestamp()
+    });
+  }
+}
+
+async function openUserProfileModal(uid) {
+  SoundFX.playClick();
+  const user = allUsers.find(u => u.id === uid);
+  if (!user) return;
+  
+  document.getElementById("modalAvatar").src = getUserAvatar(user.avatarUrl);
+  document.getElementById("modalUsername").innerText = `@${user.username}`;
+  document.getElementById("modalFullName").innerText = user.fullName || "Usuario de Rankiu";
+  document.getElementById("modalBio").innerText = user.bio || "Sin biografía disponible.";
+  
+  document.getElementById("modalFollowers").innerText = followerCounts[uid] || 0;
+  document.getElementById("modalReputation").innerText = calculateReputationPoints(uid);
+  
+  const fBtn = document.getElementById("modalFollowBtn");
+  if (currentUser && currentUser.uid === uid) {
+    fBtn.classList.add("hidden");
+  } else {
+    fBtn.classList.remove("hidden");
+    if (followingSet.has(uid)) {
+      fBtn.innerText = "Dejar de seguir";
+      fBtn.className = "flex-1 bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300 font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+    } else {
+      fBtn.innerText = "Seguir Líder";
+      fBtn.className = "flex-1 bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider shadow-lg shadow-green-500/10";
+    }
+    
+    fBtn.onclick = async () => {
+      if(!currentUser) {
+        showNotification("Inicia sesión para seguir cuentas", "error");
+        return;
+      }
+      SoundFX.playClick();
+      const followId = `${currentUser.uid}_${uid}`;
+      const fRef = getDocRef("following", followId);
+      if (followingSet.has(uid)) {
+        await deleteDoc(fRef);
+        showNotification(`Ya no sigues a @${user.username}`, "info");
+      } else {
+        await setDoc(fRef, {
+          followerId: currentUser.uid,
+          leaderId: uid,
+          timestamp: serverTimestamp()
+        });
+        showNotification(`Siguiendo a @${user.username}`, "success");
+      }
+      openUserProfileModal(uid);
+    };
+  }
+  
+  const cBtn = document.getElementById("modalChatBtn");
+  if (currentUser && currentUser.uid === uid) {
+    cBtn.classList.add("hidden");
+  } else {
+    cBtn.classList.remove("hidden");
+    cBtn.onclick = () => {
+      closeUserProfile();
+      showSection('chat');
+      startChatWith(user);
+    };
+  }
+  
+  document.getElementById("userProfileModal").classList.remove("hidden");
+  document.getElementById("userProfileModal").classList.add("flex");
+}
+window.openUserProfileModal = openUserProfileModal;
+
+function closeUserProfile() {
+  SoundFX.playClick();
+  document.getElementById("userProfileModal").classList.add("hidden");
+  document.getElementById("userProfileModal").classList.remove("flex");
+}
+window.closeUserProfile = closeUserProfile;
+
+// Publicar un pensamiento
+const pubBtn = document.getElementById("publishBtn");
+if(pubBtn){
+  pubBtn.onclick = async () => {
+    if (!currentUser) {
+      showNotification("Por favor inicia sesión para publicar en Rankiu", "error");
+      return;
+    }
+    const text = postTextarea.value.trim();
+    if (!text) {
+      showNotification("El contenido del pensamiento no puede estar vacío", "error");
+      return;
+    }
+    
+    try {
+      pubBtn.disabled = true;
+      pubBtn.innerText = "...";
+      await addDoc(getCol("posts"), {
+        authorId: currentUser.uid,
+        text: text,
+        createdAt: serverTimestamp()
+      });
+      
+      postTextarea.value = "";
+      document.getElementById("charCounter").innerText = "0 / 150";
+      showNotification("Pensamiento publicado en la red radial", "success");
+      SoundFX.playSuccess();
+    } catch (e) {
+      showNotification("Error de enlace de servidor", "error");
+    } finally {
+      pubBtn.disabled = false;
+      pubBtn.innerText = "Publicar";
+    }
+  };
+}
+
+// Escuchar base de usuarios global
+function listenUsersGlobal() {
+  onSnapshot(getCol("users"), (snapshot) => {
+    allUsers = [];
+    snapshot.docs.forEach(doc => {
+      allUsers.push({ id: doc.id, ...doc.data() });
+    });
+    renderMiniProfileCard();
+    renderSuggestedUsers();
+    renderUsersListForChat();
+    renderPosts(currentPosts);
+  });
+}
+
+function renderMiniProfileCard() {
+  const card = document.getElementById("miniProfileCard");
+  if (!card) return;
+  if (!currentUser) {
+    card.innerHTML = `
+      <div class="text-center py-2">
+        <p class="text-xs text-zinc-500 font-bold mb-3">Únete hoy a la comunidad transparente</p>
+        <button onclick="document.getElementById('authModal').classList.remove('hidden')" class="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 font-bold px-4 py-2 rounded-xl text-xs text-green-400 uppercase tracking-wider w-full">Ingresar / Crear Cuenta</button>
+      </div>
+    `;
+    return;
+  }
+  const me = allUsers.find(u => u.id === currentUser.uid);
+  if (me) {
+    const rep = calculateReputationPoints(currentUser.uid);
+    card.innerHTML = `
+      <img class="w-12 h-12 rounded-full object-cover border-2 border-green-500/40 cursor-pointer" src="${getUserAvatar(me.avatarUrl)}" onclick="showSection('profile')">
+      <div class="min-w-0 flex-1">
+        <div class="font-bold text-zinc-100 text-sm truncate cursor-pointer hover:text-green-400" onclick="showSection('profile')">${me.fullName || 'Usuario de Rankiu'}</div>
+        <div class="text-xs text-zinc-500 font-semibold truncate flex items-center justify-between">
+          <span>@${me.username}</span>
+          <span class="text-green-400 bg-green-500/5 px-1.5 py-0.2 border border-green-500/10 rounded font-mono text-[10px]">Rep: ${rep}</span>
+        </div>
+      </div>
+      <button id="logoutBtn" class="text-zinc-600 hover:text-red-400 p-2 transition"><i class="fa-solid fa-power-off text-sm"></i></button>
+    `;
+    card.querySelector("#logoutBtn").onclick = () => {
+      SoundFX.playVoteDown();
+      signOut(auth).then(() => showNotification("Sesión finalizada", "info"));
+    };
+  }
+}
+
+function renderSuggestedUsers() {
+  const container = document.getElementById("suggestedUsersList");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  const candidates = allUsers.filter(u => !currentUser || u.id !== currentUser.uid).slice(0, 4);
+  if(candidates.length === 0){
+    container.innerHTML = `<p class="text-zinc-700 text-xs text-center italic">No hay más usuarios en la red</p>`;
+    return;
+  }
+  
+  candidates.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "flex items-center justify-between gap-2 p-1.5 rounded-xl hover:bg-zinc-900/40 border border-transparent transition";
+    
+    const isFollowing = followingSet.has(u.id);
+    const followText = isFollowing ? "Líder" : "Seguir";
+    const followStyle = isFollowing ? "text-zinc-500 border-zinc-800 bg-zinc-900/20 text-[10px]" : "bg-green-500 text-black text-[11px] shadow-sm shadow-green-500/5 hover:bg-green-400";
+    
+    div.innerHTML = `
+      <div class="flex items-center gap-2.5 min-w-0 cursor-pointer" id="sug-click-${u.id}">
+        <img class="w-8 h-8 rounded-full object-cover border border-zinc-800" src="${getUserAvatar(u.avatarUrl)}">
+        <div class="min-w-0">
+          <div class="text-xs font-bold text-zinc-200 truncate leading-tight hover:text-green-400 transition">${u.fullName || 'Usuario'}</div>
+          <div class="text-[10px] text-zinc-600 font-semibold truncate leading-none">@${u.username}</div>
+        </div>
+      </div>
+      <button class="font-extrabold px-3 py-1 rounded-lg font-sans transition-all ${followStyle}" id="sug-fbtn-${u.id}">${followText}</button>
+    `;
+    container.appendChild(div);
+    
+    div.querySelector(`#sug-click-${u.id}`).onclick = () => openUserProfileModal(u.id);
+    
+    const fbtn = div.querySelector(`#sug-fbtn-${u.id}`);
+    fbtn.onclick = async () => {
+      if(!currentUser) {
+        showNotification("Inicia sesión para seguir cuentas", "error");
+        return;
+      }
+      SoundFX.playClick();
+      const followId = `${currentUser.uid}_${u.id}`;
+      const fRef = getDocRef("following", followId);
+      if (isFollowing) {
+        await deleteDoc(fRef);
+      } else {
+        await setDoc(fRef, { followerId: currentUser.uid, leaderId: u.id, timestamp: serverTimestamp() });
+      }
+    };
+  });
+}
+
+function listenPostsAndVotes() {
+  onSnapshot(query(getCol("posts"), orderBy("createdAt", "desc")), (snapshot) => {
+    currentPosts = [];
+    snapshot.docs.forEach(doc => {
+      currentPosts.push({ id: doc.id, ...doc.data() });
+    });
+    
+    // Cada vez que cambien los posts, recalcular de forma automatizada las tendencias
+    updateTrendsPanel(currentPosts);
+    
+    if (currentUser && document.getElementById("profileSection").classList.contains("hidden") === false) {
+      renderMyPosts();
+    }
+    renderPosts(currentPosts);
+  });
+  
+  onSnapshot(getCol("votes"), (snapshot) => {
+    cachedGlobalVotes = [];
+    snapshot.docs.forEach(doc => {
+      cachedGlobalVotes.push(doc.data());
+    });
+    renderPosts(currentPosts);
+    renderMiniProfileCard();
+    if(currentUser) {
+      document.getElementById("userReputationPoints").innerText = calculateReputationPoints(currentUser.uid);
+    }
+  });
+  
+  onSnapshot(getCol("following"), (snapshot) => {
+    followerCounts = {};
+    followingCounts = {};
+    followingSet.clear();
+    
+    snapshot.docs.forEach(doc => {
+      const d = doc.data();
+      const fol = d.followerId;
+      const lead = d.leaderId;
+      
+      followerCounts[lead] = (followerCounts[lead] || 0) + 1;
+      followingCounts[fol] = (followingCounts[fol] || 0) + 1;
+      
+      if (currentUser && fol === currentUser.uid) {
+        followingSet.add(lead);
+      }
+    });
+    
+    renderSuggestedUsers();
+    renderPosts(currentPosts);
+    if(currentUser && !document.getElementById("profileSection").classList.contains("hidden")) {
+      document.getElementById("followersCount").innerText = followerCounts[currentUser.uid] || 0;
+      document.getElementById("followingCount").innerText = followingCounts[currentUser.uid] || 0;
+    }
+  });
+}
+
+// Sistema Completo de Mensajería Directa (Chats)
+function renderUsersListForChat() {
+  const container = document.getElementById("usersList");
+  if (!container) return;
+  container.innerHTML = "";
+  
+  const chatUsers = allUsers.filter(u => !currentUser || u.id !== currentUser.uid);
+  if(chatUsers.length === 0){
+    container.innerHTML = `<p class="text-zinc-600 text-xs text-center p-4">Aún no hay otros miembros</p>`;
+    return;
+  }
+  
+  chatUsers.forEach(u => {
+    const div = document.createElement("div");
+    div.className = `flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition border border-transparent ${selectedUser && selectedUser.id === u.id ? 'bg-zinc-900 border-zinc-800' : 'hover:bg-zinc-900/50'}`;
+    div.innerHTML = `
+      <img class="w-10 h-10 rounded-full object-cover border border-zinc-800 shadow-sm" src="${getUserAvatar(u.avatarUrl)}">
+      <div class="min-w-0 flex-1">
+        <div class="font-bold text-zinc-100 text-sm truncate leading-snug">${u.fullName || 'Usuario'}</div>
+        <div class="text-xs text-zinc-500 font-semibold truncate leading-none">@${u.username}</div>
+      </div>
+    `;
+    div.onclick = () => startChatWith(u);
     container.appendChild(div);
   });
 }
 
-async function deletePost(postId) {
-  if(!confirm("¿Estás seguro de que quieres eliminar esta publicación permanentemente?")) return;
+let activeChatUnsubscribe = null;
+function startChatWith(user) {
   SoundFX.playClick();
-  try {
-    await deleteDoc(getDocRef("posts", postId));
-    showNotification("Publicación eliminada.", "info");
-  } catch(e) { console.error(e); }
-}
-window.deletePost = deletePost;
-
-async function vote(postId, type, btnElement) {
-  if(!currentUser) { showNotification("Inicia sesión para votar.", "error"); return; }
+  selectedUser = user;
+  renderUsersListForChat();
   
-  const voteId = `${currentUser.uid}_${postId}`;
-  const voteRef = getDocRef("votes", voteId);
-  
-  try {
-    const docSnap = await getDoc(voteRef);
-    if(docSnap.exists()) {
-      const currentVoteType = docSnap.data().type;
-      if(currentVoteType === type) {
-        await deleteDoc(voteRef);
-        SoundFX.playClick();
-        return;
-      }
-    }
-    
-    if(type === 'up') {
-      const icon = btnElement.querySelector("i");
-      if(icon) icon.classList.add("animate-upvote-arrow");
-      SoundFX.playVoteUp();
-    } else {
-      const icon = btnElement.querySelector("i");
-      if(icon) icon.classList.add("animate-downvote-arrow");
-      SoundFX.playVoteDown(); 
-    }
-    
-    await setDoc(voteRef, {
-      postId: postId,
-      userUid: currentUser.uid,
-      type: type,
-      createdAt: serverTimestamp()
-    });
-    
-  } catch(e) { console.error(e); }
-}
-window.vote = vote;
-
-async function openUserProfile(userId) {
-  SoundFX.playClick();
-  const modal = document.getElementById("userProfileModal");
-  const u = allUsers.find(user => user.id === userId);
-  if(!u || !modal) return;
-  
-  document.getElementById("modalAvatar").src = getUserAvatar(u.avatarUrl);
-  document.getElementById("modalUsername").innerText = `@${u.username}`;
-  document.getElementById("modalFullName").innerText = u.fullName;
-  document.getElementById("modalBio").innerText = u.bio || "Sin biografía todavía.";
-  
-  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
-  document.getElementById("modalReputation").innerText = calculateUserReputation(userId);
-  
-  const followBtn = document.getElementById("modalFollowBtn");
-  const chatBtn = document.getElementById("modalChatBtn");
-  
-  if(currentUser && userId === currentUser.uid) {
-    followBtn.className = "hidden";
-    chatBtn.className = "hidden";
-  } else {
-    followBtn.className = "flex-1 text-xs uppercase tracking-wider font-extrabold py-3 rounded-xl transition-all";
-    chatBtn.className = "bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold px-4 rounded-xl transition text-sm";
-    
-    if(followingSet.has(userId)) {
-      followBtn.innerText = "Siguiendo";
-      followBtn.className += " bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-red-400";
-      followBtn.onclick = () => unfollowUser(userId);
-    } else {
-      followBtn.innerText = "Seguir";
-      followBtn.className += " bg-green-500 hover:bg-green-400 text-black";
-      followBtn.onclick = () => followUser(userId);
-    }
-    
-    chatBtn.onclick = () => {
-      modal.classList.add("hidden");
-      showSection("chat");
-      startChatWith(userId);
-    };
-  }
-  
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-}
-window.openUserProfile = openUserProfile;
-
-function closeUserProfile() {
-  SoundFX.playClick();
-  const modal = document.getElementById("userProfileModal");
-  modal.classList.remove("flex");
-  modal.classList.add("hidden");
-}
-window.closeUserProfile = closeUserProfile;
-
-function renderUsersList() {
-  const container = document.getElementById("usersList");
-  if(!container) return;
-  if(!currentUser) { container.innerHTML = "<p class='text-xs text-zinc-600 text-center p-4'>Inicia sesión para chatear</p>"; return; }
-  
-  const chatPartners = allUsers.filter(u => u.id !== currentUser.uid);
-  if(chatPartners.length === 0) {
-    container.innerHTML = "<p class='text-xs text-zinc-600 text-center p-4'>No hay otros usuarios registrados.</p>";
-    return;
-  }
-  
-  container.innerHTML = "";
-  chatPartners.forEach(u => {
-    const isSelected = selectedUser && selectedUser.id === u.id;
-    const btn = document.createElement("button");
-    btn.className = `w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all text-xs ${isSelected ? 'bg-green-500/10 border border-green-500/20 text-white' : 'hover:bg-zinc-900/40 text-zinc-400 hover:text-zinc-200'}`;
-    
-    btn.onclick = () => startChatWith(u.id);
-    btn.innerHTML = `
-      <img class="w-8 h-8 rounded-full object-cover border border-zinc-900" src="${getUserAvatar(u.avatarUrl)}">
-      <div class="flex-1 min-w-0">
-        <div class="font-bold truncate text-zinc-200">${u.fullName}</div>
-        <div class="text-[10px] text-zinc-500 truncate">@${u.username}</div>
-      </div>
-    `;
-    container.appendChild(btn);
-  });
-}
-
-function startChatWith(userId) {
-  const partner = allUsers.find(u => u.id === userId);
-  if(!partner) return;
-  selectedUser = partner;
-  
-  renderUsersList();
-  
-  const header = document.getElementById("chatHeader");
-  header.innerHTML = `
-    <div class="flex items-center gap-3 w-full">
-      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer text-zinc-400 hover:text-white" onclick="closeActiveChat()"></i>
-      <img class="w-8 h-8 rounded-full object-cover border border-zinc-900" src="${getUserAvatar(partner.avatarUrl)}">
+  document.getElementById("chatHeader").innerHTML = `
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-arrow-left md:hidden text-zinc-400 text-lg cursor-pointer hover:text-white" onclick="closeActiveChat()"></i>
+      <img class="w-9 h-9 rounded-full object-cover border border-zinc-800 cursor-pointer" src="${getUserAvatar(user.avatarUrl)}" onclick="openUserProfileModal('${user.id}')">
       <div>
-        <div class="text-sm font-black text-zinc-200">${partner.fullName}</div>
-        <div class="text-[10px] text-zinc-500 font-semibold">@${partner.username}</div>
+        <div class="text-sm font-black text-zinc-100 leading-tight">${user.fullName || 'Chat'}</div>
+        <div class="text-[10px] text-green-400 font-bold uppercase tracking-wider">Conversación Encriptada</div>
       </div>
     </div>
   `;
   
-  listenMessages();
+  if (activeChatUnsubscribe) activeChatUnsubscribe();
+  
+  const mContainer = document.getElementById("chatMessages");
+  mContainer.innerHTML = `<div class="h-full flex items-center justify-center text-zinc-700 text-xs animate-pulse">Sincronizando mensajes...</div>`;
+  
+  const qChat = query(getCol("messages"), orderBy("createdAt", "asc"));
+  activeChatUnsubscribe = onSnapshot(qChat, (snapshot) => {
+    mContainer.innerHTML = "";
+    let hasMessages = false;
+    
+    snapshot.docs.forEach(doc => {
+      const msg = doc.data();
+      // Filtrar mensajes pertenecientes a este canal bidireccional exclusivo
+      const match = (msg.from === currentUser.uid && msg.to === user.id) || (msg.from === user.id && msg.to === currentUser.uid);
+      if (match) {
+        hasMessages = true;
+        const isMine = msg.from === currentUser.uid;
+        const msgDiv = document.createElement("div");
+        msgDiv.className = `flex ${isMine ? 'justify-end' : 'justify-start'} animate-fade-in`;
+        
+        const bubbleStyle = isMine 
+          ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-black rounded-br-none font-bold shadow-md shadow-green-500/5' 
+          : 'bg-zinc-900 border border-zinc-800 text-zinc-100 rounded-bl-none font-semibold';
+          
+        msgDiv.innerHTML = `
+          <div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm break-words ${bubbleStyle}">
+            ${filterBadWords(msg.text)}
+          </div>
+        `;
+        mContainer.appendChild(msgDiv);
+      }
+    });
+    
+    if(!hasMessages){
+      mContainer.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-zinc-600 text-center p-6 space-y-1">
+          <i class="fa-regular fa-comment text-3xl text-zinc-800"></i>
+          <p class="text-xs font-bold">Inicio del canal seguro de chat</p>
+          <p class="text-[11px] text-zinc-700">Dile algo interesante a @${user.username} para romper el hielo.</p>
+        </div>
+      `;
+    } else {
+      mContainer.scrollTop = mContainer.scrollHeight;
+    }
+  });
 }
 window.startChatWith = startChatWith;
 
 function closeActiveChat() {
+  SoundFX.playClick();
   selectedUser = null;
-  renderUsersList();
-  const header = document.getElementById("chatHeader");
-  header.innerHTML = `<span class="text-zinc-500 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left md:hidden cursor-pointer" onclick="closeActiveChat()"></i> Selecciona un usuario para chatear</span>`;
+  renderUsersListForChat();
+  if (activeChatUnsubscribe) activeChatUnsubscribe();
   document.getElementById("chatMessages").innerHTML = `
     <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
       <i class="fa-regular fa-paper-plane text-4xl"></i>
       <p class="text-sm">Tus chats privados están encriptados en la nube</p>
     </div>
   `;
+  document.getElementById("chatHeader").innerHTML = `
+    <span class="text-zinc-500 text-sm flex items-center gap-2">Selecciona un usuario para chatear</span>
+  `;
 }
 window.closeActiveChat = closeActiveChat;
 
-let currentMessagesListener = null;
-function listenMessages() {
-  if (currentMessagesListener) currentMessagesListener();
-  if (!currentUser || !selectedUser) return;
-  
-  const container = document.getElementById("chatMessages");
-  container.innerHTML = "<div class='text-center py-8 text-zinc-600 text-xs animate-pulse'>Abriendo canal seguro...</div>";
-  
-  const q = query(getCol("messages"), orderBy("createdAt", "asc"));
-  currentMessagesListener = onSnapshot(q, (snapshot) => {
-    container.innerHTML = "";
-    let count = 0;
-    
-    snapshot.docs.forEach(doc => {
-      const msg = doc.data();
-      const isMine = msg.from === currentUser.uid;
-      const isForMe = msg.to === currentUser.uid && msg.from === selectedUser.id;
-      const amISender = msg.from === currentUser.uid && msg.to === selectedUser.id;
-      
-      if (isForMe || amISender) {
-        count++;
-        const row = document.createElement("div");
-        row.className = `flex w-full ${isMine ? 'justify-end' : 'justify-start'} animate-fade-in text-xs`;
-        
-        const bubbleBg = isMine ? 'bg-green-500 text-black font-semibold rounded-2xl rounded-tr-sm' : 'bg-zinc-900 text-zinc-100 font-medium rounded-2xl rounded-tl-sm border border-zinc-800/60';
-        const censoredMsgText = filterBadWords(msg.text);
-        
-        row.innerHTML = `
-          <div class="max-w-[75%] px-4 py-2.5 shadow-md ${bubbleBg} break-words whitespace-pre-wrap">${censoredMsgText}</div>
-        `;
-        container.appendChild(row);
-      }
-    });
-    
-    if(count === 0) {
-      container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-1">
-          <i class="fa-regular fa-comments text-2xl"></i>
-          <p class="text-xs">Canal vacío. Dile hola a @${selectedUser.username}</p>
-        </div>
-      `;
-    } else {
-      container.scrollTop = container.scrollHeight;
-    }
-  });
-}
-
-const sendBtn = document.getElementById("sendBtn");
-const messageInput = document.getElementById("messageInput");
-
-async function sendMessage() {
-  if(!currentUser || !selectedUser || !messageInput) return;
-  const txt = messageInput.value.trim();
-  if(!txt) return;
-  
-  messageInput.value = "";
-  try {
-    await addDoc(getCol("messages"), {
-      from: currentUser.uid,
-      to: selectedUser.id,
-      text: txt,
-      createdAt: serverTimestamp()
-    });
-    SoundFX.playClick();
-  } catch(e) { console.error(e); }
-}
-
-if(sendBtn) sendBtn.onclick = sendMessage;
-if(messageInput) {
-  messageInput.onkeydown = (e) => { if(e.key === 'Enter') sendMessage(); };
-}
-
 function insertEmoji(emoji) {
-  if(!messageInput) return;
   SoundFX.playClick();
-  messageInput.value += emoji;
-  messageInput.focus();
+  const inp = document.getElementById("messageInput");
+  if(inp) {
+    inp.value += emoji;
+    inp.focus();
+  }
 }
 window.insertEmoji = insertEmoji;
 
-let notifiedMessages = new Set();
+const msgInp = document.getElementById("messageInput");
+const sendBtn = document.getElementById("sendBtn");
+
+async function handleSendMessage() {
+  if (!currentUser || !selectedUser || !msgInp) return;
+  const text = msgInp.value.trim();
+  if (!text) return;
+  
+  msgInp.value = "";
+  SoundFX.playMessage();
+  
+  await addDoc(getCol("messages"), {
+    from: currentUser.uid,
+    to: selectedUser.id,
+    text: text,
+    createdAt: Date.now() // Uso local y orden por timestamp estable
+  });
+}
+
+if(sendBtn) sendBtn.onclick = handleSendMessage;
+if(msgInp) {
+  msgInp.onkeydown = (e) => {
+    if(e.key === 'Enter') handleSendMessage();
+  };
+}
+
+// Lógica de Autenticación de Firebase
+const loginBtn = document.getElementById("loginBtn");
+if(loginBtn){
+  loginBtn.onclick = async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const pass = document.getElementById("loginPassword").value;
+    if(!email || !pass) { showNotification("Completa todos los campos de acceso", "error"); return; }
+    try {
+      loginBtn.disabled = true;
+      await signInWithEmailAndPassword(auth, email, pass);
+      showNotification("Bienvenido de vuelta a Rankiu", "success");
+      SoundFX.playSuccess();
+    } catch(e) {
+      showNotification("Credenciales inválidas o error de red", "error");
+    } finally {
+      loginBtn.disabled = false;
+    }
+  };
+}
+
+const recoverSendBtn = document.getElementById("recoverSendBtn");
+if(recoverSendBtn){
+  recoverSendBtn.onclick = async () => {
+    const email = document.getElementById("recoverEmail").value.trim();
+    if(!email) { showNotification("Ingresa un correo válido", "error"); return; }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showNotification("Enlace enviado. Revisa tu bandeja de entrada.", "success");
+      hideRecoverFlow();
+    } catch (e) {
+      showNotification("No pudimos procesar la recuperación radial", "error");
+    }
+  };
+}
+
+const registerBtn = document.getElementById("registerBtn");
+if(registerBtn){
+  registerBtn.onclick = async () => {
+    const username = cleanUsernameInput(document.getElementById("registerUsername").value);
+    const fullName = document.getElementById("registerFullName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const pass = document.getElementById("registerPassword").value;
+    
+    if(!username || !fullName || !email || !pass) {
+      showNotification("Por favor completa todo el formulario de inscripción", "error");
+      return;
+    }
+    
+    // VALIDACIÓN CRÍTICA: Impedir registro si contiene espacios
+    if (document.getElementById("registerUsername").value.includes(" ")) {
+      showNotification("El nombre de usuario no puede contener espacios.", "error");
+      return;
+    }
+    
+    try {
+      registerBtn.disabled = true;
+      registerBtn.innerText = "Verificando...";
+      
+      // VALIDACIÓN CRÍTICA: Comprobar duplicidad de nombres en la base de datos
+      const qUser = query(getCol("users"), where("username", "==", username));
+      const querySnapshot = await getDocs(qUser);
+      if (!querySnapshot.empty) {
+        showNotification("Este nombre de usuario ya está registrado por alguien más.", "error");
+        registerBtn.disabled = false;
+        registerBtn.innerText = "Crear Cuenta Nueva";
+        return;
+      }
+      
+      registerBtn.innerText = "Creando cuenta...";
+      const credential = await createUserWithEmailAndPassword(auth, email, pass);
+      const uid = credential.user.uid;
+      
+      await setDoc(getDocRef("users", uid), {
+        username: username,
+        fullName: fullName,
+        bio: "¡Hola! Acabo de unirme a la transparencia de Rankiu.",
+        avatarUrl: selectedDefaultAvatarUrl,
+        createdAt: serverTimestamp()
+      });
+      
+      showNotification("Cuenta creada exitosamente", "success");
+      SoundFX.playSuccess();
+    } catch(err) {
+      if(err.code === 'auth/email-already-in-use') {
+        showNotification("El correo electrónico ya está en uso", "error");
+      } else {
+        showNotification("Error de registro: Contraseña muy corta o datos corruptos", "error");
+      }
+    } finally {
+      registerBtn.disabled = false;
+      registerBtn.innerText = "Crear Cuenta Nueva";
+    }
+  };
+}
+
 const appLoadTime = Date.now();
+const notifiedMessages = new Set();
 
 function listenIncomingMessages() {
   if (!currentUser) return;
@@ -1510,15 +1563,21 @@ function listenIncomingMessages() {
 
 onAuthStateChanged(auth, async (user)=>{
   currentUser = user;
-  updateNavbar();
+  renderMiniProfileCard();
   if(user){
     document.getElementById("authModal").classList.add("hidden");
     showSection("feed");
-    listenUsers();
-    listenFollowers();
+    listenUsersGlobal();
+    listenPostsAndVotes();
     listenIncomingMessages();
   }else{
     document.getElementById("authModal").classList.remove("hidden");
+    selectedUser = null;
+    followingSet.clear();
+    currentPosts = [];
+    allUsers = [];
+    renderPosts([]);
+    renderSuggestedUsers();
     closeActiveChat();
   }
 });
