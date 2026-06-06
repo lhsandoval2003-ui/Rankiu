@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Rankiu</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="manifest" href="manifest.json">
@@ -58,13 +58,14 @@
   }
 </style>
 </head>
-<body class="text-zinc-100 min-h-screen relative pb-16 md:pb-0">
+<body class="text-zinc-100 min-h-screen relative pb-24 md:pb-6">
 
 <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
   <div class="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[140px]"></div>
   <div class="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] bg-red-500/5 rounded-full blur-[140px]"></div>
 </div>
 
+<!-- Barra Superior Desktop & Header Móvil -->
 <nav class="border-b border-zinc-900/80 glass sticky top-0 z-40 transition-all duration-300">
   <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
     <div class="flex items-center gap-3">
@@ -73,50 +74,46 @@
       </div>
     </div>
     
-    <div class="flex gap-1 bg-zinc-950/80 p-1 rounded-2xl border border-zinc-900">
-      <button onclick="showSection('feed')" class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200" id="tab-feed">
-        <i class="fa-solid fa-house mr-1.5 text-xs"></i>Feed
-      </button>
-      <button onclick="showSection('chat')" class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200" id="tab-chat">
-        <i class="fa-solid fa-message mr-1.5 text-xs"></i>Chats
-      </button>
-      <button onclick="showSection('profile')" class="nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200" id="tab-profile">
-        <i class="fa-solid fa-user mr-1.5 text-xs"></i>Perfil
-      </button>
+    <!-- Buscador Integrado Global -->
+    <div class="flex-1 max-w-sm mx-4 relative hidden sm:block">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-zinc-500">
+        <i class="fa-solid fa-magnifying-glass text-xs"></i>
+      </span>
+      <input type="text" id="globalSearchInput" oninput="executeGlobalSearch(this.value)" placeholder="Buscar usuarios, posts, #hashtags..." class="w-full bg-zinc-900/80 border border-zinc-800 text-xs rounded-xl pl-9 pr-4 py-2.5 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-green-500/50 transition">
+      <div id="searchDropdownResults" class="absolute left-0 right-0 mt-2 bg-zinc-950 border border-zinc-900 rounded-2xl max-h-60 overflow-y-auto hidden p-2 scrollbar z-50 shadow-2xl"></div>
     </div>
 
-    <div class="flex gap-2 items-center" id="navUser"></div>
+    <!-- Menú e Iconos del Sistema Superior -->
+    <div class="flex gap-4 items-center">
+      <button onclick="showSection('notifications')" class="relative p-2 text-zinc-400 hover:text-green-400 transition" id="navNotifBtn">
+        <i class="fa-solid fa-bell text-lg"></i>
+        <span id="notifBadge" class="absolute top-0 right-0 bg-red-500 text-white font-extrabold rounded-full px-1.5 py-0.5 text-[9px] hidden min-w-[16px] text-center">0</span>
+      </button>
+      <div class="flex gap-2 items-center" id="navUser"></div>
+    </div>
   </div>
 </nav>
 
 <div class="max-w-6xl mx-auto px-4 py-6 relative z-10">
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
     
+    <!-- Sección del Contenido Central Principal -->
     <div class="lg:col-span-8 space-y-6">
       
+      <!-- Buscador para Móviles visible únicamente en pantallas pequeñas -->
+      <div class="block sm:hidden relative w-full mb-2">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-zinc-500"><i class="fa-solid fa-magnifying-glass text-xs"></i></span>
+        <input type="text" oninput="executeGlobalSearch(this.value)" placeholder="Buscar usuarios, publicaciones o #tags..." class="w-full bg-zinc-950 border border-zinc-900 text-xs rounded-xl pl-9 pr-4 py-3 text-zinc-200 focus:outline-none">
+      </div>
+
+      <!-- SECCIÓN: FEED / EXPLORAR -->
       <section id="feedSection" class="animate-fade-in space-y-6">
-        
         <div class="flex justify-between items-center bg-zinc-950/90 border border-zinc-900 p-2.5 rounded-2xl">
           <div class="flex gap-2">
             <button id="filter-all" onclick="setFeedFilter('all')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition">Explorar</button>
             <button id="filter-following" onclick="setFeedFilter('following')" class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition">Siguiendo</button>
           </div>
           <span class="text-xs text-zinc-500 font-medium mr-2" id="feed-stats-label">Cargando comunidad...</span>
-        </div>
-
-        <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 relative overflow-hidden shadow-xl">
-          <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
-          
-          <div class="flex justify-between items-center mb-3">
-            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">¿Qué está pasando hoy?</span>
-            <span id="charCounter" class="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20">0 / 150</span>
-          </div>
-
-          <textarea id="postContent" maxlength="150" placeholder="Escribe un pensamiento directo, audaz o divertido..." class="w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-bold transition-all duration-300 text-green-400"></textarea>
-          
-          <div class="flex items-center justify-end border-t border-zinc-900/80 pt-4 mt-2">
-            <button id="publishBtn" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold px-6 py-2.5 rounded-xl text-xs transition duration-200 shadow-lg shadow-green-500/20 glow-green uppercase tracking-wider">Publicar</button>
-          </div>
         </div>
         
         <div id="postsContainer" class="space-y-4">
@@ -130,211 +127,190 @@
         </div>
       </section>
 
-      <section id="chatSection" class="hidden animate-fade-in">
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 h-[650px] bg-zinc-950/90 border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+      <!-- SECCIÓN: CREAR PUBLICACIÓN -->
+      <section id="createSection" class="hidden animate-fade-in space-y-6">
+        <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 relative overflow-hidden shadow-xl">
+          <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">¿Qué está pasando hoy? Usa #hashtags si deseas</span>
+            <span id="charCounter" class="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20">0 / 150</span>
+          </div>
+
+          <textarea id="postContent" maxlength="150" placeholder="Escribe un pensamiento directo o audaz..." class="w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-bold text-green-400"></textarea>
           
-          <div class="md:col-span-4 border-r border-zinc-900 flex flex-col h-full bg-black/40">
-            <div class="p-4 border-b border-zinc-900 bg-zinc-950/40">
-              <h2 class="text-lg font-bold text-zinc-200 flex items-center gap-2">
-                <i class="fa-solid fa-comments text-green-400 text-sm"></i>Mensajes
-              </h2>
+          <!-- Módulo Editor Estructurado de Encuestas -->
+          <div class="border-t border-zinc-900/80 pt-4 mt-2 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-zinc-400"><i class="fa-solid fa-square-poll-horizontal text-green-500 mr-1"></i> Añadir Sistema de Encuesta (Opcional)</span>
+              <button onclick="addPollOptionField()" id="addOptionBtn" class="text-[11px] bg-zinc-900 text-zinc-300 px-2.5 py-1 rounded-lg border border-zinc-800 hover:text-white"><i class="fa-solid fa-plus mr-1"></i> Opción</button>
             </div>
-            <div id="usersList" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar"></div>
-          </div>
-
-          <div id="chatWindow" class="md:col-span-8 flex flex-col h-full bg-zinc-950/20">
-            <div id="chatHeader" class="border-b border-zinc-900 p-4 font-bold flex items-center gap-3 text-zinc-200 bg-zinc-950/60 backdrop-blur-md">
-              <span class="text-zinc-500 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left md:hidden cursor-pointer" onclick="closeActiveChat()"></i> Selecciona un usuario para chatear</span>
-            </div>
-            
-            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar">
-              <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
-                <i class="fa-regular fa-paper-plane text-4xl"></i>
-                <p class="text-sm">Tus chats privados están encriptados en la nube</p>
-              </div>
-            </div>
-            
-            <div class="px-4 py-2 border-t border-zinc-900 bg-zinc-950/80 flex gap-2 overflow-x-auto scrollbar select-none">
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('😀')">😀</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('😂')">😂</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('😍')">😍</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('🔥')">🔥</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('👍')">👍</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('❤️')">❤️</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('🎉')">🎉</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('👀')">👀</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('💀')">💀</button>
-              <button class="emoji-btn hover:scale-135 active:scale-95 transition-all text-lg" onclick="insertEmoji('✨')">✨</button>
-            </div>
-            
-            <div class="p-3 bg-zinc-950 border-t border-zinc-900 flex gap-2">
-              <input id="messageInput" placeholder="Escribe un mensaje privado..." autocomplete="off" class="flex-1 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/30 text-sm transition-all"/>
-              <button id="sendBtn" class="bg-green-500 text-black font-bold px-5 rounded-2xl hover:bg-green-400 active:scale-95 transition-all"><i class="fa-solid fa-paper-plane"></i></button>
+            <div id="pollOptionsInputsContainer" class="space-y-2">
+              <input type="text" placeholder="Opción de encuesta 1" class="poll-opt-input w-full bg-zinc-900/40 border border-zinc-900 text-xs rounded-xl p-2.5 text-zinc-300 focus:outline-none focus:border-zinc-800">
+              <input type="text" placeholder="Opción de encuesta 2" class="poll-opt-input w-full bg-zinc-900/40 border border-zinc-900 text-xs rounded-xl p-2.5 text-zinc-300 focus:outline-none focus:border-zinc-800">
             </div>
           </div>
 
+          <div class="flex items-center justify-end border-t border-zinc-900/80 pt-4 mt-4">
+            <button id="publishBtn" class="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-green-500/20">Publicar Contenido</button>
+          </div>
         </div>
       </section>
 
+      <!-- SECCIÓN: CHATS PRIVADOS -->
+      <section id="chatSection" class="hidden animate-fade-in">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 h-[550px] bg-zinc-950/90 border border-zinc-900 rounded-3xl overflow-hidden shadow-2xl">
+          <div class="md:col-span-4 border-r border-zinc-900 flex flex-col h-full bg-black/40">
+            <div class="p-4 border-b border-zinc-900 bg-zinc-950/40">
+              <h2 class="text-sm font-black text-zinc-200 flex items-center gap-2 uppercase tracking-wider"><i class="fa-solid fa-comments text-green-400"></i>Mensajes</h2>
+            </div>
+            <div id="usersList" class="flex-1 overflow-y-auto p-3 space-y-2 scrollbar"></div>
+          </div>
+          <div id="chatWindow" class="md:col-span-8 flex flex-col h-full bg-zinc-950/20">
+            <div id="chatHeader" class="border-b border-zinc-900 p-4 font-bold flex items-center gap-3 text-zinc-200 bg-zinc-950/60 text-xs">
+              <span class="text-zinc-500 flex items-center gap-2">Selecciona un chat activo de la lista lateral</span>
+            </div>
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar text-xs"></div>
+            <div class="p-3 bg-zinc-950 border-t border-zinc-900 flex gap-2">
+              <input id="messageInput" placeholder="Escribe un mensaje privado..." autocomplete="off" class="flex-1 bg-zinc-900/60 border border-zinc-800/80 rounded-2xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none text-xs"/>
+              <button id="sendBtn" class="bg-green-500 text-black font-bold px-5 rounded-2xl"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN: NOTIFICACIONES E HISTORIAL -->
+      <section id="notificationsSection" class="hidden animate-fade-in space-y-4">
+        <div class="flex justify-between items-center bg-zinc-950 border border-zinc-900 p-4 rounded-2xl">
+          <h2 class="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2"><i class="fa-solid fa-bell text-red-400"></i> Centro de Avisos</h2>
+          <button onclick="clearAllNotifications()" class="text-[10px] text-zinc-600 hover:text-zinc-400 transition underline font-bold">Marcar como leídas</button>
+        </div>
+        <div id="notificationsLogContainer" class="space-y-2"></div>
+      </section>
+
+      <!-- SECCIÓN: PERFIL DE USUARIO PROPIO -->
       <section id="profileSection" class="hidden animate-fade-in space-y-6">
-        <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-6 md:p-8 max-w-xl mx-auto text-center backdrop-blur-sm relative overflow-hidden shadow-2xl">
+        <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-6 text-center backdrop-blur-sm relative overflow-hidden shadow-2xl">
           <div class="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
-          
-          <div class="relative w-28 h-28 mx-auto mb-4 group">
-            <img id="profileAvatar" class="w-28 h-28 rounded-full object-cover border-4 border-green-500/80 shadow-lg shadow-green-500/10" src="">
-            <label for="newProfilePhoto" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer">
-              <i class="fa-solid fa-camera text-white text-xl"></i>
-            </label>
+          <div class="relative w-24 h-24 mx-auto mb-4 group">
+            <img id="profileAvatar" class="w-24 h-24 rounded-full object-cover border-4 border-green-500/80 shadow-lg shadow-green-500/10" src="">
+            <label for="newProfilePhoto" class="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"><i class="fa-solid fa-camera text-white text-md"></i></label>
             <input type="file" id="newProfilePhoto" accept="image/*" class="hidden"/>
           </div>
 
+          <p id="profileRegisterDate" class="text-[10px] text-zinc-600 font-extrabold uppercase tracking-widest mb-4"></p>
+
           <div class="space-y-3 max-w-sm mx-auto">
             <div class="text-left">
-              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre de usuario (sin espacios)</label>
+              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre de usuario</label>
               <div class="relative flex items-center">
-                <span class="absolute left-3 font-bold text-zinc-500 text-lg">@</span>
-                <input type="text" id="editUsername" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl pl-8 pr-3 py-2 font-bold text-white text-md focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all" value="" placeholder="username">
+                <span class="absolute left-3 font-bold text-zinc-500 text-sm">@</span>
+                <input type="text" id="editUsername" class="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl pl-8 pr-3 py-2 font-bold text-white text-sm focus:outline-none transition-all">
               </div>
             </div>
-
             <div class="text-left">
-              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre completo / normal</label>
-              <input type="text" id="editFullName" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl px-3 py-2 font-bold text-white text-md focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all" value="" placeholder="Nombre Normal">
+              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre completo</label>
+              <input type="text" id="editFullName" class="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-3 py-2 font-bold text-white text-sm focus:outline-none transition-all">
             </div>
-            
             <div class="text-left">
               <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Biografía</label>
-              <textarea id="editBio" rows="2" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl p-3 text-center text-sm text-zinc-300 focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all resize-none" placeholder="Cuéntale al mundo quién eres..."></textarea>
+              <textarea id="editBio" rows="2" class="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-300 focus:outline-none transition-all resize-none"></textarea>
             </div>
           </div>
 
-          <div class="mt-4 flex justify-center gap-6 py-3 border-t border-b border-zinc-900/80 my-4">
+          <div class="mt-4 flex justify-center gap-6 py-3 border-t border-b border-zinc-900/80 my-4 max-w-xs mx-auto">
             <div class="text-center">
-              <div id="followersCount" class="text-xl font-black text-green-400">0</div>
-              <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Seguidores</div>
+              <div id="followersCount" class="text-lg font-black text-green-400">0</div>
+              <div class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Seguidores</div>
             </div>
             <div class="w-[1px] bg-zinc-900"></div>
             <div class="text-center">
-              <div id="userReputationPoints" class="text-xl font-black text-zinc-400">0</div>
-              <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Puntos Totales</div>
+              <div id="userReputationPoints" class="text-lg font-black text-zinc-400">0</div>
+              <div class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Puntos</div>
             </div>
             <div class="w-[1px] bg-zinc-900"></div>
             <div class="text-center">
-              <div id="followingCount" class="text-xl font-black text-emerald-400">0</div>
-              <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Siguiendo</div>
+              <div id="followingCount" class="text-lg font-black text-emerald-400">0</div>
+              <div class="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Seguidos</div>
             </div>
           </div>
 
-          <button id="saveProfileBtn" onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
-            Guardar Cambios
-          </button>
+          <button onclick="saveProfileChanges()" class="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition shadow-md">Guardar Datos de Perfil</button>
         </div>
 
         <div class="max-w-xl mx-auto space-y-4">
-          <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider pl-2 flex items-center gap-2">
-            <i class="fa-solid fa-table-columns text-green-400"></i> Mis Publicaciones
-          </h3>
+          <h3 class="text-xs font-black text-zinc-400 uppercase tracking-wider pl-2 flex items-center gap-2"><i class="fa-solid fa-table-columns text-green-400"></i> Mis Publicaciones</h3>
           <div id="myPostsContainer" class="space-y-4"></div>
         </div>
       </section>
 
     </div>
 
+    <!-- PANEL LATERAL DERECHO: TENDENCIAS Y RECOMENDACIONES DESKTOP -->
     <div class="hidden lg:block lg:col-span-4 space-y-6">
-      
-      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg relative overflow-hidden">
-        <div id="miniProfileCard" class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-zinc-900 rounded-full animate-pulse"></div>
-          <div class="space-y-1 flex-1">
-            <div class="h-3 bg-zinc-900 rounded w-1/2"></div>
-            <div class="h-2 bg-zinc-900 rounded w-1/3"></div>
-          </div>
-        </div>
-      </div>
+      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg"><div id="miniProfileCard" class="flex items-center gap-4"></div></div>
 
+      <!-- Módulo de Temas más populares del día (Hashtags Reales) -->
       <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg space-y-4">
-        <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-          <span>Gente a quien seguir</span>
-          <i class="fa-solid fa-user-plus text-green-500/80"></i>
-        </h3>
-        <div id="suggestedUsersList" class="space-y-3">
-          <div class="flex items-center justify-between animate-pulse">
-            <div class="flex items-center gap-2">
-              <div class="w-9 h-9 rounded-full bg-zinc-900"></div>
-              <div class="h-2.5 bg-zinc-900 rounded w-20"></div>
-            </div>
-            <div class="w-16 h-7 bg-zinc-900 rounded-lg"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg space-y-4">
-        <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-          <span>Tendencias</span>
+        <h3 class="text-xs font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+          <span>Temas del día</span>
           <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i>
         </h3>
-        <div class="space-y-3 text-xs">
-          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
-            <div class="text-zinc-500 font-bold">#1 Tendencia</div>
-            <div class="font-black text-zinc-100 text-sm mt-0.5">Rankiu</div>
-            <div class="text-zinc-500 mt-1">Votos de Reputación</div>
-          </div>
-          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
-            <div class="text-zinc-500 font-bold">#2 Tendencia</div>
-            <div class="font-black text-zinc-100 text-sm mt-0.5">Física de Votos</div>
-            <div class="text-zinc-500 mt-1">Animaciones fluidas</div>
-          </div>
-        </div>
+        <div id="trendingTopicsContainer" class="space-y-2 text-xs"></div>
       </div>
 
+      <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg space-y-4">
+        <h3 class="text-xs font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between"><span>Gente a quien seguir</span><i class="fa-solid fa-user-plus text-green-500/80"></i></h3>
+        <div id="suggestedUsersList" class="space-y-3"></div>
+      </div>
     </div>
 
   </div>
 </div>
 
+<!-- BARRA INFERIOR FIJA PERMANENTE (MOBILE FIRST) -->
+<div class="fixed bottom-0 left-0 right-0 z-40 glass border-t border-zinc-900 px-2 py-2 flex justify-around items-center max-w-lg mx-auto sm:rounded-t-3xl shadow-2xl">
+  <button onclick="showSection('feed')" id="bottom-tab-feed" class="flex flex-col items-center justify-center p-2 text-zinc-500 transition-all duration-200">
+    <i class="fa-solid fa-house text-lg"></i><span class="text-[9px] mt-0.5 font-bold uppercase tracking-wide">Inicio</span>
+  </button>
+  <button onclick="setFeedFilter('all'); showSection('feed');" id="bottom-tab-explore" class="flex flex-col items-center justify-center p-2 text-zinc-500 transition-all duration-200">
+    <i class="fa-solid fa-compass text-lg"></i><span class="text-[9px] mt-0.5 font-bold uppercase tracking-wide">Explorar</span>
+  </button>
+  <button onclick="showSection('create')" id="bottom-tab-create" class="flex flex-col items-center justify-center p-2 text-zinc-500 transition-all duration-200">
+    <i class="fa-solid fa-circle-plus text-xl text-green-400"></i><span class="text-[9px] mt-0.5 font-bold uppercase tracking-wide">Crear</span>
+  </button>
+  <button onclick="showSection('chat')" id="bottom-tab-chat" class="flex flex-col items-center justify-center p-2 text-zinc-500 transition-all duration-200">
+    <i class="fa-solid fa-comment-dots text-lg"></i><span class="text-[9px] mt-0.5 font-bold uppercase tracking-wide">Chats</span>
+  </button>
+  <button onclick="showSection('profile')" id="bottom-tab-profile" class="flex flex-col items-center justify-center p-2 text-zinc-500 transition-all duration-200">
+    <i class="fa-solid fa-user text-lg"></i><span class="text-[9px] mt-0.5 font-bold uppercase tracking-wide">Perfil</span>
+  </button>
+</div>
+
+<!-- MODALES DE CONTROL (AUTENTICACIÓN, PERFIL AJENO Y MENÚ DE OPCIONES DE PUBLICACIONES) -->
 <div id="authModal" class="fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50">
   <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative">
-    <div class="text-center mb-6">
-      <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 select-none">rankiu</h1>
-    </div>
-    
+    <div class="text-center mb-6"><h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 select-none">rankiu</h1></div>
     <div id="authToggleContainer" class="flex gap-2 mb-6 bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/60">
       <button onclick="switchAuth('login')" class="flex-1 rounded-xl py-2.5 text-xs font-bold transition-all" id="btn-switch-login">Login</button>
       <button onclick="switchAuth('register')" class="flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500" id="btn-switch-register">Registro</button>
     </div>
-    
     <div id="loginBox" class="space-y-3">
-      <input id="loginEmail" placeholder="Email o correo" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      <input type="password" id="loginPassword" placeholder="Contraseña de seguridad" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      <button id="loginBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl hover:from-green-400 hover:to-emerald-400 transition shadow-lg shadow-green-500/15 uppercase tracking-wider text-xs">Iniciar sesión</button>
-      <div class="text-center mt-3">
-        <button onclick="showRecoverFlow()" class="text-xs text-zinc-500 hover:text-green-400 transition-all underline">¿Olvidaste tu contraseña?</button>
-      </div>
+      <input id="loginEmail" placeholder="Email o correo" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-white text-sm focus:outline-none"/>
+      <input type="password" id="loginPassword" placeholder="Contraseña" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-white text-sm focus:outline-none"/>
+      <button id="loginBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl text-xs uppercase tracking-wider">Iniciar sesión</button>
+      <div class="text-center mt-3"><button onclick="showRecoverFlow()" class="text-xs text-zinc-500 underline">¿Olvidaste tu contraseña?</button></div>
     </div>
-    
     <div id="recoverBox" class="hidden space-y-3">
-      <p class="text-xs text-zinc-400 text-center mb-2">Ingresa tu correo electrónico para enviarte un enlace exclusivo de recuperación:</p>
-      <input id="recoverEmail" placeholder="Correo electrónico de tu cuenta" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      <button id="recoverSendBtn" class="w-full bg-green-500 text-black font-extrabold py-4 rounded-xl hover:bg-green-400 transition text-xs uppercase tracking-wider">Enviar enlace</button>
-      <div class="text-center mt-3">
-        <button onclick="hideRecoverFlow()" class="text-xs text-zinc-500 hover:text-white transition-all underline">Volver al inicio de sesión</button>
-      </div>
+      <input id="recoverEmail" placeholder="Tu correo electrónico" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-white text-sm focus:outline-none"/>
+      <button id="recoverSendBtn" class="w-full bg-green-500 text-black font-extrabold py-4 rounded-xl text-xs uppercase tracking-wider">Enviar enlace</button>
     </div>
-    
     <div id="registerBox" class="hidden space-y-3">
-      <div class="relative flex items-center">
-        <span class="absolute left-3 font-bold text-zinc-500 text-sm">@</span>
-        <input id="registerUsername" placeholder="username_instagram" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl pl-8 pr-4 py-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      </div>
-      <input id="registerFullName" placeholder="Nombre completo" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      <input id="registerEmail" placeholder="Correo electrónico" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      <input type="password" id="registerPassword" placeholder="Crea tu contraseña" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
-      
-      <div class="p-3 bg-zinc-900/50 border border-zinc-800/80 rounded-xl">
-        <div class="flex justify-center gap-3" id="avatarSelectorContainer"></div>
-      </div>
-      
-      <button id="registerBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl hover:from-green-400 hover:to-emerald-400 transition text-xs uppercase tracking-wider">Crear Cuenta Nueva</button>
+      <div class="relative flex items-center"><span class="absolute left-3 font-bold text-zinc-500 text-sm">@</span><input id="registerUsername" placeholder="username" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-8 pr-4 py-4 text-white text-sm focus:outline-none"/></div>
+      <input id="registerFullName" placeholder="Nombre completo" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-white text-sm focus:outline-none"/>
+      <input id="registerEmail" placeholder="Correo electrónico" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-white text-sm focus:outline-none"/>
+      <input type="password" id="registerPassword" placeholder="Crea tu contraseña" class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl p-4 text-white text-sm focus:outline-none"/>
+      <div class="p-3 bg-zinc-900/50 border border-zinc-800/80 rounded-xl"><div class="flex justify-center gap-3" id="avatarSelectorContainer"></div></div>
+      <button id="registerBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl text-xs uppercase tracking-wider">Crear Cuenta Nueva</button>
     </div>
   </div>
 </div>
@@ -342,37 +318,40 @@
 <div id="userProfileModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center z-50">
   <div class="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 w-full max-w-sm shadow-2xl relative text-center animate-fade-in">
     <button onclick="closeUserProfile()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
-    
-    <img id="modalAvatar" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-green-500 mb-4 shadow-xl" src="">
-    <h3 id="modalUsername" class="text-xl font-black text-white"></h3>
-    <p id="modalFullName" class="text-zinc-400 text-sm mb-2 font-medium"></p>
-    <p id="modalBio" class="text-zinc-500 text-xs mb-4 italic"></p>
-    
-    <div class="flex justify-around items-center bg-zinc-900/40 rounded-2xl py-3 border border-zinc-900/80 mb-6">
-      <div>
-        <div id="modalFollowers" class="text-lg font-black text-green-400">0</div>
-        <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Seguidores</div>
-      </div>
+    <img id="modalAvatar" class="w-20 h-20 rounded-full mx-auto object-cover border-4 border-green-500 mb-2" src="">
+    <h3 id="modalUsername" class="text-lg font-black text-white"></h3>
+    <p id="modalFullName" class="text-zinc-400 text-xs font-medium"></p>
+    <p id="modalRegisterDate" class="text-[9px] text-zinc-600 uppercase tracking-widest font-mono my-1"></p>
+    <p id="modalBio" class="text-zinc-400 text-xs my-3 px-2 italic"></p>
+    <div class="flex justify-around items-center bg-zinc-900/40 rounded-2xl py-3 border border-zinc-900/80 mb-4 text-xs">
+      <div><div id="modalFollowers" class="text-sm font-black text-green-400">0</div><div class="text-[9px] text-zinc-500 font-bold uppercase">Seguidores</div></div>
       <div class="w-[1px] bg-zinc-800 h-6"></div>
-      <div>
-        <div id="modalReputation" class="text-lg font-black text-zinc-400">0</div>
-        <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Puntos</div>
-      </div>
+      <div><div id="modalFollowing" class="text-sm font-black text-emerald-400">0</div><div class="text-[9px] text-zinc-500 font-bold uppercase">Seguidos</div></div>
+      <div class="w-[1px] bg-zinc-800 h-6"></div>
+      <div><div id="modalReputation" class="text-sm font-black text-zinc-400">0</div><div class="text-[9px] text-zinc-500 font-bold uppercase">Puntos</div></div>
     </div>
-    
     <div class="flex gap-2">
-      <button id="modalFollowBtn" class="flex-1 bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider"></button>
-      <button id="modalChatBtn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold px-4 rounded-xl transition text-sm"><i class="fa-regular fa-comment-dots text-lg"></i></button>
+      <button id="modalFollowBtn" class="flex-1 bg-green-500 text-black font-extrabold py-2.5 rounded-xl transition text-xs uppercase"></button>
+      <button id="modalChatBtn" class="bg-zinc-900 border border-zinc-800 text-white px-4 rounded-xl transition"><i class="fa-regular fa-comment-dots"></i></button>
     </div>
   </div>
 </div>
 
-<div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+<div id="optionsPostModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+  <div class="bg-zinc-950 border border-zinc-900 rounded-2xl p-4 w-full max-w-xs space-y-2 text-xs">
+    <h4 class="font-black text-zinc-400 uppercase tracking-wider text-center border-b border-zinc-900 pb-2">Opciones de publicación</h4>
+    <button id="optSaveBtn" class="w-full text-left py-2.5 px-3 bg-zinc-900/40 hover:bg-zinc-900 rounded-xl flex items-center gap-2 font-bold text-zinc-200 transition"><i class="fa-regular fa-bookmark text-green-400"></i> Guardar Publicación</button>
+    <button id="optReportBtn" onclick="showNotification('Publicación reportada al equipo de moderación', 'info'); closeOptionsModal();" class="w-full text-left py-2.5 px-3 bg-zinc-900/40 hover:bg-zinc-900 rounded-xl flex items-center gap-2 font-bold text-red-400 transition"><i class="fa-solid fa-triangle-exclamation"></i> Reportar Contenido</button>
+    <button onclick="closeOptionsModal()" class="w-full py-2 bg-zinc-900 text-zinc-400 font-bold rounded-xl mt-2">Cerrar</button>
+  </div>
+</div>
+
+<div id="toastContainer" class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp, onSnapshot, where, deleteDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'rankiu-5da90';
@@ -390,10 +369,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Diccionario de malas palabras a censurar
 const BAD_WORDS = ["mierda", "puta", "puto", "marico", "pendejo", "pendeja", "culero", "culera", "gonorrea", "hijueputa", "cabron", "cabrona", "perra", "perro", "chinga", "verga", "carajo", "malparido"];
 
-// Función para censurar texto manteniendo las letras de los extremos
 function filterBadWords(text) {
   if (!text) return "";
   let filtered = text;
@@ -407,615 +384,405 @@ function filterBadWords(text) {
   return filtered;
 }
 
-// Forzar formato estilo Instagram en los inputs de username
 function cleanUsernameInput(val) {
   return val.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '');
 }
 
 const regUserInp = document.getElementById("registerUsername");
-if(regUserInp) {
-  regUserInp.addEventListener("input", (e) => { e.target.value = cleanUsernameInput(e.target.value); });
-}
+if(regUserInp) regUserInp.addEventListener("input", (e) => { e.target.value = cleanUsernameInput(e.target.value); });
 const editUserInp = document.getElementById("editUsername");
-if(editUserInp) {
-  editUserInp.addEventListener("input", (e) => { e.target.value = cleanUsernameInput(e.target.value); });
-}
+if(editUserInp) editUserInp.addEventListener("input", (e) => { e.target.value = cleanUsernameInput(e.target.value); });
 
-setPersistence(auth, browserLocalPersistence).catch((error) => console.error("Error de persistencia:", error));
+setPersistence(auth, browserLocalPersistence).catch((error) => console.error(error));
 
-function getCol(colName) {
-  return collection(db, 'artifacts', appId, 'public', 'data', colName);
-}
-function getDocRef(colName, docId) {
-  return doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
-}
+function getCol(colName) { return collection(db, 'artifacts', appId, 'public', 'data', colName); }
+function getDocRef(colName, docId) { return doc(db, 'artifacts', appId, 'public', 'data', colName, docId); }
 
 const SoundFX = {
   ctx: null,
-  init() {
-    if (!this.ctx) {
-      this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-  },
+  init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
   playClick() {
     try {
-      this.init();
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(450, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.08);
-    } catch(e) {}
-  },
-  playVoteUp() {
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(260, now);
-      osc.frequency.setValueAtTime(390, now + 0.07);
-      osc.frequency.setValueAtTime(520, now + 0.14);
-      gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.start();
-      osc.stop(now + 0.3);
-    } catch(e) {}
-  },
-  playVoteDown() {
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(480, now);
-      osc.frequency.setValueAtTime(360, now + 0.07);
-      osc.frequency.setValueAtTime(240, now + 0.14);
-      gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      osc.start();
-      osc.stop(now + 0.3);
+      this.init(); const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+      osc.connect(gain); gain.connect(this.ctx.destination); osc.type = 'sine';
+      osc.frequency.setValueAtTime(450, this.ctx.currentTime); gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      osc.start(); osc.stop(this.ctx.currentTime + 0.06);
     } catch(e) {}
   },
   playSuccess() {
     try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, now);
-      osc.frequency.setValueAtTime(659.25, now + 0.09);
-      osc.frequency.setValueAtTime(783.99, now + 0.18);
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-      osc.start();
-      osc.stop(now + 0.4);
-    } catch(e) {}
-  },
-  playMessage() {
-    try {
-      this.init();
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(580, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(850, this.ctx.currentTime + 0.09);
-      gain.gain.setValueAtTime(0.07, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.09);
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.09);
+      this.init(); const now = this.ctx.currentTime; const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+      osc.connect(gain); gain.connect(this.ctx.destination); osc.frequency.setValueAtTime(523, now); osc.frequency.setValueAtTime(659, now + 0.08);
+      gain.gain.setValueAtTime(0.05, now); osc.start(); osc.stop(now + 0.2);
     } catch(e) {}
   }
 };
 
-let currentUser = null;
-let selectedUser = null;
-let allUsers = [];
-let followingSet = new Set();
-let followerCounts = {};
-let followingCounts = {};
-let currentPosts = [];
-let feedFilter = 'all'; 
-let cachedVotesSnapshot = null;
-let cachedGlobalVotes = [];
+let currentUser = null; let selectedUser = null; let allUsers = []; let followingSet = new Set();
+let followerCounts = {}; let followingCounts = {}; let currentPosts = []; let feedFilter = 'all';
+let cachedVotesSnapshot = null; let cachedGlobalVotes = []; let savedPostsSet = new Set();
 
 const DefaultAvatars = [
-  { id: 'teal', color: '#075e54' },
-  { id: 'blue', color: '#34b7f1' },
-  { id: 'purple', color: '#7c3aed' },
-  { id: 'pink', color: '#f43f5e' },
-  { id: 'orange', color: '#f59e0b' }
-].map(av => {
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100%" height="100%" fill="${av.color}"/><circle cx="50" cy="38" r="18" fill="#ffffff" opacity="0.85"/><path d="M50 62c-15 0-28 8-28 18v6h56v-6c0-10-13-18-28-18z" fill="#ffffff" opacity="0.85"/></svg>`;
-  const url = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg)));
-  return { id: av.id, color: av.color, url };
-});
-
+  { id: 'teal', color: '#075e54', url: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDc1ZTU0Ii8+PGNpcmNsZSBjeD0iNTAiIGN5PSIzOCIgcj0iMTgiIGZpbGw9IiNmZmZmZmYiIG9wYWNpdHk9IjAuODUiLz48cGF0aCBkPSJNNTAgNjJjLTE1IDAgLTI4IDgtMjggMTh2Nmg1NnYtNmMwLTE0LTEzLTE4LTI4LTE4eiIgZmlsbD0iI2ZmZmZmZiIgb3BhY2l0eT0iMC44NSIvPjwvc3ZnPg==" }
+];
 let selectedDefaultAvatarUrl = DefaultAvatars[0].url;
+function getUserAvatar(avatarUrl) { return avatarUrl || DefaultAvatars[0].url; }
 
-function getUserAvatar(avatarUrl) {
-  if (!avatarUrl || avatarUrl === "" || avatarUrl.includes("i.pravatar.cc") || avatarUrl.includes("placeholder") || avatarUrl.includes("undefined")) {
-    return DefaultAvatars[0].url;
-  }
-  return avatarUrl;
+function formatTimeAgo(timestamp) {
+  if (!timestamp) return "Ahora";
+  const diff = Date.now() - timestamp;
+  const secs = Math.floor(diff / 1000);
+  if (secs < 60) return `Hace ${secs}s`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `Hace ${mins}m`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `Hace ${hours}h`;
+  return `Hace ${Math.floor(hours / 24)}d`;
 }
 
-function renderDefaultAvatarSelector() {
-  const container = document.getElementById("avatarSelectorContainer");
-  if (!container) return;
-  container.innerHTML = "";
-  DefaultAvatars.forEach(av => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = `w-10 h-10 rounded-full border-2 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center overflow-hidden relative`;
-    btn.style.borderColor = av.url === selectedDefaultAvatarUrl ? '#22c55e' : 'transparent';
-    btn.id = `av-choice-${av.id}`;
-    btn.onclick = () => {
-      SoundFX.playClick();
-      selectedDefaultAvatarUrl = av.url;
-      DefaultAvatars.forEach(a => {
-        const item = document.getElementById(`av-choice-${a.id}`);
-        if(item) item.style.borderColor = 'transparent';
-      });
-      btn.style.borderColor = '#22c55e';
-    };
-    btn.innerHTML = `<img src="${av.url}" class="w-full h-full object-cover">`;
-    container.appendChild(btn);
-  });
+function formatDate(timestamp) {
+  if (!timestamp) return "Reciente";
+  return new Date(timestamp).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 }
-renderDefaultAvatarSelector();
 
 function showNotification(message, type = "info") {
   const container = document.getElementById("toastContainer");
   if(!container) return;
   const toast = document.createElement("div");
-  toast.className = `p-4 rounded-2xl shadow-xl border text-xs font-bold pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-3`;
-  
-  if (type === "success") {
-    toast.className += " bg-zinc-950 text-green-400 border-green-500/20";
-    toast.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 text-sm"></i> ${message}`;
-  } else if (type === "error") {
-    toast.className += " bg-zinc-950 text-red-400 border-red-500/20";
-    toast.innerHTML = `<i class="fa-solid fa-circle-exclamation text-red-400 text-sm"></i> ${message}`;
-  } else {
-    toast.className += " bg-zinc-950 text-zinc-300 border-zinc-800";
-    toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-sm"></i> ${message}`;
-  }
-  
+  toast.className = `p-3 rounded-xl border text-xs font-bold pointer-events-auto transition-all transform translate-y-2 opacity-0 flex items-center gap-2 bg-zinc-950 border-zinc-800 text-zinc-200 shadow-2xl`;
+  toast.innerHTML = `<i class="fa-solid fa-circle-info text-green-400"></i> ${message}`;
   container.appendChild(toast);
-  setTimeout(() => { toast.classList.remove("translate-y-2", "opacity-0"); }, 50);
-  setTimeout(() => {
-    toast.classList.add("opacity-0", "translate-y-[-10px]");
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
+  setTimeout(() => toast.classList.remove("translate-y-2", "opacity-0"), 50);
+  setTimeout(() => { toast.classList.add("opacity-0"); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-const postTextarea = document.getElementById("postContent");
-if (postTextarea) {
-  postTextarea.addEventListener("input", (e) => {
-    const len = e.target.value.length;
-    document.getElementById("charCounter").innerText = `${len} / 150`;
-    const label = document.getElementById("charCounter");
-    
-    if (len >= 130) {
-      label.className = "text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md font-mono border border-red-500/20";
-    } else if (len >= 90) {
-      label.className = "text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-md font-mono border border-yellow-500/20";
-    } else {
-      label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
-    }
+// Inyección y control dinámico del límite de opciones de encuestas
+window.addPollOptionField = function() {
+  const container = document.getElementById("pollOptionsInputsContainer");
+  const currentCount = container.querySelectorAll("input").length;
+  if (currentCount >= 5) return showNotification("Máximo 5 opciones permitidas en encuestas", "error");
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = `Opción de encuesta ${currentCount + 1}`;
+  input.className = "poll-opt-input w-full bg-zinc-900/40 border border-zinc-900 text-xs rounded-xl p-2.5 text-zinc-300 focus:outline-none focus:border-zinc-800";
+  container.appendChild(input);
+  if (currentCount + 1 === 5) document.getElementById("addOptionBtn").classList.add("hidden");
+};
 
-    if (len < 50) {
-      e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
-    } else if (len < 100) {
-      e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-lg font-bold transition-all duration-300 text-zinc-100";
-    } else {
-      e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-sm font-semibold transition-all duration-300 text-zinc-300";
-    }
+// Motor reactivo global de logs de avisos/notificaciones en Firestore
+async function sendSystemNotice(targetUserId, type, triggerUsername, referenceId = "") {
+  if (!targetUserId || targetUserId === currentUser?.uid) return;
+  await addDoc(getCol("notifications"), {
+    targetUserId, type, triggerUsername, referenceId, read: false, createdAt: Date.now()
   });
 }
 
-function switchAuth(type) {
-  SoundFX.playClick();
-  hideRecoverFlow();
-  if(type === "login"){
-    document.getElementById("loginBox").classList.remove("hidden");
-    document.getElementById("registerBox").classList.add("hidden");
-    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
-    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
-  }else{
-    document.getElementById("loginBox").classList.add("hidden");
-    document.getElementById("registerBox").classList.remove("hidden");
-    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
-    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
-  }
-}
-window.switchAuth = switchAuth;
-
-function showRecoverFlow() {
-  SoundFX.playClick();
-  document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("authToggleContainer").classList.add("hidden");
-  document.getElementById("recoverBox").classList.remove("hidden");
-  const currentLoginEmail = document.getElementById("loginEmail").value.trim();
-  document.getElementById("recoverEmail").value = currentLoginEmail;
-}
-window.showRecoverFlow = showRecoverFlow;
-
-function hideRecoverFlow() {
-  SoundFX.playClick();
-  document.getElementById("recoverBox").classList.add("hidden");
-  document.getElementById("loginBox").classList.remove("hidden");
-  document.getElementById("authToggleContainer").classList.remove("hidden");
-}
-window.hideRecoverFlow = hideRecoverFlow;
-
-async function sendResetLinkFlow() {
-  const emailInput = document.getElementById("recoverEmail").value.trim();
-  if (!emailInput) return showNotification("Por favor introduce tu correo", "error");
-  try {
-    showNotification("Enviando enlace...", "info");
-    await sendPasswordResetEmail(auth, emailInput);
-    showNotification(`¡Enlace enviado con éxito a ${emailInput}!`, "success");
-    SoundFX.playSuccess();
-    hideRecoverFlow();
-  } catch(error) { showNotification("Error: " + error.message, "error"); }
-}
-document.getElementById("recoverSendBtn").addEventListener("click", sendResetLinkFlow);
-
-async function uploadImage(file, path) {
-  const storageRef = ref(storage, `artifacts/${appId}/${path}`);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-}
-
-function listenFollowers() {
+function listenNotifications() {
   if (!currentUser) return;
-  onSnapshot(getCol("followers"), (snapshot) => {
-    followingSet.clear();
-    followerCounts = {};
-    followingCounts = {};
-    snapshot.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.followerId === currentUser.uid) {
-        followingSet.add(data.followingId);
-      }
-      followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
-      followingCounts[data.followerId] = (followingCounts[data.followerId] || 0) + 1;
+  const q = query(getCol("notifications"), where("targetUserId", "==", currentUser.uid), orderBy("createdAt", "desc"));
+  onSnapshot(q, (snapshot) => {
+    const unread = snapshot.docs.filter(d => !d.data().read).length;
+    const badge = document.getElementById("notifBadge");
+    if (badge) {
+      if (unread > 0) { badge.innerText = unread; badge.classList.remove("hidden"); }
+      else { badge.classList.add("hidden"); }
+    }
+    const container = document.getElementById("notificationsLogContainer");
+    if (container) {
+      container.innerHTML = snapshot.docs.length === 0 ? `<div class="p-4 text-center text-zinc-600 text-xs">Sin avisos por el momento</div>` : "";
+      snapshot.docs.forEach(docSnap => {
+        const notif = docSnap.data();
+        let icon = '<i class="fa-solid fa-user text-emerald-400"></i>';
+        let actionText = "te ha seguido.";
+        if (notif.type === "vote") { icon = '<i class="fa-solid fa-square-arrow-up-down text-green-400"></i>'; actionText = "reaccionó a tu publicación."; }
+        if (notif.type === "comment") { icon = '<i class="fa-solid fa-comment text-blue-400"></i>'; actionText = "comentó tu publicación."; }
+        const div = document.createElement("div");
+        div.className = `p-3 border rounded-xl flex items-center justify-between text-xs bg-zinc-950/80 ${notif.read ? 'border-zinc-900 opacity-60' : 'border-green-500/30 font-bold'}`;
+        div.innerHTML = `<div class="flex items-center gap-2">${icon} <span><strong>@${notif.triggerUsername}</strong> ${actionText}</span></div><span class="text-[9px] text-zinc-600">${formatTimeAgo(notif.createdAt)}</span>`;
+        container.appendChild(div);
+      });
+    }
+  });
+}
+
+window.clearAllNotifications = async function() {
+  const q = query(getCol("notifications"), where("targetUserId", "==", currentUser?.uid));
+  const snap = await getDocs(q);
+  snap.forEach(async (d) => { await updateDoc(getDocRef("notifications", d.id), { read: true }); });
+  showNotification("Avisos marcados como leídos", "success");
+};
+
+// Motor de Búsqueda Multipropósito (Usuarios, Posts, Hashtags)
+window.executeGlobalSearch = function(val) {
+  const queryStr = val.trim().toLowerCase();
+  const dropdown = document.getElementById("searchDropdownResults");
+  if (!dropdown) return;
+  if (!queryStr) { dropdown.classList.add("hidden"); return; }
+  dropdown.innerHTML = "";
+  dropdown.classList.remove("hidden");
+
+  // Filtrado de usuarios
+  const matchedUsers = allUsers.filter(u => u.username?.toLowerCase().includes(queryStr) || u.fullName?.toLowerCase().includes(queryStr));
+  if (matchedUsers.length > 0) {
+    const head = document.createElement("div"); head.className = "text-[9px] font-bold text-zinc-600 uppercase tracking-widest p-1 border-b border-zinc-900"; head.innerText = "Usuarios"; dropdown.appendChild(head);
+    matchedUsers.slice(0, 3).forEach(u => {
+      const item = document.createElement("div"); item.className = "p-2 hover:bg-zinc-900 rounded-xl cursor-pointer flex items-center gap-2 text-xs";
+      item.onclick = () => { viewUserProfile(u.id); dropdown.classList.add("hidden"); };
+      item.innerHTML = `<img src="${getUserAvatar(u.avatar)}" class="w-6 h-6 rounded-full object-cover"> <div><span class="text-zinc-200 font-bold">@${u.username}</span></div>`;
+      dropdown.appendChild(item);
     });
-    renderPosts(currentPosts);
-    updateProfileStats();
-    renderSuggestedUsers();
+  }
+
+  // Filtrado de publicaciones y hashtags
+  const matchedPosts = currentPosts.filter(p => p.content?.toLowerCase().includes(queryStr));
+  if (matchedPosts.length > 0) {
+    const head = document.createElement("div"); head.className = "text-[9px] font-bold text-zinc-600 uppercase tracking-widest p-1 border-b border-zinc-900 mt-2"; head.innerText = "Publicaciones & Tags"; dropdown.appendChild(head);
+    matchedPosts.slice(0, 4).forEach(p => {
+      const item = document.createElement("div"); item.className = "p-2 hover:bg-zinc-900 rounded-xl cursor-pointer text-xs truncate text-zinc-400";
+      item.onclick = () => { dropdown.classList.add("hidden"); const el = document.getElementById(`post-card-${p.id}`); if (el) el.scrollIntoView({ behavior: 'smooth' }); };
+      item.innerHTML = `<i class="fa-solid fa-hashtag text-green-500 mr-1.5"></i> ${filterBadWords(p.content)}`;
+      dropdown.appendChild(item);
+    });
+  }
+  if(dropdown.children.length === 0) dropdown.innerHTML = `<div class="p-4 text-center text-zinc-600 text-xs">Sin resultados coincidentes</div>`;
+};
+
+// Extractor automático y cálculo de Hashtags Populares del Día
+function updateTrendingTopics(posts) {
+  const container = document.getElementById("trendingTopicsContainer");
+  if (!container) return;
+  const hashCount = {};
+  posts.forEach(p => {
+    const tags = p.content?.match(/#[a-zA-Z0-9_]+/g) || [];
+    tags.forEach(t => { hashCount[t] = (hashCount[t] || 0) + 1; });
+  });
+  const sorted = Object.entries(hashCount).sort((a,b) => b[1] - a[1]).slice(0, 4);
+  if (sorted.length === 0) { container.innerHTML = `<p class="text-zinc-600 text-xs">No hay tendencias hoy</p>`; return; }
+  container.innerHTML = "";
+  sorted.forEach(([tag, count], index) => {
+    const div = document.createElement("div");
+    div.className = "p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition";
+    div.onclick = () => { const input = document.getElementById("globalSearchInput"); if(input) { input.value = tag; window.executeGlobalSearch(tag); } };
+    div.innerHTML = `<div class="text-zinc-500 font-bold">#${index+1} Tendencia</div><div class="font-black text-zinc-100 text-xs mt-0.5">${tag}</div><div class="text-zinc-600 mt-0.5">${count} interacciones</div>`;
+    container.appendChild(div);
   });
 }
 
-function getUserReputationMarkup(userId) {
-  let upvotes = 0;
-  let downvotes = 0;
-  
-  const userPostsIds = currentPosts.filter(p => p.authorId === userId).map(p => p.id);
-  
-  cachedGlobalVotes.forEach(v => {
-    if (userPostsIds.includes(v.postId)) {
-      if (v.type === "up") upvotes++;
-      if (v.type === "down") downvotes++;
-    }
-  });
-  
-  const total = upvotes - downvotes;
-  if (total > 0) {
-    return `<span class="text-green-400 font-extrabold">+${total}</span>`;
-  } else if (total < 0) {
-    return `<span class="text-red-500 font-extrabold">${total}</span>`;
-  } else {
-    return `<span class="text-zinc-400 font-bold">0</span>`;
-  }
-}
+// Ventanas modales de opciones extra
+window.openOptionsPostModal = function(postId) {
+  const modal = document.getElementById("optionsPostModal");
+  modal.style.display = "flex";
+  document.getElementById("optSaveBtn").onclick = () => { toggleSavePost(postId); closeOptionsModal(); };
+};
+window.closeOptionsModal = function() { document.getElementById("optionsPostModal").style.display = "none"; };
 
-function updateProfileStats() {
-  if (currentUser) {
-    const myFollowers = followerCounts[currentUser.uid] || 0;
-    const myFollowing = followingCounts[currentUser.uid] || 0;
-    const fCountEl = document.getElementById("followersCount");
-    const fFollowingEl = document.getElementById("followingCount");
-    if(fCountEl) fCountEl.innerText = myFollowers;
-    if(fFollowingEl) fFollowingEl.innerText = myFollowing;
-    
-    const repContainer = document.getElementById("userReputationPoints");
-    if (repContainer) {
-      repContainer.innerHTML = getUserReputationMarkup(currentUser.uid);
-    }
-  }
-}
+window.toggleSavePost = function(postId) {
+  if (savedPostsSet.has(postId)) { savedPostsSet.delete(postId); showNotification("Eliminado de tus marcadores", "info"); }
+  else { savedPostsSet.add(postId); showNotification("Guardado en tu colección privada", "success"); }
+};
 
-async function viewUserProfile(userId) {
-  if (!userId) return;
-  let user = allUsers.find(u => u.id === userId);
-  if (!user) {
-    try {
-      const userDoc = await getDoc(getDocRef("users", userId));
-      if (userDoc.exists()) user = { id: userDoc.id, ...userDoc.data() };
-    } catch(e) { console.error(e); }
-  }
-  if (!user) return showNotification("No se pudo cargar el perfil", "error");
-  
-  SoundFX.playClick();
-  document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
-  document.getElementById("modalUsername").innerText = user.username ? `@${user.username}` : "@usuario";
-  document.getElementById("modalFullName").innerText = user.fullName || "Nombre completo";
-  document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía.";
-  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
-  
-  const modalRep = document.getElementById("modalReputation");
-  if(modalRep) {
-    modalRep.innerHTML = getUserReputationMarkup(userId);
-  }
-  
-  const followBtn = document.getElementById("modalFollowBtn");
-  if (userId === currentUser?.uid) {
-    followBtn.classList.add("hidden");
-  } else {
-    followBtn.classList.remove("hidden");
-    const isFollowing = followingSet.has(userId);
-    if (isFollowing) {
-      followBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Siguiendo';
-      followBtn.className = "flex-grow bg-zinc-900 border border-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase";
-    } else {
-      followBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Seguir';
-      followBtn.className = "flex-grow bg-green-500 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase";
-    }
-    followBtn.onclick = () => {
-      toggleFollow(userId);
-      setTimeout(() => viewUserProfile(userId), 350);
-    };
-  }
-  
-  const chatBtn = document.getElementById("modalChatBtn");
-  if (userId === currentUser?.uid) {
-    chatBtn.classList.add("hidden");
-  } else {
-    chatBtn.classList.remove("hidden");
-    chatBtn.onclick = () => {
-      selectedUser = user;
-      closeUserProfile();
-      showSection("chat");
-      listenMessages();
-    };
-  }
-  document.getElementById("userProfileModal").style.display = "flex";
-}
-window.viewUserProfile = viewUserProfile;
+window.sharePostLink = function(postId) {
+  const syntheticUrl = `${window.location.origin}${window.location.pathname}?post=${postId}`;
+  navigator.clipboard.writeText(syntheticUrl).then(() => {
+    showNotification("Enlace directo copiado al portapapeles", "success");
+  }).catch(() => showNotification("Error al copiar enlace", "error"));
+};
 
-function closeUserProfile() {
-  SoundFX.playClick();
-  document.getElementById("userProfileModal").style.display = "none";
-}
-window.closeUserProfile = closeUserProfile;
-
-function getFontSize(content) {
-  if (!content) return "text-sm";
-  if (content.length < 50) return "text-2xl font-black text-green-400";
-  if (content.length < 100) return "text-lg font-bold text-zinc-100";
-  return "text-sm font-semibold text-zinc-300";
-}
-
-function renderPosts(posts) {
-  currentPosts = posts;
-  
-  const container = document.getElementById("postsContainer");
-  if (container) {
-    let filteredPosts = posts;
-    if (feedFilter === 'following' && currentUser) {
-      filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
-    }
-    
-    const statsLabel = document.getElementById("feed-stats-label");
-    if(statsLabel) statsLabel.innerText = `${filteredPosts.length} Publicaciones`;
-
-    if (filteredPosts.length === 0) {
-      container.innerHTML = `
-        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
-          <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
-          <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
-        </div>
-      `;
-    } else {
-      container.innerHTML = "";
-      filteredPosts.forEach(post => {
-        container.appendChild(createPostCardElement(post));
-      });
-    }
+window.votePoll = async function(postId, optionIndex) {
+  if (!currentUser) return showNotification("Inicia sesión para votar", "error");
+  const refDoc = getDocRef("posts", postId);
+  const snap = await getDoc(refDoc);
+  if (snap.exists()) {
+    const data = snap.data();
+    const poll = data.poll || { votes: {} };
+    if (!poll.voters) poll.voters = {};
+    if (poll.voters[currentUser.uid] !== undefined) return showNotification("Ya has votado en esta encuesta", "error");
+    poll.voters[currentUser.uid] = optionIndex;
+    if (!poll.votes[optionIndex]) poll.votes[optionIndex] = 0;
+    poll.votes[optionIndex] += 1;
+    await updateDoc(refDoc, { poll });
+    showNotification("Voto registrado con éxito", "success");
   }
+};
 
-  const myPostsContainer = document.getElementById("myPostsContainer");
-  if (myPostsContainer && currentUser) {
-    const myFilteredPosts = posts.filter(p => p.authorId === currentUser.uid);
-    if (myFilteredPosts.length === 0) {
-      myPostsContainer.innerHTML = `
-        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-6 text-center text-zinc-600 text-xs">
-          Aún no has compartido ninguna publicación.
-        </div>
-      `;
-    } else {
-      myPostsContainer.innerHTML = "";
-      myFilteredPosts.forEach(post => {
-        myPostsContainer.appendChild(createPostCardElement(post));
-      });
-    }
-  }
-
-  if (cachedVotesSnapshot) {
-     applyVotesStyles(cachedVotesSnapshot);
-  }
-  updateProfileStats();
-}
-
+// Renderizado estructural de tarjetas de publicaciones con soporte de encuestas y subcomentarios
 function createPostCardElement(post) {
   const isFollowing = followingSet.has(post.authorId);
   let followBtnMarkup = '';
-  
   if (currentUser && post.authorId !== currentUser.uid) {
-    if (isFollowing) {
-      followBtnMarkup = `
-        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-extrabold flex items-center gap-1">
-          <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
-        </button>`;
-    } else {
-      followBtnMarkup = `
-        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black text-xs font-black flex items-center gap-1">
-          <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
-        </button>`;
-    }
+    followBtnMarkup = isFollowing ? 
+      `<button onclick="toggleFollow('${post.authorId}')" class="px-2.5 py-1 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-[10px] font-extrabold">Siguiendo</button>` : 
+      `<button onclick="toggleFollow('${post.authorId}')" class="px-2.5 py-1 rounded-lg bg-green-500 text-black text-[10px] font-black">Seguir</button>`;
   }
 
-  // Censurar contenido del post en vivo al renderizar
   const censoredContent = filterBadWords(post.content);
+  const timeAgo = formatTimeAgo(post.createdAt);
+
+  // Módulo UI Render de Encuestas Incorporado
+  let pollMarkup = "";
+  if (post.poll && post.poll.options && post.poll.options.length > 0) {
+    pollMarkup = `<div class="mt-3 bg-zinc-900/30 border border-zinc-900 rounded-2xl p-3 space-y-2 text-xs">`;
+    const totalVotes = Object.values(post.poll.votes || {}).reduce((a,b)=>a+b, 0) || 1;
+    post.poll.options.forEach((opt, idx) => {
+      const votesOpt = post.poll.votes?.[idx] || 0;
+      const pct = Math.round((votesOpt / totalVotes) * 100);
+      pollMarkup += `
+        <div onclick="votePoll('${post.id}', ${idx})" class="relative p-2.5 bg-zinc-900/60 hover:bg-zinc-900 rounded-xl border border-zinc-800 cursor-pointer overflow-hidden flex justify-between items-center transition">
+          <div class="absolute top-0 left-0 bottom-0 bg-green-500/10 transition-all" style="width: ${pct}%"></div>
+          <span class="relative z-10 font-bold text-zinc-200">${opt}</span>
+          <span class="relative z-10 font-mono font-black text-green-400 text-[10px]">${pct}% (${votesOpt})</span>
+        </div>`;
+    });
+    pollMarkup += `</div>`;
+  }
 
   const div = document.createElement("div");
   div.id = `post-card-${post.id}`;
-  div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
+  div.className = `bg-zinc-950/80 border border-zinc-900 rounded-2xl p-4 hover:border-zinc-800 transition-all relative overflow-hidden border-2`;
   div.innerHTML = `
   <div class="flex justify-between items-center">
-    <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
-      <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
+    <div class="flex gap-2 items-center cursor-pointer" onclick="viewUserProfile('${post.authorId}')">
+      <img src="${getUserAvatar(post.authorAvatar)}" class="w-9 h-9 rounded-full object-cover">
       <div>
-        <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">@${post.authorUsername || 'usuario'}</div>
-        <div class="text-[11px] text-zinc-400 font-medium">${post.authorFullName || 'Nombre'}</div>
+        <div class="font-extrabold text-xs text-zinc-100">@${post.authorUsername || 'user'}</div>
+        <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">${timeAgo}</div>
       </div>
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5">
       ${followBtnMarkup}
-      ${currentUser && post.authorId === currentUser.uid ? `
-        <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 p-2 rounded-xl transition-colors">
-          <i class="fa-solid fa-trash text-sm"></i>
-        </button>
-      ` : ''}
+      <button onclick="sharePostLink('${post.id}')" class="text-zinc-500 hover:text-green-400 p-2 text-xs"><i class="fa-solid fa-share-nodes"></i></button>
+      <button onclick="openOptionsPostModal('${post.id}')" class="text-zinc-500 hover:text-zinc-200 p-2 text-xs"><i class="fa-solid fa-ellipsis-vertical"></i></button>
     </div>
   </div>
   
-  <p class="mt-4 leading-relaxed whitespace-pre-wrap ${getFontSize(censoredContent)}">${censoredContent}</p>
+  <p class="mt-3 text-sm leading-relaxed text-zinc-200 whitespace-pre-wrap">${censoredContent}</p>
+  ${pollMarkup}
 
-  <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
-    <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
-      <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
-        <i class="fa-solid fa-circle-arrow-up text-lg" id="up-icon-${post.id}"></i>
-        <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
+  <div class="mt-3 flex gap-2 items-center border-b border-zinc-900/40 pb-3">
+    <div class="flex items-center bg-zinc-900/40 p-1 rounded-xl border border-zinc-900 gap-1 text-xs">
+      <button id="up-btn-${post.id}" class="upvoteBtn px-3 py-1.5 rounded-lg text-green-400 bg-green-500/5 font-black flex items-center gap-1" data-id="${post.id}">
+        <i class="fa-solid fa-circle-arrow-up text-md" id="up-icon-${post.id}"></i>
+        <span id="up-counter-${post.id}" class="font-mono text-xs">0</span>
       </button>
-      <div class="w-[1px] h-6 bg-zinc-800"></div>
-      <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
-        <i class="fa-solid fa-circle-arrow-down text-lg" id="down-icon-${post.id}"></i>
-        <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
+      <div class="w-[1px] h-4 bg-zinc-800"></div>
+      <button id="down-btn-${post.id}" class="downvoteBtn px-3 py-1.5 rounded-lg text-red-400 bg-red-500/5 font-black flex items-center gap-1" data-id="${post.id}">
+        <i class="fa-solid fa-circle-arrow-down text-md" id="down-icon-${post.id}"></i>
+        <span id="down-counter-${post.id}" class="font-mono text-xs">0</span>
       </button>
     </div>
   </div>
 
-  <div class="mt-4">
-    <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
+  <div class="mt-3 space-y-2">
+    <div id="comments-list-${post.id}" class="space-y-1.5 max-h-40 overflow-y-auto scrollbar text-[11px]"></div>
     <div class="flex gap-2">
-      <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"/>
-      <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}">
-        <i class="fa-solid fa-paper-plane"></i>
-      </button>
+      <input id="comment-input-${post.id}" placeholder="Escribe un comentario público..." autocomplete="off" class="flex-1 bg-zinc-900/40 border border-zinc-900 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-zinc-800"/>
+      <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-3 rounded-xl commentBtn" data-id="${post.id}"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
   </div>
   `;
 
+  // Listener para comentarios ordenados por popularidad (Likes)
   const commentsQuery = query(getCol("comments"), where("postId", "==", post.id));
   onSnapshot(commentsQuery, (commentSnapshot) => {
-      const commentListContainer = div.querySelector(`#comments-list-${post.id}`);
-      if (commentListContainer) {
-          commentListContainer.innerHTML = "";
-          const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
-          sortedDocs.forEach(comment => {
-              const censoredCommentText = filterBadWords(comment.text);
-              const commentDiv = document.createElement("div");
-              commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
-              commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer" onclick="viewUserProfile('${comment.authorId}')">@${comment.authorUsername || 'usuario'}:</strong> <span class="text-zinc-300 ml-1">${censoredCommentText}</span>`;
-              commentListContainer.appendChild(commentDiv);
+      const listCont = div.querySelector(`#comments-list-${post.id}`);
+      if (listCont) {
+          listCont.innerHTML = "";
+          const listed = commentSnapshot.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.likes || 0) - (a.likes || 0));
+          listed.forEach(comment => {
+              const censoredComm = filterBadWords(comment.text);
+              const commDiv = document.createElement("div");
+              commDiv.className = "bg-zinc-900/30 p-2 rounded-xl border border-zinc-900/60 space-y-1";
+              commDiv.innerHTML = `
+                <div class="flex justify-between items-start">
+                  <div>
+                    <strong class="text-zinc-400 cursor-pointer" onclick="viewUserProfile('${comment.authorId}')">@${comment.authorUsername}:</strong>
+                    <span class="text-zinc-200 ml-1">${censoredComm}</span>
+                  </div>
+                  <button onclick="likeComment('${comment.id}')" class="text-zinc-600 hover:text-green-400 transition flex items-center gap-0.5"><i class="fa-solid fa-heart"></i> <span class="font-mono text-[9px]">${comment.likes || 0}</span></button>
+                </div>
+                <div class="pl-3 border-l border-zinc-800 space-y-1" id="replies-container-${comment.id}"></div>
+                <div class="flex gap-1 mt-1 pl-3">
+                  <input id="reply-to-${comment.id}" placeholder="Responder a este comentario..." class="bg-transparent text-[10px] text-zinc-300 placeholder-zinc-600 focus:outline-none w-full">
+                  <button onclick="submitReply('${post.id}', '${comment.id}')" class="text-green-500 text-[10px] font-bold uppercase tracking-wider">Responder</button>
+                </div>
+              `;
+
+              // Renderizado recursivo plano de respuestas en cadena
+              if (comment.replies && comment.replies.length > 0) {
+                const repCont = commDiv.querySelector(`#replies-container-${comment.id}`);
+                comment.replies.forEach(r => {
+                  const rDiv = document.createElement("div");
+                  rDiv.className = "text-[10px] text-zinc-400 mt-0.5";
+                  rDiv.innerHTML = `<span class="text-zinc-500 font-bold">@${r.authorUsername}:</span> ${filterBadWords(r.text)}`;
+                  repCont.appendChild(rDiv);
+                });
+              }
+              listCont.appendChild(commDiv);
           });
       }
   });
-
   return div;
 }
 
+window.likeComment = async function(commentId) {
+  if (!currentUser) return showNotification("Inicia sesión para interactuar", "error");
+  const ref = getDocRef("comments", commentId);
+  await updateDoc(ref, { likes: increment(1) });
+};
+
+window.submitReply = async function(postId, commentId) {
+  if (!currentUser) return showNotification("Inicia sesión", "error");
+  const input = document.getElementById(`reply-to-${commentId}`);
+  const text = input ? input.value.trim() : "";
+  if (!text) return;
+  const myUserData = allUsers.find(u => u.id === currentUser.uid);
+  const ref = getDocRef("comments", commentId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const data = snap.exists() ? snap.data() : {};
+    const replies = data.replies || [];
+    replies.push({ authorId: currentUser.uid, authorUsername: myUserData?.username || "usuario", text, createdAt: Date.now() });
+    await updateDoc(ref, { replies });
+    if(input) input.value = "";
+    showNotification("Respuesta enviada", "success");
+    await sendSystemNotice(data.authorId, "comment", myUserData?.username || "usuario", postId);
+  }
+};
+
 document.addEventListener("click", async (event) => {
     const target = event.target;
-
-    if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
-        const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
-        const postId = btn.dataset.id;
-        if (!confirm("¿Estás seguro de que quieres eliminar este post permanentemente?")) return;
-        try {
-            await deleteDoc(getDocRef("posts", postId));
-            showNotification("Publicación eliminada correctamente.", "success");
-        } catch (error) { showNotification("No se pudo eliminar el post.", "error"); }
-        return;
-    }
-
     if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
         const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
         if(!currentUser) return showNotification("Debes iniciar sesión", "error");
-        
         const postId = btn.dataset.id;
         const input = document.getElementById(`comment-input-${postId}`);
         const text = input ? input.value.trim() : "";
         if(!text) return;
-
         const myUserData = allUsers.find(u => u.id === currentUser.uid);
-
+        
         await addDoc(getCol("comments"), {
-            postId, 
-            text, 
-            authorUsername: myUserData?.username || currentUser.displayName, 
-            authorId: currentUser.uid, 
-            createdAt: Date.now()
+            postId, text, authorUsername: myUserData?.username || currentUser.displayName, authorId: currentUser.uid, likes: 0, replies: [], createdAt: Date.now()
         });
+        const postSnap = await getDoc(getDocRef("posts", postId));
+        if(postSnap.exists()) await sendSystemNotice(postSnap.data().authorId, "comment", myUserData?.username || "usuario", postId);
         if(input) input.value = "";
         SoundFX.playSuccess();
-        showNotification("Comentario publicado", "success");
         return;
     }
 
     if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
         const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
         if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-        
-        const postId = btn.dataset.id;
-        const voteId = `${currentUser.uid}_${postId}`;
+        const postId = btn.dataset.id; const voteId = `${currentUser.uid}_${postId}`;
         const icon = document.getElementById(`up-icon-${postId}`);
+        if (icon) { icon.classList.add("animate-upvote-arrow"); icon.addEventListener("animationend", () => icon.classList.remove("animate-upvote-arrow"), { once: true }); }
         
-        SoundFX.playVoteUp();
-        if (icon) {
-          icon.classList.add("animate-upvote-arrow");
-          icon.addEventListener("animationend", () => icon.classList.remove("animate-upvote-arrow"), { once: true });
-        }
-        
-        const voteRef = getDocRef("votes", voteId);
-        const voteSnap = await getDoc(voteRef);
-        
-        if (voteSnap.exists() && voteSnap.data().type === "up") {
-            await deleteDoc(voteRef);
-            showNotification("Voto retirado", "info");
-        } else {
+        const voteRef = getDocRef("votes", voteId); const voteSnap = await getDoc(voteRef);
+        if (voteSnap.exists() && voteSnap.data().type === "up") { await deleteDoc(voteRef); } 
+        else {
             await setDoc(voteRef, { postId, userId: currentUser.uid, type: "up", createdAt: Date.now() });
+            const pSnap = await getDoc(getDocRef("posts", postId));
+            if(pSnap.exists()) await sendSystemNotice(pSnap.data().authorId, "vote", auth.currentUser.displayName || "usuario", postId);
         }
         return;
     }
@@ -1023,459 +790,168 @@ document.addEventListener("click", async (event) => {
     if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
         const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
         if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-        
-        const postId = btn.dataset.id;
-        const voteId = `${currentUser.uid}_${postId}`;
+        const postId = btn.dataset.id; const voteId = `${currentUser.uid}_${postId}`;
         const icon = document.getElementById(`down-icon-${postId}`);
-
-        SoundFX.playVoteDown();
-        if (icon) {
-          icon.classList.add("animate-downvote-arrow");
-          icon.addEventListener("animationend", () => icon.classList.remove("animate-downvote-arrow"), { once: true });
-        }
+        if (icon) { icon.classList.add("animate-downvote-arrow"); icon.addEventListener("animationend", () => icon.classList.remove("animate-downvote-arrow"), { once: true }); }
         
-        const voteRef = getDocRef("votes", voteId);
-        const voteSnap = await getDoc(voteRef);
-        
-        if (voteSnap.exists() && voteSnap.data().type === "down") {
-            await deleteDoc(voteRef);
-            showNotification("Voto retirado", "info");
-        } else {
-            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "down", createdAt: Date.now() });
-        }
+        const voteRef = getDocRef("votes", voteId); const voteSnap = await getDoc(voteRef);
+        if (voteSnap.exists() && voteSnap.data().type === "down") { await deleteDoc(voteRef); } 
+        else { await setDoc(voteRef, { postId, userId: currentUser.uid, type: "down", createdAt: Date.now() }); }
         return;
     }
 });
 
+// Sistema Avanzado de Enrutamiento de Vistas (Barra Inferior + Navbar)
+window.showSection = function(section) {
+  SoundFX.playClick();
+  const sections = ["feed", "create", "chat", "profile", "notifications"];
+  sections.forEach(s => {
+    const el = document.getElementById(`${s}Section`);
+    if(el) el.classList.add("hidden");
+    const tab = document.getElementById(`bottom-tab-${s}`);
+    if(tab) tab.className = "flex flex-col items-center justify-center p-2 text-zinc-500 transition-all duration-200";
+  });
+
+  const activeSection = document.getElementById(`${section}Section`);
+  if(activeSection) activeSection.classList.remove("hidden");
+  const activeTab = document.getElementById(`bottom-tab-${section}`);
+  if(activeTab) activeTab.className = "flex flex-col items-center justify-center p-2 text-green-400 font-bold scale-110 transition-all duration-200";
+};
+
 window.setFeedFilter = function(filter) {
   feedFilter = filter;
-  SoundFX.playClick();
-  const btnAll = document.getElementById("filter-all");
-  const btnFollow = document.getElementById("filter-following");
-  if(filter === 'all') {
-    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
-    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-  } else {
-    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
-  }
   renderPosts(currentPosts);
 };
 
+window.viewUserProfile = async function(userId) {
+  let user = allUsers.find(u => u.id === userId);
+  if (!user) {
+    const uDoc = await getDoc(getDocRef("users", userId));
+    if (uDoc.exists()) user = { id: uDoc.id, ...uDoc.data() };
+  }
+  if (!user) return;
+  
+  document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
+  document.getElementById("modalUsername").innerText = `@${user.username}`;
+  document.getElementById("modalFullName").innerText = user.fullName || "Usuario";
+  document.getElementById("modalBio").innerText = user.bio || "Sin biografía.";
+  document.getElementById("modalRegisterDate").innerText = `Miembro desde: ${formatDate(user.createdAt)}`;
+  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
+  document.getElementById("modalFollowing").innerText = followingCounts[userId] || 0;
+  
+  const fBtn = document.getElementById("modalFollowBtn");
+  if(userId === currentUser?.uid) fBtn.classList.add("hidden");
+  else {
+    fBtn.classList.remove("hidden");
+    fBtn.innerText = followingSet.has(userId) ? "Siguiendo" : "Seguir";
+    fBtn.onclick = async () => { await toggleFollow(userId); viewUserProfile(userId); };
+  }
+  
+  document.getElementById("modalChatBtn").onclick = () => { selectedUser = user; closeUserProfile(); showSection("chat"); listenMessages(); };
+  document.getElementById("userProfileModal").style.display = "flex";
+};
+
+window.closeUserProfile = function() { document.getElementById("userProfileModal").style.display = "none"; };
+
 window.toggleFollow = async function(targetUserId) {
-  if(!currentUser) return showNotification("Inicia sesión para seguir usuarios", "error");
-  const followId = `${currentUser.uid}_${targetUserId}`;
-  const followRef = getDocRef("followers", followId);
-  const snap = await getDoc(followRef);
-  if(snap.exists()) {
-    await deleteDoc(followRef);
-    showNotification("Dejaste de seguir a este usuario", "info");
-  } else {
-    await setDoc(followRef, { followerId: currentUser.uid, followingId: targetUserId, createdAt: Date.now() });
-    showNotification("¡Ahora sigues a este usuario!", "success");
-  }
-};
-
-window.showSection = function(section) {
-  SoundFX.playClick();
-  document.getElementById("feedSection").classList.add("hidden");
-  document.getElementById("chatSection").classList.add("hidden");
-  document.getElementById("profileSection").classList.add("hidden");
-  
-  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
-  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
-  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
-
-  if(section === 'feed') {
-    document.getElementById("feedSection").classList.remove("hidden");
-    document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
-  } else if(section === 'chat') {
-    document.getElementById("chatSection").classList.remove("hidden");
-    document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
-  } else if(section === 'profile') {
-    document.getElementById("profileSection").classList.remove("hidden");
-    document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
-    renderPosts(currentPosts);
-  }
-};
-
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const pass = document.getElementById("loginPassword").value.trim();
-  if(!email || !pass) return showNotification("Por favor rellena todos los campos", "error");
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    showNotification("Sesión iniciada correctamente", "success");
-  } catch(err) { showNotification("Credenciales inválidas", "error"); }
-};
-
-document.getElementById("registerBtn").onclick = async () => {
-  const username = document.getElementById("registerUsername").value.trim();
-  const fullName = document.getElementById("registerFullName").value.trim();
-  const email = document.getElementById("registerEmail").value.trim();
-  const pass = document.getElementById("registerPassword").value.trim();
-  if(!username || !fullName || !email || !pass) return showNotification("Por favor rellena todos los campos", "error");
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await updateProfile(cred.user, { displayName: username, photoURL: selectedDefaultAvatarUrl });
-    await setDoc(getDocRef("users", cred.user.uid), {
-      uid: cred.user.uid, username, fullName, email, bio: "¡Hola! Estoy usando Rankiu.", avatar: selectedDefaultAvatarUrl, createdAt: Date.now()
-    });
-    showNotification("Cuenta creada con éxito", "success");
-  } catch(err) { showNotification("Error al registrar cuenta", "error"); }
-};
-
-document.getElementById("publishBtn").onclick = async () => {
-  if(!currentUser) return showNotification("Inicia sesión para publicar", "error");
-  const content = document.getElementById("postContent").value.trim();
-  if(!content) return showNotification("El contenido no puede estar vacío", "error");
-  try {
+  if(!currentUser) return;
+  const fId = `${currentUser.uid}_${targetUserId}`;
+  const fRef = getDocRef("followers", fId);
+  const snap = await getDoc(fRef);
+  if(snap.exists()) { await deleteDoc(fRef); } 
+  else {
+    await setDoc(fRef, { followerId: currentUser.uid, followingId: targetUserId, createdAt: Date.now() });
     const myUserData = allUsers.find(u => u.id === currentUser.uid);
-
-    await addDoc(getCol("posts"), {
-      content, 
-      authorUsername: myUserData?.username || currentUser.displayName, 
-      authorFullName: myUserData?.fullName || "Usuario",
-      authorId: currentUser.uid, 
-      authorAvatar: currentUser.photoURL, 
-      createdAt: Date.now()
-    });
-    document.getElementById("postContent").value = "";
-    document.getElementById("charCounter").innerText = "0 / 150";
-    showNotification("Publicación enviada", "success");
-  } catch(err) { showNotification("Error al publicar", "error"); }
+    await sendSystemNotice(targetUserId, "follow", myUserData?.username || "usuario");
+  }
 };
 
-function renderSuggestedUsers() {
-  const container = document.getElementById("suggestedUsersList");
-  if (!container) return;
-  const suggestions = allUsers.filter(u => u.id !== currentUser?.uid && !followingSet.has(u.id)).slice(0, 4);
-  
-  if (suggestions.length === 0) {
-    container.innerHTML = `<p class="text-xs text-zinc-500">Ya sigues a todos los miembros.</p>`;
-    return;
+// Guardado de Publicaciones
+document.getElementById("publishBtn").onclick = async () => {
+  if(!currentUser) return showNotification("Inicia sesión", "error");
+  const content = document.getElementById("postContent").value.trim();
+  if(!content) return;
+
+  // Analizar si contiene opciones válidas de encuesta
+  const optionsArr = [];
+  document.querySelectorAll(".poll-opt-input").forEach(inp => { if(inp.value.trim()) optionsArr.push(inp.value.trim()); });
+  let pollObj = null;
+  if(optionsArr.length >= 2) {
+    const votesInit = {}; optionsArr.forEach((o, i) => votesInit[i] = 0);
+    pollObj = { options: optionsArr, votes: votesInit, voters: {} };
   }
-  
-  container.innerHTML = "";
-  suggestions.forEach(user => {
-    const div = document.createElement("div");
-    div.className = "flex items-center justify-between p-2 rounded-2xl bg-zinc-900/30 border border-zinc-900 hover:border-zinc-800 transition";
-    div.innerHTML = `
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="viewUserProfile('${user.id}')">
-        <img src="${getUserAvatar(user.avatar)}" class="w-8 h-8 rounded-full object-cover">
-        <div class="truncate max-w-[110px]">
-          <div class="text-xs font-black text-zinc-200">@${user.username}</div>
-          <div class="text-[9px] text-zinc-500 font-medium truncate">${user.fullName || ''}</div>
-        </div>
-      </div>
-      <button onclick="toggleFollow('${user.id}')" class="px-3 py-1 bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-black font-extrabold text-[10px] rounded-lg transition-all border border-green-500/20">
-        Seguir
-      </button>
-    `;
-    container.appendChild(div);
+
+  const myUserData = allUsers.find(u => u.id === currentUser.uid);
+  await addDoc(getCol("posts"), {
+    content, authorUsername: myUserData?.username || currentUser.displayName, authorFullName: myUserData?.fullName || "Usuario",
+    authorId: currentUser.uid, authorAvatar: currentUser.photoURL, poll: pollObj, createdAt: Date.now()
   });
-}
 
-function listenUsers() {
-  onSnapshot(query(getCol("users")), (snapshot) => {
-    allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderUsers();
-    renderSuggestedUsers();
-    updateNavbar();
-    renderProfile();
-  });
-}
-
-function renderUsers() {
-  const container = document.getElementById("usersList");
-  if (!container) return;
-  container.innerHTML = "";
-  allUsers.forEach(user => {
-    if(currentUser && user.id === currentUser.uid) return;
-    const div = document.createElement("div");
-    div.className = `flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-900 rounded-2xl p-3 cursor-pointer hover:border-zinc-800 transition-all duration-200`;
-    div.onclick = () => {
-      selectedUser = user;
-      SoundFX.playClick();
-      listenMessages();
-    };
-    div.innerHTML = `
-    <img src="${getUserAvatar(user.avatar)}" class="w-10 h-10 rounded-full object-cover">
-    <div>
-      <div class="font-extrabold text-sm text-zinc-200 truncate">@${user.username}</div>
-      <div class="text-xs text-zinc-500 font-medium">${user.fullName || ''}</div>
-    </div>
-    `;
-    container.appendChild(div);
-  });
-}
-
-function insertEmoji(emoji) {
-  const input = document.getElementById("messageInput");
-  if(input) {
-    input.value += emoji;
-    input.focus();
-    SoundFX.playClick();
-  }
-}
-window.insertEmoji = insertEmoji;
-
-async function sendMessage(){
-  if(!selectedUser){ showNotification("Selecciona un usuario primero", "error"); return; }
-  const input = document.getElementById("messageInput");
-  const text = input ? input.value.trim() : "";
-  if(!text) return;
-
-  await addDoc(getCol("messages"),{
-    from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
-  });
-  input.value = "";
-  SoundFX.playMessage();
-}
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
-
-document.getElementById("messageInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function listenMessages(){
-  if(!selectedUser) return;
-  document.getElementById("chatHeader").innerHTML = `
-    <div class="flex items-center gap-3">
-      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer mr-1" onclick="closeActiveChat()"></i>
-      <img src="${getUserAvatar(selectedUser.avatar)}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
-      <div class="flex flex-col text-left cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
-        <span class="text-white font-bold hover:text-green-400 text-sm transition">@${selectedUser.username}</span>
-        <span class="text-zinc-400 font-medium text-xs">${selectedUser.fullName || ''}</span>
-      </div>
-    </div>
+  document.getElementById("postContent").value = "";
+  document.getElementById("pollOptionsInputsContainer").innerHTML = `
+    <input type="text" placeholder="Opción de encuesta 1" class="poll-opt-input w-full bg-zinc-900/40 border border-zinc-900 text-xs rounded-xl p-2.5 text-zinc-300 focus:outline-none">
+    <input type="text" placeholder="Opción de encuesta 2" class="poll-opt-input w-full bg-zinc-900/40 border border-zinc-900 text-xs rounded-xl p-2.5 text-zinc-300 focus:outline-none">
   `;
-  const q = query(getCol("messages"), orderBy("createdAt","asc"));
-  onSnapshot(q,(snapshot)=>{
-    const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
-    .filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
+  document.getElementById("addOptionBtn").classList.remove("hidden");
+  showNotification("Publicación enviada con éxito", "success");
+  showSection("feed");
+};
 
-    const container = document.getElementById("chatMessages");
-    if(!container) return;
-    container.innerHTML = "";
-    
-    if (messages.length === 0) {
-      container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center text-zinc-600">
-          <p class="text-xs">Di hola para empezar una conversación con @${selectedUser.username}.</p>
-        </div>`;
-    }
-
-    messages.forEach(msg => {
-      const mine = msg.from === currentUser.uid;
-      const censoredMsgText = filterBadWords(msg.text);
-      const div = document.createElement("div");
-      div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
-      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold shadow-md shadow-green-500/10' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${censoredMsgText}</div>`;
-      container.appendChild(div);
-    });
-    container.scrollTop = container.scrollHeight;
-  });
-}
-
-function closeActiveChat() {
-  selectedUser = null;
-  SoundFX.playClick();
-  document.getElementById("chatHeader").innerHTML = `<span class="text-zinc-500 text-sm">Selecciona un usuario para chatear</span>`;
-  document.getElementById("chatMessages").innerHTML = `
-    <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
-      <i class="fa-regular fa-paper-plane text-4xl"></i>
-      <p class="text-sm">Tus chats privados están encriptados en la nube</p>
-    </div>`;
-}
-window.closeActiveChat = closeActiveChat;
-
-async function saveProfileChanges() {
-  if (!currentUser) return;
-  const newUsername = document.getElementById("editUsername").value.trim();
-  const newFullName = document.getElementById("editFullName").value.trim();
-  const newBio = document.getElementById("editBio").value.trim();
-  if (!newUsername || !newFullName) return showNotification("El nombre de usuario y nombre completo no pueden estar vacíos", "error");
-  
-  try {
-    showNotification("Guardando perfil...", "info");
-    await updateProfile(currentUser, { displayName: newUsername });
-    await setDoc(getDocRef("users", currentUser.uid), { username: newUsername, fullName: newFullName, bio: newBio }, { merge: true });
-    SoundFX.playSuccess();
-    showNotification("¡Perfil actualizado con éxito!", "success");
-  } catch(err) { showNotification("Error: " + err.message, "error"); }
-}
-window.saveProfileChanges = saveProfileChanges;
-
-async function logout(){ 
-  await signOut(auth); 
-  SoundFX.playClick();
-  showNotification("Sesión cerrada", "info");
-}
-
-function updateNavbar(){
-  const nav = document.getElementById("navUser");
-  if(!nav) return;
-  if(currentUser){
-    nav.innerHTML = `
-    <div class="flex items-center gap-2">
-      <img src="${getUserAvatar(currentUser.photoURL)}" class="w-8 h-8 rounded-full object-cover border border-green-500 cursor-pointer hidden sm:block" onclick="showSection('profile')">
-      <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider">Salir</button>
-    </div>
-    `;
-    document.getElementById("logoutBtn").addEventListener("click", logout);
-    
-    const miniCard = document.getElementById("miniProfileCard");
-    if(miniCard) {
-      const myData = allUsers.find(u => u.id === currentUser.uid);
-      miniCard.innerHTML = `
-        <img src="${getUserAvatar(currentUser.photoURL)}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
-        <div class="truncate flex-1 text-left">
-          <div class="font-extrabold text-sm text-zinc-200">@${myData?.username || currentUser.displayName || 'usuario'}</div>
-          <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">${myData?.fullName || 'Mi Perfil'}</div>
-        </div>
-      `;
-    }
-  }else{ 
-    nav.innerHTML = `<div class="text-zinc-500 text-xs">Invitado</div>`; 
+function renderPosts(posts) {
+  currentPosts = posts;
+  updateTrendingTopics(posts);
+  const container = document.getElementById("postsContainer");
+  if (container) {
+    let filtered = posts;
+    if (feedFilter === 'following' && currentUser) filtered = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
+    container.innerHTML = filtered.length === 0 ? `<div class="p-12 text-center text-zinc-600 text-xs">No hay publicaciones disponibles</div>` : "";
+    filtered.forEach(p => container.appendChild(createPostCardElement(p)));
   }
+  if (cachedVotesSnapshot) applyVotesStyles(cachedVotesSnapshot);
 }
-
-function renderProfile(){
-  if(!currentUser) return;
-  document.getElementById("profileAvatar").src = getUserAvatar(currentUser.photoURL);
-  const myData = allUsers.find(u => u.id === currentUser.uid);
-  document.getElementById("editUsername").value = myData?.username || currentUser.displayName || '';
-  document.getElementById("editFullName").value = myData?.fullName || '';
-  document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
-}
-
-const postsQuery = query(getCol("posts"), orderBy("createdAt","desc"));
-onSnapshot(postsQuery, (snapshot)=>{
-  const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
-  renderPosts(posts);
-});
-
-async function updateProfilePhoto(){
-  if(!currentUser) return;
-  const file = document.getElementById("newProfilePhoto").files[0];
-  if(!file){ showNotification("Por favor, selecciona una foto", "error"); return; }
-  try{
-    showNotification("Actualizando avatar...", "info");
-    const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
-    await updateProfile(currentUser,{ photoURL:imageUrl });
-    await setDoc(getDocRef("users", currentUser.uid), { avatar:imageUrl }, { merge:true });
-    
-    document.getElementById("profileAvatar").src = imageUrl;
-    updateNavbar();
-    SoundFX.playSuccess();
-    showNotification("Avatar de perfil actualizado", "success");
-  }catch(error){ showNotification(error.message, "error"); }
-}
-document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
 
 function applyVotesStyles(snapshot) {
-    if (!snapshot) return;
-    const postVotes = {};
-    const myVotes = {}; 
-
-    snapshot.docs.forEach(doc => {
-        const vote = doc.data();
-        if (!postVotes[vote.postId]) {
-            postVotes[vote.postId] = { up: 0, down: 0 };
-        }
-        if (vote.type === "up") { postVotes[vote.postId].up += 1; } 
-        else if (vote.type === "down") { postVotes[vote.postId].down += 1; }
-        
-        if (currentUser && vote.userId === currentUser.uid) {
-          myVotes[vote.postId] = vote.type;
-        }
-    });
-
-    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
-        const postId = card.id.replace('post-card-', '');
-        const votes = postVotes[postId] || { up: 0, down: 0 };
-        
-        const upCounter = card.querySelector(`#up-counter-${postId}`);
-        const downCounter = card.querySelector(`#down-counter-${postId}`);
-        const upBtn = card.querySelector(`#up-btn-${postId}`);
-        const downBtn = card.querySelector(`#down-btn-${postId}`);
-
-        if (upCounter) upCounter.innerText = votes.up;
-        if (downCounter) downCounter.innerText = votes.down;
-
-        if (upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5";
-        }
-        if (downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5";
-        }
-
-        if (myVotes[postId] === "up" && upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
-        } else if (myVotes[postId] === "down" && downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
-        }
-
-        card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
-        if (votes.up > votes.down) {
-            card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
-        } else if (votes.down > votes.up) {
-            card.classList.add("border-red-500", "shadow-[0_0_15px_rgba(239,68,68,0.15)]");
-        } else {
-            card.classList.add("border-zinc-900");
-        }
-    });
-}
-
-onSnapshot(getCol("votes"), (snapshot) => {
-    cachedVotesSnapshot = snapshot;
-    cachedGlobalVotes = snapshot.docs.map(doc => doc.data());
-    applyVotesStyles(snapshot);
-    updateProfileStats();
-});
-
-let appLoadTime = Date.now();
-let notifiedMessages = new Set();
-
-function listenIncomingMessages() {
-  if (!currentUser) return;
-  onSnapshot(query(getCol("messages")), (snapshot) => {
-    snapshot.docs.forEach(doc => {
-      const msg = doc.data();
-      const msgId = doc.id;
-      
-      if (msg.to === currentUser.uid && msg.from !== currentUser.uid && !notifiedMessages.has(msgId)) {
-        notifiedMessages.add(msgId);
-        const isCurrentActiveChat = (selectedUser && selectedUser.id === msg.from && !document.getElementById("chatSection").classList.contains("hidden"));
-        
-        if (msg.createdAt) {
-          const msgTime = msg.createdAt.seconds ? msg.createdAt.seconds * 1000 : msg.createdAt;
-          if (msgTime > appLoadTime) {
-            SoundFX.playMessage();
-            if (!isCurrentActiveChat) {
-              const sender = allUsers.find(u => u.id === msg.from);
-              const senderDisplayName = sender ? `@${sender.username}` : "Alguien";
-              const censoredNotificationText = filterBadWords(msg.text);
-              showNotification(`Nuevo mensaje de ${senderDisplayName}: "${censoredNotificationText}"`, "success");
-            }
-          }
-        }
-      }
-    });
+  if (!snapshot) return;
+  const postVotes = {}; const myVotes = {};
+  snapshot.docs.forEach(doc => {
+    const vote = doc.data(); if (!postVotes[vote.postId]) postVotes[vote.postId] = { up: 0, down: 0 };
+    if (vote.type === "up") postVotes[vote.postId].up += 1; else if (vote.type === "down") postVotes[vote.postId].down += 1;
+    if (currentUser && vote.userId === currentUser.uid) myVotes[vote.postId] = vote.type;
+  });
+  document.querySelectorAll('[id^="post-card-"]').forEach(card => {
+    const pId = card.id.replace('post-card-', ''); const votes = postVotes[pId] || { up: 0, down: 0 };
+    const uc = card.querySelector(`#up-counter-${pId}`); const dc = card.querySelector(`#down-counter-${pId}`);
+    if (uc) uc.innerText = votes.up; if (dc) dc.innerText = votes.down;
   });
 }
 
-onAuthStateChanged(auth, async (user)=>{
+function listenFollowers() {
+  if (!currentUser) return;
+  onSnapshot(getCol("followers"), (snapshot) => {
+    followingSet.clear(); followerCounts = {}; followingCounts = {};
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.followerId === currentUser.uid) followingSet.add(data.followingId);
+      followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
+      followingCounts[data.followerId] = (followingCounts[data.followerId] || 0) + 1;
+    });
+    renderPosts(currentPosts);
+  });
+}
+
+// Inicialización de datos generales
+onSnapshot(query(getCol("posts"), orderBy("createdAt","desc")), (snap) => { renderPosts(snap.docs.map(d => ({ id: d.id, ...d.data() }))); });
+onSnapshot(getCol("votes"), (snap) => { cachedVotesSnapshot = snap; applyVotesStyles(snap); });
+onSnapshot(getCol("users"), (snap) => { allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
+
+onAuthStateChanged(auth, (user) => {
   currentUser = user;
-  updateNavbar();
-  if(user){
+  if(user) {
     document.getElementById("authModal").classList.add("hidden");
-    showSection("feed");
-    listenUsers();
-    listenFollowers();
-    listenIncomingMessages();
-  }else{
+    const profileReg = document.getElementById("profileRegisterDate");
+    if(profileReg) profileReg.innerText = `Miembro desde: ${formatDate(user.metadata.createdAt || Date.now())}`;
+    showSection("feed"); listenFollowers(); listenNotifications();
+  } else {
     document.getElementById("authModal").classList.remove("hidden");
   }
 });
