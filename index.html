@@ -295,7 +295,7 @@
       </div>
     </div>
     
-    <!-- Recuperación de contraseña integrada (Sin alert ni prompt) -->
+    <!-- Recuperación de contraseña integrada -->
     <div id="recoverBox" class="hidden space-y-3">
       <p class="text-xs text-zinc-400 text-center mb-2">Ingresa tu correo electrónico para enviarte un enlace exclusivo de recuperación:</p>
       <input id="recoverEmail" placeholder="Correo electrónico de tu cuenta" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
@@ -311,10 +311,9 @@
       <input id="registerEmail" placeholder="Correo electrónico" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
       <input type="password" id="registerPassword" placeholder="Crea tu contraseña" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
       
-      <!-- Lista limpia de Avatares (Sin etiquetas de texto confusas) -->
       <div class="p-3 bg-zinc-900/50 border border-zinc-800/80 rounded-xl">
         <div class="flex justify-center gap-3" id="avatarSelectorContainer">
-          <!-- Generado de forma dinámica por JavaScript -->
+          <!-- Generado por JS -->
         </div>
       </div>
       
@@ -481,8 +480,8 @@ let followerCounts = {};
 let followingCounts = {};
 let currentPosts = [];
 let feedFilter = 'all'; 
+let cachedVotesSnapshot = null;
 
-// Conversión segura de los monitos de colores estilo WhatsApp a Base64
 const DefaultAvatars = [
   { id: 'teal', color: '#075e54' },
   { id: 'blue', color: '#34b7f1' },
@@ -506,18 +505,20 @@ function getUserAvatar(avatarUrl) {
 
 function renderDefaultAvatarSelector() {
   const container = document.getElementById("avatarSelectorContainer");
+  if (!container) return;
   container.innerHTML = "";
   DefaultAvatars.forEach(av => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = `w-10 h-10 rounded-full border-2 transition-all transform hover:scale-110 active:scale-95 flex items-center justify-center overflow-hidden relative`;
-    btn.style.borderColor = av.id === 'teal' ? '#22c55e' : 'transparent';
+    btn.style.borderColor = av.url === selectedDefaultAvatarUrl ? '#22c55e' : 'transparent';
     btn.id = `av-choice-${av.id}`;
     btn.onclick = () => {
       SoundFX.playClick();
       selectedDefaultAvatarUrl = av.url;
       DefaultAvatars.forEach(a => {
-        document.getElementById(`av-choice-${a.id}`).style.borderColor = 'transparent';
+        const item = document.getElementById(`av-choice-${a.id}`);
+        if(item) item.style.borderColor = 'transparent';
       });
       btn.style.borderColor = '#22c55e';
     };
@@ -529,6 +530,7 @@ renderDefaultAvatarSelector();
 
 function showNotification(message, type = "info") {
   const container = document.getElementById("toastContainer");
+  if(!container) return;
   const toast = document.createElement("div");
   toast.className = `p-4 rounded-2xl shadow-xl border text-xs font-bold pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-3`;
   
@@ -544,39 +546,37 @@ function showNotification(message, type = "info") {
   }
   
   container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.remove("translate-y-2", "opacity-0");
-  }, 50);
-
+  setTimeout(() => { toast.classList.remove("translate-y-2", "opacity-0"); }, 50);
   setTimeout(() => {
     toast.classList.add("opacity-0", "translate-y-[-10px]");
     setTimeout(() => toast.remove(), 300);
   }, 3500);
 }
 
-// Escucha del campo de creación de posts de texto adaptativo
 const postTextarea = document.getElementById("postContent");
-postTextarea.addEventListener("input", (e) => {
-  const len = e.target.value.length;
-  document.getElementById("charCounter").innerText = `${len} / 150`;
-  
-  const label = document.getElementById("charCounter");
-  if (len >= 130) {
-    label.className = "text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md font-mono border border-red-500/20";
-  } else if (len >= 90) {
-    label.className = "text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-md font-mono border border-yellow-500/20";
-  } else {
-    label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
-  }
+if (postTextarea) {
+  postTextarea.addEventListener("input", (e) => {
+    const len = e.target.value.length;
+    document.getElementById("charCounter").innerText = `${len} / 150`;
+    const label = document.getElementById("charCounter");
+    
+    if (len >= 130) {
+      label.className = "text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md font-mono border border-red-500/20";
+    } else if (len >= 90) {
+      label.className = "text-xs text-yellow-400 bg-yellow-500/10 px-2 py-0.5 rounded-md font-mono border border-yellow-500/20";
+    } else {
+      label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
+    }
 
-  if (len < 50) {
-    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
-  } else if (len < 100) {
-    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-lg font-bold transition-all duration-300 text-zinc-100";
-  } else {
-    e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-sm font-semibold transition-all duration-300 text-zinc-300";
-  }
-});
+    if (len < 50) {
+      e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
+    } else if (len < 100) {
+      e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-lg font-bold transition-all duration-300 text-zinc-100";
+    } else {
+      e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-sm font-semibold transition-all duration-300 text-zinc-300";
+    }
+  });
+}
 
 function switchAuth(type) {
   SoundFX.playClick();
@@ -595,13 +595,11 @@ function switchAuth(type) {
 }
 window.switchAuth = switchAuth;
 
-// Flujo de recuperación de contraseña integrado sin prompt
 function showRecoverFlow() {
   SoundFX.playClick();
   document.getElementById("loginBox").classList.add("hidden");
   document.getElementById("authToggleContainer").classList.add("hidden");
   document.getElementById("recoverBox").classList.remove("hidden");
-  
   const currentLoginEmail = document.getElementById("loginEmail").value.trim();
   document.getElementById("recoverEmail").value = currentLoginEmail;
 }
@@ -617,26 +615,14 @@ window.hideRecoverFlow = hideRecoverFlow;
 
 async function sendResetLinkFlow() {
   const emailInput = document.getElementById("recoverEmail").value.trim();
-  if (!emailInput) {
-    showNotification("Por favor introduce tu dirección de correo electrónico", "error");
-    return;
-  }
-  
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(emailInput)) {
-    showNotification("Introduce un formato de correo válido", "error");
-    return;
-  }
-
+  if (!emailInput) return showNotification("Por favor introduce tu correo", "error");
   try {
     showNotification("Enviando enlace...", "info");
     await sendPasswordResetEmail(auth, emailInput);
-    showNotification(`¡Enlace enviado con éxito a ${emailInput}! Revisa tu bandeja de entrada o spam.`, "success");
+    showNotification(`¡Enlace enviado con éxito a ${emailInput}!`, "success");
     SoundFX.playSuccess();
     hideRecoverFlow();
-  } catch(error) {
-    showNotification("Error: " + error.message, "error");
-  }
+  } catch(error) { showNotification("Error: " + error.message, "error"); }
 }
 document.getElementById("recoverSendBtn").addEventListener("click", sendResetLinkFlow);
 
@@ -646,96 +632,12 @@ async function uploadImage(file, path) {
   return await getDownloadURL(storageRef);
 }
 
-async function register() {
-  const username = document.getElementById("registerUsername").value.trim();
-  const email = document.getElementById("registerEmail").value.trim();
-  const password = document.getElementById("registerPassword").value.trim();
-
-  if(!username || !email || !password){
-    showNotification("Completa todos los campos", "error");
-    return;
-  }
-  try{
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    let avatarUrl = selectedDefaultAvatarUrl;
-    
-    await updateProfile(userCredential.user,{ displayName: username, photoURL: avatarUrl });
-    await setDoc(getDocRef("users", userCredential.user.uid), {
-      username, email, avatar: avatarUrl, bio: "¡Hola! Estoy usando Rankiu.", followers: 0, createdAt: Date.now()
-    });
-    SoundFX.playSuccess();
-    showNotification("Cuenta creada con éxito", "success");
-  }catch(error){ showNotification(error.message, "error"); }
-}
-
-async function login(){
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-  if(!email || !password) return showNotification("Ingresa tus credenciales", "error");
-  try{ 
-    await signInWithEmailAndPassword(auth, email, password); 
-    SoundFX.playSuccess();
-    showNotification("Bienvenido a Rankiu", "success");
-  } catch(error){ showNotification("Error de login: " + error.message, "error"); }
-}
-
-async function logout(){ 
-  await signOut(auth); 
-  SoundFX.playClick();
-  showNotification("Sesión cerrada", "info");
-}
-
-document.getElementById("registerBtn").addEventListener("click", register);
-document.getElementById("loginBtn").addEventListener("click", login);
-
-async function createPost() {
-  if(!currentUser){ showNotification("Inicia sesión para publicar", "error"); return; }
-  const content = document.getElementById("postContent").value.trim();
-
-  if(!content){ showNotification("Por favor, escribe algo", "error"); return; }
-
-  await addDoc(getCol("posts"),{
-    content, author:currentUser.displayName, authorId:currentUser.uid, authorAvatar:currentUser.photoURL, likes:0, createdAt:serverTimestamp()
-  });
-  
-  document.getElementById("postContent").value = "";
-  document.getElementById("charCounter").innerText = "0 / 150";
-  SoundFX.playSuccess();
-  showNotification("Publicación subida con éxito", "success");
-}
-document.getElementById("publishBtn").addEventListener("click", createPost);
-
-function toggleFollow(authorId) {
-  if(!currentUser) return showNotification("Inicia sesión para seguir personas", "error");
-  if(authorId === currentUser.uid) return showNotification("No te puedes seguir a ti mismo", "error");
- 
-  const isFollowing = followingSet.has(authorId);
-  const followId = `${currentUser.uid}_${authorId}`;
-  
-  SoundFX.playClick();
-  if (isFollowing) {
-    deleteDoc(getDocRef("followers", followId))
-      .then(() => showNotification("Dejaste de seguir al usuario", "info"));
-  } else {
-    setDoc(getDocRef("followers", followId), {
-      followerId: currentUser.uid,
-      followingId: authorId,
-      createdAt: Date.now()
-    }).then(() => {
-      SoundFX.playSuccess();
-      showNotification("¡Ahora sigues a este usuario!", "success");
-    });
-  }
-}
-window.toggleFollow = toggleFollow;
-
 function listenFollowers() {
   if (!currentUser) return;
   onSnapshot(getCol("followers"), (snapshot) => {
     followingSet.clear();
     followerCounts = {};
     followingCounts = {};
-    
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       if (data.followerId === currentUser.uid) {
@@ -744,21 +646,18 @@ function listenFollowers() {
       followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
       followingCounts[data.followerId] = (followingCounts[data.followerId] || 0) + 1;
     });
-    
     renderPosts(currentPosts);
     updateProfileStats();
     renderSuggestedUsers();
-  }, (err) => console.error("Error en Snapshot followers: ", err));
+  });
 }
 
 function updateProfileStats() {
   if (currentUser) {
     const myFollowers = followerCounts[currentUser.uid] || 0;
     const myFollowing = followingCounts[currentUser.uid] || 0;
-    
     const fCountEl = document.getElementById("followersCount");
     const fFollowingEl = document.getElementById("followingCount");
-    
     if(fCountEl) fCountEl.innerText = myFollowers;
     if(fFollowingEl) fFollowingEl.innerText = myFollowing;
   }
@@ -767,30 +666,19 @@ function updateProfileStats() {
 async function viewUserProfile(userId) {
   if (!userId) return;
   let user = allUsers.find(u => u.id === userId);
-  
   if (!user) {
     try {
       const userDoc = await getDoc(getDocRef("users", userId));
-      if (userDoc.exists()) {
-        user = { id: userDoc.id, ...userDoc.data() };
-      }
-    } catch(e) {
-      console.error("Error al buscar usuario en el modal", e);
-    }
+      if (userDoc.exists()) user = { id: userDoc.id, ...userDoc.data() };
+    } catch(e) { console.error(e); }
   }
-
-  if (!user) {
-    showNotification("No se pudo cargar el perfil del usuario", "error");
-    return;
-  }
+  if (!user) return showNotification("No se pudo cargar el perfil", "error");
   
   SoundFX.playClick();
   document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
   document.getElementById("modalUsername").innerText = user.username || "Usuario";
-  document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía todavía.";
-  
-  const totalFollowers = followerCounts[userId] || 0;
-  document.getElementById("modalFollowers").innerText = totalFollowers;
+  document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía.";
+  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
   
   const followBtn = document.getElementById("modalFollowBtn");
   if (userId === currentUser?.uid) {
@@ -798,18 +686,16 @@ async function viewUserProfile(userId) {
   } else {
     followBtn.classList.remove("hidden");
     const isFollowing = followingSet.has(userId);
-    
     if (isFollowing) {
       followBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Siguiendo';
-      followBtn.className = "flex-grow bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+      followBtn.className = "flex-grow bg-zinc-900 border border-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase";
     } else {
       followBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Seguir';
-      followBtn.className = "flex-grow bg-green-500 hover:bg-green-400 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase tracking-wider";
+      followBtn.className = "flex-grow bg-green-500 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase";
     }
-    
     followBtn.onclick = () => {
       toggleFollow(userId);
-      setTimeout(() => viewUserProfile(userId), 300);
+      setTimeout(() => viewUserProfile(userId), 350);
     };
   }
   
@@ -825,7 +711,6 @@ async function viewUserProfile(userId) {
       listenMessages();
     };
   }
-  
   document.getElementById("userProfileModal").style.display = "flex";
 }
 window.viewUserProfile = viewUserProfile;
@@ -853,14 +738,14 @@ function renderPosts(posts) {
     filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
   }
   
-  document.getElementById("feed-stats-label").innerText = `${filteredPosts.length} Publicaciones encontradas`;
+  const statsLabel = document.getElementById("feed-stats-label");
+  if(statsLabel) statsLabel.innerText = `${filteredPosts.length} Publicaciones`;
 
   if (filteredPosts.length === 0) {
     container.innerHTML = `
       <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
         <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
         <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
-        <p class="text-xs text-zinc-600 mt-1">Escribe tu primer post o empieza a seguir gente.</p>
       </div>
     `;
     return;
@@ -874,12 +759,12 @@ function renderPosts(posts) {
     if (currentUser && post.authorId !== currentUser.uid) {
       if (isFollowing) {
         followBtnMarkup = `
-          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20 hover:text-red-400 transition-all text-xs font-extrabold flex items-center gap-1" title="Siguiendo">
+          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-extrabold flex items-center gap-1">
             <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
           </button>`;
       } else {
         followBtnMarkup = `
-          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black hover:scale-105 transition-all text-xs font-black flex items-center gap-1 shadow-md shadow-green-500/10">
+          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black text-xs font-black flex items-center gap-1">
             <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
           </button>`;
       }
@@ -888,40 +773,36 @@ function renderPosts(posts) {
     const div = document.createElement("div");
     div.id = `post-card-${post.id}`;
     div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
-    
     div.innerHTML = `
     <div class="flex justify-between items-center">
       <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
-        <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900 group-hover:ring-green-500/40 transition">
+        <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
         <div>
           <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">${post.author || 'Usuario'}</div>
           <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Publicado</div>
         </div>
       </div>
-      
       <div class="flex items-center gap-2">
         ${followBtnMarkup}
         ${currentUser && post.authorId === currentUser.uid ? `
-          <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 transition-colors p-2 rounded-xl hover:bg-red-500/10 active:scale-95 duration-150" title="Eliminar publicación">
+          <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 p-2 rounded-xl">
             <i class="fa-solid fa-trash text-sm"></i>
           </button>
         ` : ''}
       </div>
     </div>
     
-    <p class="mt-4 leading-relaxed whitespace-pre-wrap select-all ${getFontSize(post.content)}">${post.content}</p>
+    <p class="mt-4 leading-relaxed whitespace-pre-wrap ${getFontSize(post.content)}">${post.content}</p>
 
     <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
       <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
-        <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150" data-id="${post.id}">
-          <i class="fa-solid fa-circle-arrow-up text-lg transition-transform" id="up-icon-${post.id}"></i>
+        <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
+          <i class="fa-solid fa-circle-arrow-up text-lg" id="up-icon-${post.id}"></i>
           <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
         </button>
-        
         <div class="w-[1px] h-6 bg-zinc-800"></div>
-        
-        <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150" data-id="${post.id}">
-          <i class="fa-solid fa-circle-arrow-down text-lg transition-transform" id="down-icon-${post.id}"></i>
+        <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
+          <i class="fa-solid fa-circle-arrow-down text-lg" id="down-icon-${post.id}"></i>
           <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
         </button>
       </div>
@@ -930,8 +811,8 @@ function renderPosts(posts) {
     <div class="mt-4">
       <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
       <div class="flex gap-2">
-        <input id="comment-input-${post.id}" placeholder="Escribe un comentario público..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-green-500/50 text-white placeholder-zinc-600 transition-all"/>
-        <button class="bg-zinc-900 border border-zinc-800 hover:border-green-500/30 text-green-400 font-bold px-4 py-2 rounded-xl text-xs commentBtn active:scale-95 transition-all" data-id="${post.id}">
+        <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"/>
+        <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
@@ -948,14 +829,19 @@ function renderPosts(posts) {
             sortedDocs.forEach(comment => {
                 const commentDiv = document.createElement("div");
                 commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
-                commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer hover:text-green-400 transition-colors" onclick="viewUserProfile('${comment.authorId}')">${comment.author}:</strong> <span class="text-zinc-300 ml-1">${comment.text}</span>`;
+                commentDiv.innerHTML = `<strong class="text-zinc-400" onclick="viewUserProfile('${comment.authorId}')">${comment.author}:</strong> <span class="text-zinc-300 ml-1">${comment.text}</span>`;
                 commentListContainer.appendChild(commentDiv);
             });
         }
     });
   });
+
+  if (cachedVotesSnapshot) {
+     applyVotesStyles(cachedVotesSnapshot);
+  }
 }
 
+// LISTENER GLOBAL DE CLICKS SIN DUPLICADOS NI CÓDIGO ROTO
 document.addEventListener("click", async (event) => {
     const target = event.target;
 
@@ -963,23 +849,18 @@ document.addEventListener("click", async (event) => {
     if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
         const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
         const postId = btn.dataset.id;
-        const deAcuerdo = confirm("¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.");
-        if (!deAcuerdo) return;
-
+        if (!confirm("¿Estás seguro de eliminar esta publicación?")) return;
         try {
             await deleteDoc(getDocRef("posts", postId));
-            showNotification("Publicación eliminada correctamente", "success");
-        } catch (error) {
-            console.error("Error al eliminar post:", error);
-            showNotification("No se pudo eliminar la publicación", "error");
-        }
+            showNotification("Publicación eliminada", "success");
+        } catch (error) { showNotification("No se pudo eliminar", "error"); }
         return;
     }
 
-    // COMENTAR
+    // PUBLICAR COMENTARIO
     if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
         const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
-        if(!currentUser) return showNotification("Debes iniciar sesión para comentar", "error");
+        if(!currentUser) return showNotification("Debes iniciar sesión", "error");
         
         const postId = btn.dataset.id;
         const input = document.getElementById(`comment-input-${postId}`);
@@ -987,11 +868,7 @@ document.addEventListener("click", async (event) => {
         if(!text) return;
 
         await addDoc(getCol("comments"), {
-            postId,
-            text,
-            author: currentUser.displayName || "Anónimo",
-            authorId: currentUser.uid,
-            createdAt: Date.now()
+            postId, text, author: currentUser.displayName || "Anónimo", authorId: currentUser.uid, createdAt: Date.now()
         });
         if(input) input.value = "";
         SoundFX.playSuccess();
@@ -999,7 +876,7 @@ document.addEventListener("click", async (event) => {
         return;
     }
 
-    // UPVOTE (Modificado para retirar el voto si se presiona de nuevo)
+    // UPVOTE
     if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
         const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
         if(!currentUser) return showNotification("Inicia sesión para votar", "error");
@@ -1021,17 +898,12 @@ document.addEventListener("click", async (event) => {
             await deleteDoc(voteRef);
             showNotification("Voto retirado", "info");
         } else {
-            await setDoc(voteRef, {
-                postId,
-                userId: currentUser.uid,
-                type: "up",
-                createdAt: Date.now()
-            });
+            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "up", createdAt: Date.now() });
         }
         return;
     }
 
-    // DOWNVOTE (Modificado para retirar el voto si se presiona de nuevo)
+    // DOWNVOTE
     if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
         const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
         if(!currentUser) return showNotification("Inicia sesión para votar", "error");
@@ -1053,12 +925,7 @@ document.addEventListener("click", async (event) => {
             await deleteDoc(voteRef);
             showNotification("Voto retirado", "info");
         } else {
-            await setDoc(voteRef, {
-                postId,
-                userId: currentUser.uid,
-                type: "down",
-                createdAt: Date.now()
-            });
+            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "down", createdAt: Date.now() });
         }
         return;
     }
@@ -1066,14 +933,15 @@ document.addEventListener("click", async (event) => {
 
 window.setFeedFilter = function(filter) {
   feedFilter = filter;
+  SoundFX.playClick();
   const btnAll = document.getElementById("filter-all");
   const btnFollow = document.getElementById("filter-following");
   if(filter === 'all') {
-    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md";
+    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
     if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
   } else {
     if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md";
+    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
   }
   renderPosts(currentPosts);
 };
@@ -1093,13 +961,14 @@ window.toggleFollow = async function(targetUserId) {
 };
 
 window.showSection = function(section) {
+  SoundFX.playClick();
   document.getElementById("feedSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
   document.getElementById("profileSection").classList.add("hidden");
   
-  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-zinc-200";
-  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-zinc-200";
-  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-zinc-200";
+  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
+  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
+  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
 
   if(section === 'feed') {
     document.getElementById("feedSection").classList.remove("hidden");
@@ -1113,12 +982,6 @@ window.showSection = function(section) {
   }
 };
 
-const postsQuery = query(getCol("posts"), orderBy("createdAt", "desc"));
-onSnapshot(postsQuery, (snapshot) => {
-  const posts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  renderPosts(posts);
-});
-
 document.getElementById("loginBtn").onclick = async () => {
   const email = document.getElementById("loginEmail").value.trim();
   const pass = document.getElementById("loginPassword").value.trim();
@@ -1126,9 +989,7 @@ document.getElementById("loginBtn").onclick = async () => {
   try {
     await signInWithEmailAndPassword(auth, email, pass);
     showNotification("Sesión iniciada correctamente", "success");
-  } catch(err) {
-    showNotification("Credenciales inválidas", "error");
-  }
+  } catch(err) { showNotification("Credenciales inválidas", "error"); }
 };
 
 document.getElementById("registerBtn").onclick = async () => {
@@ -1140,17 +1001,10 @@ document.getElementById("registerBtn").onclick = async () => {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: username, photoURL: selectedDefaultAvatarUrl });
     await setDoc(getDocRef("users", cred.user.uid), {
-      uid: cred.user.uid,
-      username,
-      email,
-      bio: "¡Hola! Estoy usando Rankiu.",
-      avatar: selectedDefaultAvatarUrl,
-      createdAt: Date.now()
+      uid: cred.user.uid, username, email, bio: "¡Hola! Estoy usando Rankiu.", avatar: selectedDefaultAvatarUrl, createdAt: Date.now()
     });
     showNotification("Cuenta creada con éxito", "success");
-  } catch(err) {
-    showNotification("Error al registrar cuenta", "error");
-  }
+  } catch(err) { showNotification("Error al registrar cuenta", "error"); }
 };
 
 document.getElementById("publishBtn").onclick = async () => {
@@ -1159,170 +1013,21 @@ document.getElementById("publishBtn").onclick = async () => {
   if(!content) return showNotification("El contenido no puede estar vacío", "error");
   try {
     await addDoc(getCol("posts"), {
-      content,
-      author: currentUser.displayName,
-      authorId: currentUser.uid,
-      authorAvatar: currentUser.photoURL,
-      createdAt: Date.now()
+      content, author: currentUser.displayName, authorId: currentUser.uid, authorAvatar: currentUser.photoURL, createdAt: Date.now()
     });
     document.getElementById("postContent").value = "";
+    document.getElementById("charCounter").innerText = "0 / 150";
     showNotification("Publicación enviada", "success");
-  } catch(err) {
-    showNotification("Error al publicar", "error");
-  }
+  } catch(err) { showNotification("Error al publicar", "error"); }
 };
-
-document.addEventLidocument.addEventListener ("click", async (event)) => {
-    const target = event.target;}
-
-    // --- NUEVA FUNCIÓN: ELIMINAR POST ---
-    if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
-        const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
-        const postId = btn.dataset.id;
-
-        const deAcuerdo = confirm("¿Estás seguro de que quieres eliminar esta publicación? Esta acción no se puede deshacer.");
-        if (!deAcuerdo) return;
-
-        try {
-            const postRef = getDocRef("posts", postId);
-            await deleteDoc(postRef);
-            showNotification("Publicación eliminada correctamente", "success");
-        } catch (error) {
-            console.error("Error al eliminar el post:", error);
-            showNotification("No se pudo eliminar la publicación", "error");
-        }
-        return; // Detiene la ejecución aquí ya que encontramos el botón correcto
-    }
-
-    if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {stener("click", async (event) => {
-    const target = event.target;
-
-    if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
-        const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
-        if(!currentUser) return showNotification("Debes iniciar sesión para comentar", "error");
-        
-        const postId = btn.dataset.id;
-        const input = document.getElementById(`comment-input-${postId}`);
-        const text = input.value.trim();
-        if(!text) return;
-
-        await addDoc(getCol("comments"), {
-            postId,
-            text,
-            author: currentUser.displayName,
-            authorId: currentUser.uid,
-            createdAt: Date.now()
-        });
-        input.value = "";
-        SoundFX.playSuccess();
-        showNotification("Comentario publicado", "success");
-    }
-
-    // Reemplaza los bloques de votación (Upvote y Downvote) dentro de tu document.addEventListener("click") con esto:
-
-if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
-    const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
-    if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-    
-    const postId = btn.dataset.id;
-    const voteId = `${currentUser.uid}_${postId}`;
-    const icon = document.getElementById(`up-icon-${postId}`);
-    
-    SoundFX.playVoteUp();
-    if (icon) {
-      icon.classList.add("animate-upvote-arrow");
-      icon.addEventListener("animationend", () => {
-        icon.classList.remove("animate-upvote-arrow");
-      }, { once: true });
-    }
-    
-    // Nueva Lógica: Verificar si ya existía un upvote activo para quitarlo
-    const voteRef = getDocRef("votes", voteId);
-    const voteSnap = await getDoc(voteRef);
-    
-    if (voteSnap.exists() && voteSnap.data().type === "up") {
-        // Si ya era un upvote, lo removemos (Retirar voto)
-        await deleteDoc(voteRef);
-        showNotification("Voto retirado", "info");
-    } else {
-        // Si no existía o era un downvote, lo registramos como upvote
-        await setDoc(voteRef, {
-            postId: postId,
-            userId: currentUser.uid,
-            type: "up",
-            createdAt: Date.now()
-        });
-    }
-}
-
-if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
-    const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
-    if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-    
-    const postId = btn.dataset.id;
-    const voteId = `${currentUser.uid}_${postId}`;
-    const icon = document.getElementById(`down-icon-${postId}`);
-
-    SoundFX.playVoteDown();
-    if (icon) {
-      icon.classList.add("animate-downvote-arrow");
-      icon.addEventListener("animationend", () => {
-        icon.classList.remove("animate-downvote-arrow");
-      }, { once: true });
-    }
-    
-    // Nueva Lógica: Verificar si ya existía un downvote activo para quitarlo
-    const voteRef = getDocRef("votes", voteId);
-    const voteSnap = await getDoc(voteRef);
-    
-    if (voteSnap.exists() && voteSnap.data().type === "down") {
-        // Si ya era un downvote, lo removemos (Retirar voto)
-        await deleteDoc(voteRef);
-        showNotification("Voto retirado", "info");
-    } else {
-        // Si no existía o era un upvote, lo registramos como downvote
-        await setDoc(voteRef, {
-            postId: postId,
-            userId: currentUser.uid,
-            type: "down",
-            createdAt: Date.now()
-        });
-    }
-}
-
-    if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
-        const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
-        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-        
-        const postId = btn.dataset.id;
-        const voteId = `${currentUser.uid}_${postId}`;
-        const icon = document.getElementById(`down-icon-${postId}`);
-
-        SoundFX.playVoteDown();
-        if (icon) {
-          icon.classList.add("animate-downvote-arrow");
-          icon.addEventListener("animationend", () => {
-            icon.classList.remove("animate-downvote-arrow");
-          }, { once: true });
-        }
-        
-        await setDoc(getDocRef("votes", voteId), {
-            postId: postId,
-            userId: currentUser.uid,
-            type: "down",
-            createdAt: Date.now()
-        });
-    }
-});
 
 function renderSuggestedUsers() {
   const container = document.getElementById("suggestedUsersList");
   if (!container) return;
-  
   const suggestions = allUsers.filter(u => u.id !== currentUser?.uid && !followingSet.has(u.id)).slice(0, 4);
   
   if (suggestions.length === 0) {
-    container.innerHTML = `<p class="text-xs text-zinc-500">Ya sigues a todos los miembros de Rankiu.</p>`;
+    container.innerHTML = `<p class="text-xs text-zinc-500">Ya sigues a todos los miembros.</p>`;
     return;
   }
   
@@ -1343,24 +1048,14 @@ function renderSuggestedUsers() {
   });
 }
 
-function setFeedFilter(filter) {
-  feedFilter = filter;
-  SoundFX.playClick();
-  document.getElementById("filter-all").className = filter === 'all' ? "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition" : "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-  document.getElementById("filter-following").className = filter === 'following' ? "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition" : "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-  renderPosts(currentPosts);
-}
-window.setFeedFilter = setFeedFilter;
-
 function listenUsers() {
-  const q = query(getCol("users"));
-  onSnapshot(q, (snapshot) => {
+  onSnapshot(query(getCol("users")), (snapshot) => {
     allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     renderUsers();
     renderSuggestedUsers();
     updateNavbar();
     renderProfile();
-  }, (err) => console.error("Error al sincronizar usuarios: ", err));
+  });
 }
 
 function renderUsers() {
@@ -1386,16 +1081,18 @@ function renderUsers() {
 
 function insertEmoji(emoji) {
   const input = document.getElementById("messageInput");
-  input.value += emoji;
-  input.focus();
-  SoundFX.playClick();
+  if(input) {
+    input.value += emoji;
+    input.focus();
+    SoundFX.playClick();
+  }
 }
 window.insertEmoji = insertEmoji;
 
 async function sendMessage(){
   if(!selectedUser){ showNotification("Selecciona un usuario primero", "error"); return; }
   const input = document.getElementById("messageInput");
-  const text = input.value.trim();
+  const text = input ? input.value.trim() : "";
   if(!text) return;
 
   await addDoc(getCol("messages"),{
@@ -1425,12 +1122,13 @@ function listenMessages(){
     .filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
 
     const container = document.getElementById("chatMessages");
+    if(!container) return;
     container.innerHTML = "";
     
     if (messages.length === 0) {
       container.innerHTML = `
         <div class="h-full flex flex-col items-center justify-center text-zinc-600">
-          <p class="text-xs">Di hola para empezar una conversación privada con ${selectedUser.username}.</p>
+          <p class="text-xs">Di hola para empezar una conversación con ${selectedUser.username}.</p>
         </div>`;
     }
 
@@ -1461,52 +1159,27 @@ async function saveProfileChanges() {
   if (!currentUser) return;
   const newName = document.getElementById("editUsername").value.trim();
   const newBio = document.getElementById("editBio").value.trim();
-  
   if (!newName) return showNotification("El nombre de usuario no puede estar vacío", "error");
   
   try {
     showNotification("Guardando perfil...", "info");
     await updateProfile(currentUser, { displayName: newName });
-    await setDoc(getDocRef("users", currentUser.uid), {
-      username: newName,
-      bio: newBio
-    }, { merge: true });
-    
+    await setDoc(getDocRef("users", currentUser.uid), { username: newName, bio: newBio }, { merge: true });
     SoundFX.playSuccess();
     showNotification("¡Perfil actualizado con éxito!", "success");
-  } catch(err) {
-    showNotification("Error: " + err.message, "error");
-  }
+  } catch(err) { showNotification("Error: " + err.message, "error"); }
 }
 window.saveProfileChanges = saveProfileChanges;
 
-function showSection(section){
+async function logout(){ 
+  await signOut(auth); 
   SoundFX.playClick();
-  document.getElementById("feedSection").classList.add("hidden");
-  document.getElementById("profileSection").classList.add("hidden");
-  document.getElementById("chatSection").classList.add("hidden");
-  
-  document.querySelectorAll(".nav-tab").forEach(btn => {
-    btn.className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-400 hover:text-white";
-  });
-  
-  if(section === "feed") {
-    document.getElementById("feedSection").classList.remove("hidden");
-    document.getElementById("tab-feed").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-black text-green-400 bg-zinc-900 border border-zinc-800";
-  }
-  if(section === "profile") {
-    document.getElementById("profileSection").classList.remove("hidden");
-    document.getElementById("tab-profile").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-black text-green-400 bg-zinc-900 border border-zinc-800";
-  }
-  if(section === "chat") {
-    document.getElementById("chatSection").classList.remove("hidden");
-    document.getElementById("tab-chat").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-black text-green-400 bg-zinc-900 border border-zinc-800";
-  }
+  showNotification("Sesión cerrada", "info");
 }
-window.showSection = showSection;
 
 function updateNavbar(){
   const nav = document.getElementById("navUser");
+  if(!nav) return;
   if(currentUser){
     nav.innerHTML = `
     <div class="flex items-center gap-2">
@@ -1514,7 +1187,7 @@ function updateNavbar(){
       <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider">Salir</button>
     </div>
     `;
-    setTimeout(()=>{ document.getElementById("logoutBtn").addEventListener("click", logout); }, 100);
+    document.getElementById("logoutBtn").addEventListener("click", logout);
     
     const miniCard = document.getElementById("miniProfileCard");
     if(miniCard) {
@@ -1535,7 +1208,6 @@ function renderProfile(){
   if(!currentUser) return;
   document.getElementById("profileAvatar").src = getUserAvatar(currentUser.photoURL);
   document.getElementById("editUsername").value = currentUser.displayName || '';
-  
   const myData = allUsers.find(u => u.id === currentUser.uid);
   document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
 }
@@ -1544,19 +1216,6 @@ const postsQuery = query(getCol("posts"), orderBy("createdAt","desc"));
 onSnapshot(postsQuery, (snapshot)=>{
   const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
   renderPosts(posts);
-  function renderPosts(posts) {
-  currentPosts = posts;
-  const container = document.getElementById("postsContainer");
-  
-  // ... (Todo tu código interno de renderPosts se mantiene exactamente igual) ...
-  
-  // AL FINAL de la función renderPosts, justo después de cerrar el forEach de los posts:
-  // Forzamos la aplicación de estilos usando los datos que ya tenemos en caché
-  if (typeof cachedVotesSnapshot !== 'undefined' && cachedVotesSnapshot) {
-     applyVotesStyles(cachedVotesSnapshot);
-  }
-}
-
 });
 
 async function updateProfilePhoto(){
@@ -1577,9 +1236,6 @@ async function updateProfilePhoto(){
 }
 document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
 
-// Declaramos una variable global para almacenar el último estado de los votos detectados
-let cachedVotesSnapshot = null;
-
 function applyVotesStyles(snapshot) {
     if (!snapshot) return;
     const postVotes = {};
@@ -1590,11 +1246,8 @@ function applyVotesStyles(snapshot) {
         if (!postVotes[vote.postId]) {
             postVotes[vote.postId] = { up: 0, down: 0 };
         }
-        if (vote.type === "up") {
-            postVotes[vote.postId].up += 1;
-        } else if (vote.type === "down") {
-            postVotes[vote.postId].down += 1;
-        }
+        if (vote.type === "up") { postVotes[vote.postId].up += 1; } 
+        else if (vote.type === "down") { postVotes[vote.postId].down += 1; }
         
         if (currentUser && vote.userId === currentUser.uid) {
           myVotes[vote.postId] = vote.type;
@@ -1614,21 +1267,19 @@ function applyVotesStyles(snapshot) {
         if (downCounter) downCounter.innerText = votes.down;
 
         if (upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 hover:border-green-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5";
         }
         if (downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5";
         }
 
         if (myVotes[postId] === "up" && upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 shadow-lg shadow-green-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
         } else if (myVotes[postId] === "down" && downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 shadow-lg shadow-red-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
         }
 
-        // Limpieza de clases previas para evitar acumulación de bordes rotos
         card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
-        
         if (votes.up > votes.down) {
             card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
         } else if (votes.down > votes.up) {
@@ -1639,81 +1290,40 @@ function applyVotesStyles(snapshot) {
     });
 }
 
-// Mantenemos la escucha en tiempo real activa actualizando nuestra caché
 onSnapshot(getCol("votes"), (snapshot) => {
     cachedVotesSnapshot = snapshot;
     applyVotesStyles(snapshot);
 });
-
-    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
-        const postId = card.id.replace('post-card-', '');
-        const votes = postVotes[postId] || { up: 0, down: 0 };
-        
-        const upCounter = document.getElementById(`up-counter-${postId}`);
-        const downCounter = document.getElementById(`down-counter-${postId}`);
-        const upBtn = document.getElementById(`up-btn-${postId}`);
-        const downBtn = document.getElementById(`down-btn-${postId}`);
-
-        if (upCounter) upCounter.innerText = votes.up;
-        if (downCounter) downCounter.innerText = votes.down;
-
-        if (upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 hover:bg-green-500/20 hover:border-green-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
-        }
-        if (downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 hover:border-red-500/40 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150";
-        }
-
-        if (myVotes[postId] === "up" && upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 shadow-lg shadow-green-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
-        } else if (myVotes[postId] === "down" && downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 shadow-lg shadow-red-500/20 transition-all font-black text-sm flex items-center gap-1.5 active:scale-95 duration-150 scale-105";
-        }
-
-        card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
-        if (votes.up > votes.down) {
-            card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
-        } else if (votes.down > votes.up) {
-            card.classList.add("border-red-500", "shadow-[0_0_15px_rgba(239,68,68,0.15)]");
-        } else {
-            card.classList.add("border-zinc-900");
-        }
-    });
 
 let appLoadTime = Date.now();
 let notifiedMessages = new Set();
 
 function listenIncomingMessages() {
   if (!currentUser) return;
-  const q = query(getCol("messages"));
-  onSnapshot(q, (snapshot) => {
+  onSnapshot(query(getCol("messages")), (snapshot) => {
     snapshot.docs.forEach(doc => {
       const msg = doc.data();
       const msgId = doc.id;
       
       if (msg.to === currentUser.uid && msg.from !== currentUser.uid && !notifiedMessages.has(msgId)) {
         notifiedMessages.add(msgId);
-        
         const isCurrentActiveChat = (selectedUser && selectedUser.id === msg.from && !document.getElementById("chatSection").classList.contains("hidden"));
         
         if (msg.createdAt) {
           const msgTime = msg.createdAt.seconds ? msg.createdAt.seconds * 1000 : msg.createdAt;
-          
           if (msgTime > appLoadTime) {
             SoundFX.playMessage();
             if (!isCurrentActiveChat) {
               const sender = allUsers.find(u => u.id === msg.from);
-              const senderName = sender ? sender.username : "Alguien";
-              showNotification(`Nuevo mensaje de ${senderName}: "${msg.text}"`, "success");
+              showNotification(`Nuevo mensaje de ${sender ? sender.username : "Alguien"}: "${msg.text}"`, "success");
             }
           }
         }
       }
     });
-  }, (err) => console.error("Error al recibir mensajes: ", err));
+  });
 }
 
-// Inicialización de sesión de Firebase
 onAuthStateChanged(auth, async (user)=>{
   currentUser = user;
   updateNavbar();
