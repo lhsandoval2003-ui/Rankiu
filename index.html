@@ -68,7 +68,7 @@
 <nav class="border-b border-zinc-900/80 glass sticky top-0 z-40 transition-all duration-300">
   <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
     <div class="flex items-center gap-3">
-      <div class="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 cursor-pointer select-none" onclick="window.clearHashtagFilter ? window.clearHashtagFilter() : showSection('feed')">
+      <div class="text-3xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-500 cursor-pointer select-none" onclick="showSection('feed')">
         rankiu
       </div>
     </div>
@@ -97,13 +97,9 @@
       <section id="feedSection" class="animate-fade-in space-y-6">
         
         <div class="flex justify-between items-center bg-zinc-950/90 border border-zinc-900 p-2.5 rounded-2xl">
-          <div class="flex gap-2 items-center">
+          <div class="flex gap-2">
             <button id="filter-all" onclick="setFeedFilter('all')" class="px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition">Explorar</button>
             <button id="filter-following" onclick="setFeedFilter('following')" class="px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition">Siguiendo</button>
-            <div id="hashtag-active-badge" class="hidden px-3 py-1 rounded-xl text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-2">
-              <span id="hashtag-badge-text"></span>
-              <i class="fa-solid fa-xmark cursor-pointer hover:text-white" onclick="window.clearHashtagFilter()"></i>
-            </div>
           </div>
           <span class="text-xs text-zinc-500 font-medium mr-2" id="feed-stats-label">Cargando comunidad...</span>
         </div>
@@ -112,11 +108,11 @@
           <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
           
           <div class="flex justify-between items-center mb-3">
-            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">¿Qué está pasando hoy? (Usa #hashtags)</span>
+            <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wider">¿Qué está pasando hoy?</span>
             <span id="charCounter" class="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20">0 / 150</span>
           </div>
 
-          <textarea id="postContent" maxlength="150" placeholder="Escribe un pensamiento directo, audaz o divertido con #hashtags..." class="w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-bold transition-all duration-300 text-green-400"></textarea>
+          <textarea id="postContent" maxlength="150" placeholder="Escribe un pensamiento directo, audaz o divertido..." class="w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-bold transition-all duration-300 text-green-400"></textarea>
           
           <div class="flex items-center justify-end border-t border-zinc-900/80 pt-4 mt-2">
             <button id="publishBtn" class="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold px-6 py-2.5 rounded-xl text-xs transition duration-200 shadow-lg shadow-green-500/20 glow-green uppercase tracking-wider">Publicar</button>
@@ -229,7 +225,7 @@
             </div>
           </div>
 
-          <button id="saveProfileBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
+          <button id="saveProfileBtn" onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
             Guardar Cambios
           </button>
         </div>
@@ -274,11 +270,20 @@
 
       <div class="bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 shadow-lg space-y-4">
         <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider flex items-center justify-between">
-          <span>Hashtags Populares</span>
-          <i class="fa-solid fa-hashtag text-emerald-400"></i>
+          <span>Tendencias</span>
+          <i class="fa-solid fa-arrow-trend-up text-emerald-400"></i>
         </h3>
-        <div id="hashtagsTrendList" class="space-y-2 text-xs">
-          <div class="text-zinc-500 italic p-1">No hay hashtags activos aún</div>
+        <div class="space-y-3 text-xs">
+          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
+            <div class="text-zinc-500 font-bold">#1 Tendencia</div>
+            <div class="font-black text-zinc-100 text-sm mt-0.5">Rankiu</div>
+            <div class="text-zinc-500 mt-1">Votos de Reputación</div>
+          </div>
+          <div class="p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition">
+            <div class="text-zinc-500 font-bold">#2 Tendencia</div>
+            <div class="font-black text-zinc-100 text-sm mt-0.5">Física de Votos</div>
+            <div class="text-zinc-500 mt-1">Animaciones fluidas</div>
+          </div>
         </div>
       </div>
 
@@ -385,8 +390,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Diccionario de malas palabras a censurar
 const BAD_WORDS = ["mierda", "puta", "puto", "marico", "pendejo", "pendeja", "culero", "culera", "gonorrea", "hijueputa", "cabron", "cabrona", "perra", "perro", "chinga", "verga", "carajo", "malparido"];
 
+// Función para censurar texto manteniendo las letras de los extremos
 function filterBadWords(text) {
   if (!text) return "";
   let filtered = text;
@@ -400,15 +407,7 @@ function filterBadWords(text) {
   return filtered;
 }
 
-// Renderizar texto con hashtags linkeables
-function formatPostTextWithHashtags(text) {
-  if (!text) return "";
-  const censored = filterBadWords(text);
-  return censored.replace(/#([a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]+)/g, (match, hashtag) => {
-    return `<span class="text-green-400 hover:underline cursor-pointer font-bold hashtag-clickable" onclick="window.filterByHashtag('${hashtag}'); event.stopPropagation();">${match}</span>`;
-  });
-}
-
+// Forzar formato estilo Instagram en los inputs de username
 function cleanUsernameInput(val) {
   return val.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '');
 }
@@ -534,10 +533,8 @@ let followerCounts = {};
 let followingCounts = {};
 let currentPosts = [];
 let feedFilter = 'all'; 
-let currentHashtagFilter = null; 
 let cachedVotesSnapshot = null;
 let cachedGlobalVotes = [];
-let cachedCommentVotes = {}; // Para guardar votos arriba de comentarios en tiempo real
 
 const DefaultAvatars = [
   { id: 'teal', color: '#075e54' },
@@ -590,6 +587,7 @@ function showNotification(message, type = "info") {
   if(!container) return;
   const toast = document.createElement("div");
   toast.className = `p-4 rounded-2xl shadow-xl border text-xs font-bold pointer-events-auto transition-all duration-300 transform translate-y-2 opacity-0 flex items-center gap-3`;
+  
   if (type === "success") {
     toast.className += " bg-zinc-950 text-green-400 border-green-500/20";
     toast.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 text-sm"></i> ${message}`;
@@ -600,10 +598,9 @@ function showNotification(message, type = "info") {
     toast.className += " bg-zinc-950 text-zinc-300 border-zinc-800";
     toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-sm"></i> ${message}`;
   }
+  
   container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.remove("translate-y-2", "opacity-0");
-  }, 50);
+  setTimeout(() => { toast.classList.remove("translate-y-2", "opacity-0"); }, 50);
   setTimeout(() => {
     toast.classList.add("opacity-0", "translate-y-[-10px]");
     setTimeout(() => toast.remove(), 300);
@@ -616,6 +613,7 @@ if (postTextarea) {
     const len = e.target.value.length;
     document.getElementById("charCounter").innerText = `${len} / 150`;
     const label = document.getElementById("charCounter");
+    
     if (len >= 130) {
       label.className = "text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md font-mono border border-red-500/20";
     } else if (len >= 90) {
@@ -623,6 +621,7 @@ if (postTextarea) {
     } else {
       label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
     }
+
     if (len < 50) {
       e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
     } else if (len < 100) {
@@ -640,964 +639,805 @@ function switchAuth(type) {
     document.getElementById("loginBox").classList.remove("hidden");
     document.getElementById("registerBox").classList.add("hidden");
     document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
-    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500";
+    document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
   }else{
     document.getElementById("loginBox").classList.add("hidden");
     document.getElementById("registerBox").classList.remove("hidden");
-    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500";
+    document.getElementById("btn-switch-login").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500 hover:text-zinc-300";
     document.getElementById("btn-switch-register").className = "flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-green-400 bg-zinc-900 border border-zinc-800";
   }
 }
 window.switchAuth = switchAuth;
 
 function showRecoverFlow() {
+  SoundFX.playClick();
   document.getElementById("loginBox").classList.add("hidden");
+  document.getElementById("authToggleContainer").classList.add("hidden");
   document.getElementById("recoverBox").classList.remove("hidden");
+  const currentLoginEmail = document.getElementById("loginEmail").value.trim();
+  document.getElementById("recoverEmail").value = currentLoginEmail;
 }
 window.showRecoverFlow = showRecoverFlow;
 
 function hideRecoverFlow() {
-  document.getElementById("loginBox").classList.remove("hidden");
+  SoundFX.playClick();
   document.getElementById("recoverBox").classList.add("hidden");
+  document.getElementById("loginBox").classList.remove("hidden");
+  document.getElementById("authToggleContainer").classList.remove("hidden");
 }
 window.hideRecoverFlow = hideRecoverFlow;
 
-function showSection(sect) {
+async function sendResetLinkFlow() {
+  const emailInput = document.getElementById("recoverEmail").value.trim();
+  if (!emailInput) return showNotification("Por favor introduce tu correo", "error");
+  try {
+    showNotification("Enviando enlace...", "info");
+    await sendPasswordResetEmail(auth, emailInput);
+    showNotification(`¡Enlace enviado con éxito a ${emailInput}!`, "success");
+    SoundFX.playSuccess();
+    hideRecoverFlow();
+  } catch(error) { showNotification("Error: " + error.message, "error"); }
+}
+document.getElementById("recoverSendBtn").addEventListener("click", sendResetLinkFlow);
+
+async function uploadImage(file, path) {
+  const storageRef = ref(storage, `artifacts/${appId}/${path}`);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+}
+
+function listenFollowers() {
+  if (!currentUser) return;
+  onSnapshot(getCol("followers"), (snapshot) => {
+    followingSet.clear();
+    followerCounts = {};
+    followingCounts = {};
+    snapshot.docs.forEach(doc => {
+      const data = doc.data();
+      if (data.followerId === currentUser.uid) {
+        followingSet.add(data.followingId);
+      }
+      followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
+      followingCounts[data.followerId] = (followingCounts[data.followerId] || 0) + 1;
+    });
+    renderPosts(currentPosts);
+    updateProfileStats();
+    renderSuggestedUsers();
+  });
+}
+
+function getUserReputationMarkup(userId) {
+  let upvotes = 0;
+  let downvotes = 0;
+  
+  const userPostsIds = currentPosts.filter(p => p.authorId === userId).map(p => p.id);
+  
+  cachedGlobalVotes.forEach(v => {
+    if (userPostsIds.includes(v.postId)) {
+      if (v.type === "up") upvotes++;
+      if (v.type === "down") downvotes++;
+    }
+  });
+  
+  const total = upvotes - downvotes;
+  if (total > 0) {
+    return `<span class="text-green-400 font-extrabold">+${total}</span>`;
+  } else if (total < 0) {
+    return `<span class="text-red-500 font-extrabold">${total}</span>`;
+  } else {
+    return `<span class="text-zinc-400 font-bold">0</span>`;
+  }
+}
+
+function updateProfileStats() {
+  if (currentUser) {
+    const myFollowers = followerCounts[currentUser.uid] || 0;
+    const myFollowing = followingCounts[currentUser.uid] || 0;
+    const fCountEl = document.getElementById("followersCount");
+    const fFollowingEl = document.getElementById("followingCount");
+    if(fCountEl) fCountEl.innerText = myFollowers;
+    if(fFollowingEl) fFollowingEl.innerText = myFollowing;
+    
+    const repContainer = document.getElementById("userReputationPoints");
+    if (repContainer) {
+      repContainer.innerHTML = getUserReputationMarkup(currentUser.uid);
+    }
+  }
+}
+
+async function viewUserProfile(userId) {
+  if (!userId) return;
+  let user = allUsers.find(u => u.id === userId);
+  if (!user) {
+    try {
+      const userDoc = await getDoc(getDocRef("users", userId));
+      if (userDoc.exists()) user = { id: userDoc.id, ...userDoc.data() };
+    } catch(e) { console.error(e); }
+  }
+  if (!user) return showNotification("No se pudo cargar el perfil", "error");
+  
+  SoundFX.playClick();
+  document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
+  document.getElementById("modalUsername").innerText = user.username ? `@${user.username}` : "@usuario";
+  document.getElementById("modalFullName").innerText = user.fullName || "Nombre completo";
+  document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía.";
+  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
+  
+  const modalRep = document.getElementById("modalReputation");
+  if(modalRep) {
+    modalRep.innerHTML = getUserReputationMarkup(userId);
+  }
+  
+  const followBtn = document.getElementById("modalFollowBtn");
+  if (userId === currentUser?.uid) {
+    followBtn.classList.add("hidden");
+  } else {
+    followBtn.classList.remove("hidden");
+    const isFollowing = followingSet.has(userId);
+    if (isFollowing) {
+      followBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Siguiendo';
+      followBtn.className = "flex-grow bg-zinc-900 border border-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase";
+    } else {
+      followBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Seguir';
+      followBtn.className = "flex-grow bg-green-500 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase";
+    }
+    followBtn.onclick = () => {
+      toggleFollow(userId);
+      setTimeout(() => viewUserProfile(userId), 350);
+    };
+  }
+  
+  const chatBtn = document.getElementById("modalChatBtn");
+  if (userId === currentUser?.uid) {
+    chatBtn.classList.add("hidden");
+  } else {
+    chatBtn.classList.remove("hidden");
+    chatBtn.onclick = () => {
+      selectedUser = user;
+      closeUserProfile();
+      showSection("chat");
+      listenMessages();
+    };
+  }
+  document.getElementById("userProfileModal").style.display = "flex";
+}
+window.viewUserProfile = viewUserProfile;
+
+function closeUserProfile() {
+  SoundFX.playClick();
+  document.getElementById("userProfileModal").style.display = "none";
+}
+window.closeUserProfile = closeUserProfile;
+
+function getFontSize(content) {
+  if (!content) return "text-sm";
+  if (content.length < 50) return "text-2xl font-black text-green-400";
+  if (content.length < 100) return "text-lg font-bold text-zinc-100";
+  return "text-sm font-semibold text-zinc-300";
+}
+
+function renderPosts(posts) {
+  currentPosts = posts;
+  
+  const container = document.getElementById("postsContainer");
+  if (container) {
+    let filteredPosts = posts;
+    if (feedFilter === 'following' && currentUser) {
+      filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
+    }
+    
+    const statsLabel = document.getElementById("feed-stats-label");
+    if(statsLabel) statsLabel.innerText = `${filteredPosts.length} Publicaciones`;
+
+    if (filteredPosts.length === 0) {
+      container.innerHTML = `
+        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
+          <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
+          <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
+        </div>
+      `;
+    } else {
+      container.innerHTML = "";
+      filteredPosts.forEach(post => {
+        container.appendChild(createPostCardElement(post));
+      });
+    }
+  }
+
+  const myPostsContainer = document.getElementById("myPostsContainer");
+  if (myPostsContainer && currentUser) {
+    const myFilteredPosts = posts.filter(p => p.authorId === currentUser.uid);
+    if (myFilteredPosts.length === 0) {
+      myPostsContainer.innerHTML = `
+        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-6 text-center text-zinc-600 text-xs">
+          Aún no has compartido ninguna publicación.
+        </div>
+      `;
+    } else {
+      myPostsContainer.innerHTML = "";
+      myFilteredPosts.forEach(post => {
+        myPostsContainer.appendChild(createPostCardElement(post));
+      });
+    }
+  }
+
+  if (cachedVotesSnapshot) {
+     applyVotesStyles(cachedVotesSnapshot);
+  }
+  updateProfileStats();
+}
+
+function createPostCardElement(post) {
+  const isFollowing = followingSet.has(post.authorId);
+  let followBtnMarkup = '';
+  
+  if (currentUser && post.authorId !== currentUser.uid) {
+    if (isFollowing) {
+      followBtnMarkup = `
+        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-extrabold flex items-center gap-1">
+          <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
+        </button>`;
+    } else {
+      followBtnMarkup = `
+        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black text-xs font-black flex items-center gap-1">
+          <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
+        </button>`;
+    }
+  }
+
+  // Censurar contenido del post en vivo al renderizar
+  const censoredContent = filterBadWords(post.content);
+
+  const div = document.createElement("div");
+  div.id = `post-card-${post.id}`;
+  div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
+  div.innerHTML = `
+  <div class="flex justify-between items-center">
+    <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
+      <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
+      <div>
+        <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">@${post.authorUsername || 'usuario'}</div>
+        <div class="text-[11px] text-zinc-400 font-medium">${post.authorFullName || 'Nombre'}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      ${followBtnMarkup}
+      ${currentUser && post.authorId === currentUser.uid ? `
+        <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 p-2 rounded-xl transition-colors">
+          <i class="fa-solid fa-trash text-sm"></i>
+        </button>
+      ` : ''}
+    </div>
+  </div>
+  
+  <p class="mt-4 leading-relaxed whitespace-pre-wrap ${getFontSize(censoredContent)}">${censoredContent}</p>
+
+  <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
+    <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
+      <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
+        <i class="fa-solid fa-circle-arrow-up text-lg" id="up-icon-${post.id}"></i>
+        <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
+      </button>
+      <div class="w-[1px] h-6 bg-zinc-800"></div>
+      <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
+        <i class="fa-solid fa-circle-arrow-down text-lg" id="down-icon-${post.id}"></i>
+        <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
+    <div class="flex gap-2">
+      <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"/>
+      <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+  `;
+
+  const commentsQuery = query(getCol("comments"), where("postId", "==", post.id));
+  onSnapshot(commentsQuery, (commentSnapshot) => {
+      const commentListContainer = div.querySelector(`#comments-list-${post.id}`);
+      if (commentListContainer) {
+          commentListContainer.innerHTML = "";
+          const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
+          sortedDocs.forEach(comment => {
+              const censoredCommentText = filterBadWords(comment.text);
+              const commentDiv = document.createElement("div");
+              commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
+              commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer" onclick="viewUserProfile('${comment.authorId}')">@${comment.authorUsername || 'usuario'}:</strong> <span class="text-zinc-300 ml-1">${censoredCommentText}</span>`;
+              commentListContainer.appendChild(commentDiv);
+          });
+      }
+  });
+
+  return div;
+}
+
+document.addEventListener("click", async (event) => {
+    const target = event.target;
+
+    if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
+        const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
+        const postId = btn.dataset.id;
+        if (!confirm("¿Estás seguro de que quieres eliminar este post permanentemente?")) return;
+        try {
+            await deleteDoc(getDocRef("posts", postId));
+            showNotification("Publicación eliminada correctamente.", "success");
+        } catch (error) { showNotification("No se pudo eliminar el post.", "error"); }
+        return;
+    }
+
+    if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
+        const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
+        if(!currentUser) return showNotification("Debes iniciar sesión", "error");
+        
+        const postId = btn.dataset.id;
+        const input = document.getElementById(`comment-input-${postId}`);
+        const text = input ? input.value.trim() : "";
+        if(!text) return;
+
+        const myUserData = allUsers.find(u => u.id === currentUser.uid);
+
+        await addDoc(getCol("comments"), {
+            postId, 
+            text, 
+            authorUsername: myUserData?.username || currentUser.displayName, 
+            authorId: currentUser.uid, 
+            createdAt: Date.now()
+        });
+        if(input) input.value = "";
+        SoundFX.playSuccess();
+        showNotification("Comentario publicado", "success");
+        return;
+    }
+
+    if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
+        const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
+        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
+        
+        const postId = btn.dataset.id;
+        const voteId = `${currentUser.uid}_${postId}`;
+        const icon = document.getElementById(`up-icon-${postId}`);
+        
+        SoundFX.playVoteUp();
+        if (icon) {
+          icon.classList.add("animate-upvote-arrow");
+          icon.addEventListener("animationend", () => icon.classList.remove("animate-upvote-arrow"), { once: true });
+        }
+        
+        const voteRef = getDocRef("votes", voteId);
+        const voteSnap = await getDoc(voteRef);
+        
+        if (voteSnap.exists() && voteSnap.data().type === "up") {
+            await deleteDoc(voteRef);
+            showNotification("Voto retirado", "info");
+        } else {
+            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "up", createdAt: Date.now() });
+        }
+        return;
+    }
+
+    if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
+        const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
+        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
+        
+        const postId = btn.dataset.id;
+        const voteId = `${currentUser.uid}_${postId}`;
+        const icon = document.getElementById(`down-icon-${postId}`);
+
+        SoundFX.playVoteDown();
+        if (icon) {
+          icon.classList.add("animate-downvote-arrow");
+          icon.addEventListener("animationend", () => icon.classList.remove("animate-downvote-arrow"), { once: true });
+        }
+        
+        const voteRef = getDocRef("votes", voteId);
+        const voteSnap = await getDoc(voteRef);
+        
+        if (voteSnap.exists() && voteSnap.data().type === "down") {
+            await deleteDoc(voteRef);
+            showNotification("Voto retirado", "info");
+        } else {
+            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "down", createdAt: Date.now() });
+        }
+        return;
+    }
+});
+
+window.setFeedFilter = function(filter) {
+  feedFilter = filter;
+  SoundFX.playClick();
+  const btnAll = document.getElementById("filter-all");
+  const btnFollow = document.getElementById("filter-following");
+  if(filter === 'all') {
+    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
+    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
+  } else {
+    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
+    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
+  }
+  renderPosts(currentPosts);
+};
+
+window.toggleFollow = async function(targetUserId) {
+  if(!currentUser) return showNotification("Inicia sesión para seguir usuarios", "error");
+  const followId = `${currentUser.uid}_${targetUserId}`;
+  const followRef = getDocRef("followers", followId);
+  const snap = await getDoc(followRef);
+  if(snap.exists()) {
+    await deleteDoc(followRef);
+    showNotification("Dejaste de seguir a este usuario", "info");
+  } else {
+    await setDoc(followRef, { followerId: currentUser.uid, followingId: targetUserId, createdAt: Date.now() });
+    showNotification("¡Ahora sigues a este usuario!", "success");
+  }
+};
+
+window.showSection = function(section) {
   SoundFX.playClick();
   document.getElementById("feedSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
   document.getElementById("profileSection").classList.add("hidden");
   
-  document.querySelectorAll(".nav-tab").forEach(t => {
-    t.className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-200";
-  });
+  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
+  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
+  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
 
-  if(sect === 'feed') {
+  if(section === 'feed') {
     document.getElementById("feedSection").classList.remove("hidden");
-    document.getElementById("tab-feed").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-zinc-900 border border-zinc-800 text-green-400 shadow-inner shadow-black";
-    renderFeed();
-  } else if(sect === 'chat') {
+    document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
+  } else if(section === 'chat') {
     document.getElementById("chatSection").classList.remove("hidden");
-    document.getElementById("tab-chat").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-zinc-900 border border-zinc-800 text-green-400 shadow-inner shadow-black";
-    renderUsersList();
-  } else if(sect === 'profile') {
+    document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
+  } else if(section === 'profile') {
     document.getElementById("profileSection").classList.remove("hidden");
-    document.getElementById("tab-profile").className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all duration-200 bg-zinc-900 border border-zinc-800 text-green-400 shadow-inner shadow-black";
-    loadMyProfileData();
+    document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
+    renderPosts(currentPosts);
   }
-}
-window.showSection = showSection;
+};
 
-function setFeedFilter(f) {
-  SoundFX.playClick();
-  feedFilter = f;
-  const btnAll = document.getElementById("filter-all");
-  const btnFol = document.getElementById("filter-following");
-  if(f === 'all') {
-    btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
-    btnFol.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-  } else {
-    btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-    btnFol.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
-  }
-  renderFeed();
-}
-window.setFeedFilter = setFeedFilter;
-
-// Filtrar por Hashtag
-function filterByHashtag(tag) {
-  SoundFX.playClick();
-  currentHashtagFilter = tag.toLowerCase();
-  const badge = document.getElementById("hashtag-active-badge");
-  const badgeText = document.getElementById("hashtag-badge-text");
-  if (badge && badgeText) {
-    badgeText.innerText = `#${tag}`;
-    badge.classList.remove("hidden");
-  }
-  renderFeed();
-}
-window.filterByHashtag = filterByHashtag;
-
-function clearHashtagFilter() {
-  SoundFX.playClick();
-  currentHashtagFilter = null;
-  const badge = document.getElementById("hashtag-active-badge");
-  if (badge) badge.classList.add("hidden");
-  renderFeed();
-}
-window.clearHashtagFilter = clearHashtagFilter;
-
-// Extrae hashtags de un texto
-function extractHashtags(text) {
-  if (!text) return [];
-  const matches = text.match(/#([a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]+)/g);
-  if (!matches) return [];
-  return matches.map(m => m.slice(1).toLowerCase());
-}
-
-// Escuchar los votos arriba de comentarios de forma reactiva
-function listenCommentUpvotes() {
-  onSnapshot(query(getCol("comment_upvotes")), (snapshot) => {
-    const counts = {};
-    snapshot.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.commentId) {
-        counts[data.commentId] = (counts[data.commentId] || 0) + 1;
-      }
-    });
-    cachedCommentVotes = counts;
-    // Si hay un contenedor de comentarios abierto, forzar re-renderizado visual de contadores
-    document.querySelectorAll("[data-comment-count-id]").forEach(el => {
-      const cId = el.getAttribute("data-comment-count-id");
-      el.innerText = counts[cId] || 0;
-    });
-  });
-}
-
-// Votar arriba un comentario
-async function upvoteComment(commentId) {
-  if (!currentUser) return;
-  SoundFX.playVoteUp();
-  const upvoteId = `${currentUser.uid}_${commentId}`;
-  const docRef = getDocRef("comment_upvotes", upvoteId);
-  
+document.getElementById("loginBtn").onclick = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPassword").value.trim();
+  if(!email || !pass) return showNotification("Por favor rellena todos los campos", "error");
   try {
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      showNotification("Ya le diste voto arriba a este comentario", "info");
-    } else {
-      await setDoc(docRef, {
-        commentId: commentId,
-        uid: currentUser.uid,
-        createdAt: serverTimestamp()
-      });
-      showNotification("Voto arriba añadido al comentario", "success");
-    }
-  } catch (e) {
-    console.error(e);
-  }
-}
-window.upvoteComment = upvoteComment;
+    await signInWithEmailAndPassword(auth, email, pass);
+    showNotification("Sesión iniciada correctamente", "success");
+  } catch(err) { showNotification("Credenciales inválidas", "error"); }
+};
 
-// Calcular reputación de posts y ordenarlos alternadamente (Popular / Impopular)
-function processAndRenderPosts(postsArray) {
-  const container = document.getElementById("postsContainer");
-  if(!container) return;
-  
-  if(postsArray.length === 0) {
-    container.innerHTML = `<div class="p-8 text-center text-zinc-600 font-bold border border-zinc-900 rounded-3xl bg-zinc-950/20">Aún no hay publicaciones aquí. ¡Sé el primero!</div>`;
-    return;
-  }
-
-  // Agrupar votos globales por postId para calcular reputación neta
-  const voteScores = {};
-  cachedGlobalVotes.forEach(v => {
-    if(!voteScores[v.postId]) voteScores[v.postId] = 0;
-    if(v.type === 'up') voteScores[v.postId] += 1;
-    if(v.type === 'down') voteScores[v.postId] -= 1;
-  });
-
-  // Mapear posts adjuntando su reputación calculada
-  let enrichedPosts = postsArray.map(p => {
-    return { ...p, score: voteScores[p.id] || 0 };
-  });
-
-  // Aplicar filtros de seguidor o hashtag si están activos
-  if (feedFilter === 'following') {
-    enrichedPosts = enrichedPosts.filter(p => followingSet.has(p.uid) || p.uid === currentUser.uid);
-  }
-  if (currentHashtagFilter) {
-    enrichedPosts = enrichedPosts.filter(p => {
-      const tags = extractHashtags(p.text);
-      return tags.includes(currentHashtagFilter);
-    });
-  }
-
-  // --- ALGORITMO DE FEED ALTERNADO (Popular / Impopular) ---
-  // Ordenamos una copia de mayor a menor popularidad
-  const sortedByPopularity = [...enrichedPosts].sort((a, b) => b.score - a.score);
-  
-  let finalAlternatedPosts = [];
-  let leftIndex = 0; // Apunta al más popular
-  let rightIndex = sortedByPopularity.length - 1; // Apunta al más impopular
-
-  while (leftIndex <= rightIndex) {
-    if (leftIndex === rightIndex) {
-      finalAlternatedPosts.push(sortedByPopularity[leftIndex]);
-      break;
-    }
-    // Añadimos el más popular disponible
-    finalAlternatedPosts.push(sortedByPopularity[leftIndex]);
-    leftIndex++;
-    // Añadimos el más impopular disponible
-    finalAlternatedPosts.push(sortedByPopularity[rightIndex]);
-    rightIndex--;
-  }
-  // ---------------------------------------------------------
-
-  container.innerHTML = "";
-  
-  finalAlternatedPosts.forEach(post => {
-    const author = allUsers.find(u => u.id === post.uid);
-    const authorName = author ? author.fullName : "Usuario de Rankiu";
-    const authorUser = author ? `@${author.username}` : "@anonimo";
-    const avatar = getUserAvatar(author ? author.avatarUrl : "");
-    const totalScore = post.score;
-
-    // Verificar si el usuario actual ya votó este post
-    const myVote = cachedGlobalVotes.find(v => v.postId === post.id && v.uid === (currentUser ? currentUser.uid : ''));
-    const isUp = myVote && myVote.type === 'up';
-    const isDown = myVote && myVote.type === 'down';
-
-    const postCard = document.createElement("div");
-    postCard.className = "bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition duration-300 shadow-xl flex gap-4 animate-fade-in relative overflow-hidden group";
-    
-    // Insignia del tipo de post alternado para feedback visual del usuario
-    const isPopularPlace = enrichedPosts.find(p => p.id === post.id).score >= 0;
-    postCard.innerHTML = `
-      <div class="flex flex-col items-center gap-1 bg-zinc-900/40 p-2 rounded-2xl border border-zinc-900/60 h-fit self-start select-none">
-        <button onclick="window.castVote('${post.id}', 'up')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isUp ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'text-zinc-500 hover:text-green-400'}">
-          <i class="fa-solid fa-arrow-up text-sm ${isUp ? 'animate-upvote-arrow' : ''}"></i>
-        </button>
-        <span class="text-xs font-black font-mono ${totalScore > 0 ? 'text-green-400' : totalScore < 0 ? 'text-red-400' : 'text-zinc-500'}">${totalScore > 0 ? '+' : ''}${totalScore}</span>
-        <button onclick="window.castVote('${post.id}', 'down')" class="w-8 h-8 rounded-xl flex items-center justify-center transition-all ${isDown ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'text-zinc-500 hover:text-red-400'}">
-          <i class="fa-solid fa-arrow-down text-sm ${isDown ? 'animate-downvote-arrow' : ''}"></i>
-        </button>
-      </div>
-
-      <div class="flex-1 space-y-3">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2.5 cursor-pointer" onclick="window.openUserProfile('${post.uid}')">
-            <img src="${avatar}" class="w-9 h-9 rounded-full object-cover border border-zinc-800">
-            <div>
-              <div class="text-xs font-black text-zinc-200 group-hover:text-green-400 transition flex items-center gap-1.5">
-                ${authorName}
-                <span class="text-[10px] bg-zinc-900 text-zinc-500 px-1.5 py-0.5 rounded-md border border-zinc-800 font-mono">${post.score >= 0 ? '🔥 Popular' : '❄️ Impopular'}</span>
-              </div>
-              <div class="text-[10px] font-bold text-zinc-500 font-mono">${authorUser}</div>
-            </div>
-          </div>
-          ${currentUser && post.uid === currentUser.uid ? `
-            <button onclick="window.deletePost('${post.id}')" class="text-zinc-700 hover:text-red-400 p-1 text-xs transition"><i class="fa-regular fa-trash-can"></i></button>
-          ` : ''}
-        </div>
-
-        <p class="text-base font-bold text-zinc-100 tracking-tight leading-snug break-words">${formatPostTextWithHashtags(post.text)}</p>
-        
-        <div class="border-t border-zinc-900/60 pt-3 flex flex-col gap-3">
-          <div class="flex gap-4 text-xs font-bold text-zinc-500">
-            <button onclick="window.toggleCommentsView('${post.id}')" class="hover:text-zinc-300 flex items-center gap-1.5"><i class="fa-regular fa-comment text-sm"></i> <span id="com-count-${post.id}">0</span> Comentarios</button>
-          </div>
-
-          <div id="comments-box-${post.id}" class="hidden space-y-3 bg-zinc-950/40 p-3 rounded-2xl border border-zinc-900/80">
-            <div id="comments-list-${post.id}" class="space-y-2 max-h-48 overflow-y-auto scrollbar pr-1"></div>
-            <div class="flex gap-2">
-              <input id="com-input-${post.id}" placeholder="Escribe una respuesta comunitaria..." autocomplete="off" class="flex-1 bg-zinc-900/60 border border-zinc-800/80 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-green-500/40 text-xs"/>
-              <button onclick="window.submitComment('${post.id}')" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-green-400 font-bold px-3 rounded-xl text-xs transition">Responder</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-    container.appendChild(postCard);
-    listenCommentsForPost(post.id);
-  });
-
-  // Re-calcular barra de tendencias de hashtags del feed global
-  renderHashtagsSidebar(postsArray);
-}
-
-// Renderizar la barra lateral de hashtags dinámicos
-function renderHashtagsSidebar(allPosts) {
-  const trendList = document.getElementById("hashtagsTrendList");
-  if (!trendList) return;
-
-  const countMap = {};
-  allPosts.forEach(p => {
-    const tags = extractHashtags(p.text);
-    tags.forEach(t => {
-      countMap[t] = (countMap[t] || 0) + 1;
-    });
-  });
-
-  const sortedTags = Object.keys(countMap).sort((a, b) => countMap[b] - countMap[a]).slice(0, 5);
-
-  if (sortedTags.length === 0) {
-    trendList.innerHTML = `<div class="text-zinc-600 italic p-1">No hay hashtags activos aún</div>`;
-    return;
-  }
-
-  trendList.innerHTML = "";
-  sortedTags.forEach((tag, idx) => {
-    const div = document.createElement("div");
-    div.className = "p-2 bg-zinc-900/40 rounded-xl border border-zinc-900 hover:border-zinc-800 cursor-pointer transition flex justify-between items-center";
-    div.onclick = () => filterByHashtag(tag);
-    div.innerHTML = `
-      <div>
-        <div class="text-zinc-500 font-bold font-mono text-[10px]">#${idx + 1} Tendencia</div>
-        <div class="font-black text-zinc-100 text-xs mt-0.5">#${tag}</div>
-      </div>
-      <span class="text-[10px] font-mono font-bold bg-zinc-900 text-green-400 px-2 py-0.5 rounded-md border border-zinc-800">${countMap[tag]} posts</span>
-    `;
-    trendList.appendChild(div);
-  });
-}
-
-function renderFeed() {
-  processAndRenderPosts(currentPosts);
-}
-
-// Manejar votos de posts globales
-async function castVote(postId, type) {
-  if(!currentUser) return;
-  const voteId = `${currentUser.uid}_${postId}`;
-  const voteRef = getDocRef("votes", voteId);
-  
+document.getElementById("registerBtn").onclick = async () => {
+  const username = document.getElementById("registerUsername").value.trim();
+  const fullName = document.getElementById("registerFullName").value.trim();
+  const email = document.getElementById("registerEmail").value.trim();
+  const pass = document.getElementById("registerPassword").value.trim();
+  if(!username || !fullName || !email || !pass) return showNotification("Por favor rellena todos los campos", "error");
   try {
-    const snap = await getDoc(voteRef);
-    if(snap.exists()) {
-      const currentVote = snap.data().type;
-      if(currentVote === type) {
-        await deleteDoc(voteRef);
-        if(type === 'up') SoundFX.playVoteDown();
-        else SoundFX.playVoteUp();
-      } else {
-        await setDoc(voteRef, { postId, uid: currentUser.uid, type }, { merge: true });
-        if(type === 'up') SoundFX.playVoteUp();
-        else SoundFX.playVoteDown();
-      }
-    } else {
-      await setDoc(voteRef, { postId, uid: currentUser.uid, type });
-      if(type === 'up') SoundFX.playVoteUp();
-      else SoundFX.playVoteDown();
-    }
-  } catch(e) { console.error(e); }
-}
-window.castVote = castVote;
-
-function toggleCommentsView(postId) {
-  SoundFX.playClick();
-  const box = document.getElementById(`comments-box-${postId}`);
-  if(box) box.classList.toggle("hidden");
-}
-window.toggleCommentsView = toggleCommentsView;
-
-async function submitComment(postId) {
-  if(!currentUser) return;
-  const inp = document.getElementById(`com-input-${postId}`);
-  if(!inp || !inp.value.trim()) return;
-  
-  SoundFX.playSuccess();
-  const text = inp.value.trim();
-  inp.value = "";
-  
-  try {
-    await addDoc(getCol("comments"), {
-      postId: postId,
-      uid: currentUser.uid,
-      text: text,
-      createdAt: Date.now()
+    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(cred.user, { displayName: username, photoURL: selectedDefaultAvatarUrl });
+    await setDoc(getDocRef("users", cred.user.uid), {
+      uid: cred.user.uid, username, fullName, email, bio: "¡Hola! Estoy usando Rankiu.", avatar: selectedDefaultAvatarUrl, createdAt: Date.now()
     });
-  } catch(e) { console.error(e); }
-}
-window.submitComment = submitComment;
+    showNotification("Cuenta creada con éxito", "success");
+  } catch(err) { showNotification("Error al registrar cuenta", "error"); }
+};
 
-const activeCommentListeners = new Set();
-function listenCommentsForPost(postId) {
-  if (activeCommentListeners.has(postId)) return;
-  activeCommentListeners.add(postId);
-  
-  const q = query(getCol("comments"), where("postId", "==", postId));
-  onSnapshot(q, (snapshot) => {
-    const listEl = document.getElementById(`comments-list-${postId}`);
-    const countEl = document.getElementById(`com-count-${postId}`);
-    
-    let comments = [];
-    snapshot.docs.forEach(d => {
-      comments.push({ id: d.id, ...d.data() });
-    });
-    comments.sort((a,b) => a.createdAt - b.createdAt);
-    
-    if(countEl) countEl.innerText = comments.length;
-    if(!listEl) return;
-    
-    if(comments.length === 0) {
-      listEl.innerHTML = `<div class="text-[10px] text-zinc-600 font-bold py-1">Nadie ha comentado todavía.</div>`;
-      return;
-    }
-    
-    listEl.innerHTML = "";
-    comments.forEach(c => {
-      const user = allUsers.find(u => u.id === c.uid);
-      const uName = user ? `@${user.username}` : "@anonimo";
-      const upvotesCount = cachedCommentVotes[c.id] || 0;
-      
-      const div = document.createElement("div");
-      div.className = "text-xs bg-zinc-900/30 p-2 rounded-xl border border-zinc-900/60 flex flex-col gap-1 relative group/item";
-      div.innerHTML = `
-        <div class="flex justify-between items-start">
-          <div class="font-bold text-green-400 font-mono text-[10px]">${uName}:</div>
-          
-          <button onclick="window.upvoteComment('${c.id}')" class="text-zinc-500 hover:text-green-400 font-mono text-[10px] flex items-center gap-1 bg-zinc-950 px-1.5 py-0.5 rounded-md border border-zinc-900 transition-all active:scale-95">
-            <i class="fa-solid fa-heart text-[9px]"></i>
-            <span data-comment-count-id="${c.id}">${upvotesCount}</span>
-          </button>
-        </div>
-        <p class="text-zinc-300 break-words pr-2">${formatPostTextWithHashtags(c.text)}</p>
-      `;
-      listEl.appendChild(div);
-    });
-  });
-}
-
-async function deletePost(postId) {
-  if(!confirm("¿Estás seguro de eliminar este pensamiento de Rankiu?")) return;
-  SoundFX.playVoteDown();
+document.getElementById("publishBtn").onclick = async () => {
+  if(!currentUser) return showNotification("Inicia sesión para publicar", "error");
+  const content = document.getElementById("postContent").value.trim();
+  if(!content) return showNotification("El contenido no puede estar vacío", "error");
   try {
-    await deleteDoc(getDocRef("posts", postId));
-    showNotification("Publicación eliminada", "info");
-  } catch(e) { console.error(e); }
-}
-window.deletePost = deletePost;
+    const myUserData = allUsers.find(u => u.id === currentUser.uid);
 
-// Crear publicación admitiendo hashtags nativos
-async function createNewPost() {
-  if(!currentUser) return;
-  const inp = document.getElementById("postContent");
-  if(!inp || !inp.value.trim()) return;
-  
-  SoundFX.playSuccess();
-  const text = inp.value.trim();
-  inp.value = "";
-  document.getElementById("charCounter").innerText = "0 / 150";
-  
-  try {
     await addDoc(getCol("posts"), {
-      uid: currentUser.uid,
-      text: text,
+      content, 
+      authorUsername: myUserData?.username || currentUser.displayName, 
+      authorFullName: myUserData?.fullName || "Usuario",
+      authorId: currentUser.uid, 
+      authorAvatar: currentUser.photoURL, 
       createdAt: Date.now()
     });
-    showNotification("Tu pensamiento ha sido esparcido en Rankiu", "success");
-  } catch(e) {
-    showNotification("Error al publicar", "error");
-  }
-}
-
-const pubBtn = document.getElementById("publishBtn");
-if(pubBtn) pubBtn.addEventListener("click", createNewPost);
-
-function listenGlobalVotes() {
-  onSnapshot(getCol("votes"), (snapshot) => {
-    let votes = [];
-    snapshot.docs.forEach(d => votes.push(d.data()));
-    cachedGlobalVotes = votes;
-    renderFeed();
-    updateReputationScores();
-  });
-}
-
-function updateReputationScores() {
-  const userPoints = {};
-  allUsers.forEach(u => userPoints[u.id] = 0);
-  
-  currentPosts.forEach(post => {
-    const postVotes = cachedGlobalVotes.filter(v => v.postId === post.id);
-    let score = 0;
-    postVotes.forEach(v => {
-      if(v.type === 'up') score += 1;
-      if(v.type === 'down') score -= 1;
-    });
-    if(userPoints[post.uid] !== undefined) {
-      userPoints[post.uid] += score;
-    }
-  });
-  
-  allUsers.forEach(u => {
-    u.reputation = userPoints[u.id] || 0;
-  });
-
-  if(currentUser) {
-    const me = allUsers.find(u => u.id === currentUser.uid);
-    const repEl = document.getElementById("userReputationPoints");
-    if(repEl && me) repEl.innerText = me.reputation;
-  }
-  renderSuggestedUsers();
-}
-
-function updateNavbar() {
-  const navUser = document.getElementById("navUser");
-  if(!navUser) return;
-  if(currentUser) {
-    const userObj = allUsers.find(u => u.id === currentUser.uid);
-    const uName = userObj ? `@${userObj.username}` : "...";
-    const avatar = getUserAvatar(userObj ? userObj.avatarUrl : "");
-    navUser.innerHTML = `
-      <div class="flex items-center gap-2 cursor-pointer bg-zinc-950 p-1.5 pr-3 rounded-xl border border-zinc-900 hover:border-zinc-800 transition" onclick="showSection('profile')">
-        <img src="${avatar}" class="w-6 h-6 rounded-full object-cover">
-        <span class="text-xs font-bold text-zinc-300 font-mono">${uName}</span>
-      </div>
-      <button onclick="window.appSignOut()" class="text-zinc-500 hover:text-red-400 text-xs p-2 transition" title="Cerrar sesión"><i class="fa-solid fa-power-off"></i></button>
-    `;
-  } else {
-    navUser.innerHTML = `<button onclick="document.getElementById('authModal').classList.remove('hidden')" class="bg-green-500 text-black font-bold px-4 py-1.5 rounded-xl text-xs hover:bg-green-400 transition shadow-md shadow-green-500/10">Acceder</button>`;
-  }
-}
-
-async function appSignOut() {
-  SoundFX.playVoteDown();
-  await signOut(auth);
-  currentUser = null;
-  location.reload();
-}
-window.appSignOut = appSignOut;
-
-function listenUsers() {
-  onSnapshot(getCol("users"), (snapshot) => {
-    let users = [];
-    snapshot.docs.forEach(doc => {
-      users.push({ id: doc.id, ...doc.data() });
-    });
-    allUsers = users;
-    updateNavbar();
-    renderSuggestedUsers();
-    renderMiniProfileCard();
-    
-    // Iniciar escucha de posts ahora que los usuarios están listos
-    onSnapshot(getCol("posts"), (postSnapshot) => {
-      let posts = [];
-      postSnapshot.docs.forEach(doc => {
-        posts.push({ id: doc.id, ...doc.data() });
-      });
-      posts.sort((a,b) => b.createdAt - a.createdAt);
-      currentPosts = posts;
-      renderFeed();
-      updateReputationScores();
-    });
-  });
-}
-
-function listenFollowers() {
-  onSnapshot(getCol("followers"), (snapshot) => {
-    followingSet.clear();
-    const fCounts = {};
-    const folCounts = {};
-    
-    allUsers.forEach(u => { fCounts[u.id] = 0; folCounts[u.id] = 0; });
-    
-    snapshot.docs.forEach(doc => {
-      const pair = doc.data();
-      if(currentUser && pair.followerId === currentUser.uid) {
-        followingSet.add(pair.followingId);
-      }
-      if(pair.followingId) fCounts[pair.followingId] = (fCounts[pair.followingId] || 0) + 1;
-      if(pair.followerId) folCounts[pair.followerId] = (folCounts[pair.followerId] || 0) + 1;
-    });
-    
-    followerCounts = fCounts;
-    followingCounts = folCounts;
-    
-    const fCountEl = document.getElementById("followersCount");
-    if(fCountEl && currentUser) fCountEl.innerText = followerCounts[currentUser.uid] || 0;
-    const fingCountEl = document.getElementById("followingCount");
-    if(fingCountEl && currentUser) fingCountEl.innerText = followingCounts[currentUser.uid] || 0;
-    
-    renderSuggestedUsers();
-  });
-}
-
-function renderMiniProfileCard() {
-  const card = document.getElementById("miniProfileCard");
-  if(!card || !currentUser) return;
-  const me = allUsers.find(u => u.id === currentUser.uid);
-  if(!me) return;
-  
-  card.innerHTML = `
-    <div class="flex items-center gap-3 cursor-pointer w-full" onclick="showSection('profile')">
-      <img src="${getUserAvatar(me.avatarUrl)}" class="w-11 h-11 rounded-full object-cover border-2 border-green-500/30">
-      <div class="flex-1 min-w-0">
-        <div class="text-xs font-black text-zinc-200 truncate">${me.fullName}</div>
-        <div class="text-[10px] font-bold text-zinc-500 font-mono truncate">@${me.username}</div>
-      </div>
-      <div class="text-right">
-        <div class="text-xs font-black text-green-400 font-mono">${me.reputation || 0}</div>
-        <div class="text-[8px] text-zinc-600 uppercase font-bold tracking-wider">Rep</div>
-      </div>
-    </div>
-  `;
-}
+    document.getElementById("postContent").value = "";
+    document.getElementById("charCounter").innerText = "0 / 150";
+    showNotification("Publicación enviada", "success");
+  } catch(err) { showNotification("Error al publicar", "error"); }
+};
 
 function renderSuggestedUsers() {
-  const list = document.getElementById("suggestedUsersList");
-  if(!list) return;
-  if(!currentUser) {
-    list.innerHTML = `<div class="text-xs text-zinc-600 font-bold p-2">Inicia sesión para descubrir personas</div>`;
+  const container = document.getElementById("suggestedUsersList");
+  if (!container) return;
+  const suggestions = allUsers.filter(u => u.id !== currentUser?.uid && !followingSet.has(u.id)).slice(0, 4);
+  
+  if (suggestions.length === 0) {
+    container.innerHTML = `<p class="text-xs text-zinc-500">Ya sigues a todos los miembros.</p>`;
     return;
   }
   
-  // Filtrar fuera a nosotros mismos y ordenar por reputación acumulada
-  let candidates = allUsers.filter(u => u.id !== currentUser.uid && !followingSet.has(u.id));
-  candidates.sort((a,b) => (b.reputation || 0) - (a.reputation || 0));
-  candidates = candidates.slice(0, 4);
-  
-  if(candidates.length === 0) {
-    list.innerHTML = `<div class="text-xs text-zinc-600 font-bold p-1"><i class="fa-solid fa-circle-check text-green-500 mr-1.5"></i>¡Estás al día con todos!</div>`;
-    return;
-  }
-  
-  list.innerHTML = "";
-  candidates.forEach(u => {
+  container.innerHTML = "";
+  suggestions.forEach(user => {
     const div = document.createElement("div");
-    div.className = "flex items-center justify-between bg-zinc-900/30 p-2 rounded-xl border border-zinc-900/60";
+    div.className = "flex items-center justify-between p-2 rounded-2xl bg-zinc-900/30 border border-zinc-900 hover:border-zinc-800 transition";
     div.innerHTML = `
-      <div class="flex items-center gap-2 cursor-pointer min-w-0 flex-1" onclick="window.openUserProfile('${u.id}')">
-        <img src="${getUserAvatar(u.avatarUrl)}" class="w-8 h-8 rounded-full object-cover border border-zinc-800">
-        <div class="min-w-0 flex-1">
-          <div class="text-xs font-black text-zinc-300 truncate">${u.fullName}</div>
-          <div class="text-[9px] text-zinc-500 font-mono truncate">@${u.username}</div>
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="viewUserProfile('${user.id}')">
+        <img src="${getUserAvatar(user.avatar)}" class="w-8 h-8 rounded-full object-cover">
+        <div class="truncate max-w-[110px]">
+          <div class="text-xs font-black text-zinc-200">@${user.username}</div>
+          <div class="text-[9px] text-zinc-500 font-medium truncate">${user.fullName || ''}</div>
         </div>
       </div>
-      <button onclick="window.toggleFollowUser('${u.id}')" class="bg-zinc-100 hover:bg-white text-black font-extrabold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition">Seguir</button>
-    `;
-    list.appendChild(div);
-  });
-}
-
-async function toggleFollowUser(targetUid) {
-  if(!currentUser) return;
-  SoundFX.playSuccess();
-  const followDocId = `${currentUser.uid}_${targetUid}`;
-  const followRef = getDocRef("followers", followDocId);
-  
-  try {
-    if(followingSet.has(targetUid)) {
-      await deleteDoc(followRef);
-      showNotification("Dejaste de seguir al usuario", "info");
-    } else {
-      await setDoc(followRef, {
-        followerId: currentUser.uid,
-        followingId: targetUid,
-        createdAt: Date.now()
-      });
-      showNotification("Usuario seguido con éxito", "success");
-    }
-  } catch(e) { console.error(e); }
-}
-window.toggleFollowUser = toggleFollowUser;
-
-function loadMyProfileData() {
-  if(!currentUser) return;
-  const me = allUsers.find(u => u.id === currentUser.uid);
-  if(!me) return;
-  
-  document.getElementById("profileAvatar").src = getUserAvatar(me.avatarUrl);
-  document.getElementById("editUsername").value = me.username || "";
-  document.getElementById("editFullName").value = me.fullName || "";
-  document.getElementById("editBio").value = me.bio || "";
-  
-  const myPosts = currentPosts.filter(p => p.uid === currentUser.uid);
-  const container = document.getElementById("myPostsContainer");
-  if(!container) return;
-  
-  if(myPosts.length === 0) {
-    container.innerHTML = `<div class="p-6 text-center text-zinc-600 font-bold border border-zinc-900 rounded-3xl bg-zinc-950/20 text-xs">No has compartido publicaciones aún</div>`;
-    return;
-  }
-  
-  container.innerHTML = "";
-  myPosts.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "bg-zinc-950 border border-zinc-900 rounded-2xl p-4 flex justify-between items-center text-xs font-medium";
-    div.innerHTML = `
-      <p class="text-zinc-300 flex-1 break-words pr-4 font-bold">${formatPostTextWithHashtags(p.text)}</p>
-      <button onclick="window.deletePost('${p.id}')" class="text-zinc-600 hover:text-red-400 p-2 transition"><i class="fa-regular fa-trash-can"></i></button>
+      <button onclick="toggleFollow('${user.id}')" class="px-3 py-1 bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-black font-extrabold text-[10px] rounded-lg transition-all border border-green-500/20">
+        Seguir
+      </button>
     `;
     container.appendChild(div);
   });
 }
 
-async function saveProfileChanges() {
-  if(!currentUser) return;
-  const userRef = getDocRef("users", currentUser.uid);
-  const username = cleanUsernameInput(document.getElementById("editUsername").value);
-  const fullName = document.getElementById("editFullName").value.trim();
-  const bio = document.getElementById("editBio").value.trim();
-  
-  if(!username || !fullName) {
-    showNotification("Rellena los campos obligatorios", "error");
-    return;
-  }
-  
-  SoundFX.playSuccess();
-  try {
-    await setDoc(userRef, { username, fullName, bio }, { merge: true });
-    showNotification("Perfil de Rankiu actualizado", "success");
-    showSection('feed');
-  } catch(e) { showNotification("Error al actualizar", "error"); }
-}
-document.getElementById("saveProfileBtn").onclick = saveProfileChanges;
-
-// Flujo de Fotos de Perfil
-const fileInp = document.getElementById("newProfilePhoto");
-if(fileInp) {
-  fileInp.addEventListener("change", async (e) => {
-    if(!currentUser || !e.target.files[0]) return;
-    const file = e.target.files[0];
-    showNotification("Subiendo avatar...", "info");
-    
-    try {
-      const storagePathRef = ref(storage, `users/${currentUser.uid}/${Date.now()}_${file.name}`);
-      const snapshot = await uploadBytes(storagePathRef, file);
-      const downloadUrl = await getDownloadURL(snapshot.ref);
-      
-      await setDoc(getDocRef("users", currentUser.uid), { avatarUrl: downloadUrl }, { merge: true });
-      document.getElementById("profileAvatar").src = downloadUrl;
-      showNotification("Avatar modificado con éxito", "success");
-    } catch(err) {
-      console.error(err);
-      showNotification("La nube rechazó el archivo. Intentando fallback local...", "info");
-      const reader = new FileReader();
-      reader.onload = async function(event) {
-        const base64 = event.target.result;
-        await setDoc(getDocRef("users", currentUser.uid), { avatarUrl: base64 }, { merge: true });
-        document.getElementById("profileAvatar").src = base64;
-        showNotification("Avatar cargado localmente en Firestore", "success");
-      }
-      reader.readAsDataURL(file);
-    }
+function listenUsers() {
+  onSnapshot(query(getCol("users")), (snapshot) => {
+    allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderUsers();
+    renderSuggestedUsers();
+    updateNavbar();
+    renderProfile();
   });
 }
 
-function openUserProfile(uid) {
-  SoundFX.playClick();
-  const user = allUsers.find(u => u.id === uid);
-  if(!user) return;
-  
-  document.getElementById("modalAvatar").src = getUserAvatar(user.avatarUrl);
-  document.getElementById("modalUsername").innerText = `@${user.username}`;
-  document.getElementById("modalFullName").innerText = user.fullName;
-  document.getElementById("modalBio").innerText = user.bio || "Sin biografía en Rankiu.";
-  document.getElementById("modalFollowers").innerText = followerCounts[uid] || 0;
-  document.getElementById("modalReputation").innerText = user.reputation || 0;
-  
-  const followBtn = document.getElementById("modalFollowBtn");
-  if(currentUser && uid === currentUser.uid) {
-    followBtn.classList.add("hidden");
-  } else {
-    followBtn.classList.remove("hidden");
-    followBtn.innerText = followingSet.has(uid) ? "Dejar de Seguir" : "Seguir";
-    followBtn.onclick = () => {
-      toggleFollowUser(uid);
-      closeUserProfile();
-    };
-  }
-  
-  const chatBtn = document.getElementById("modalChatBtn");
-  if(currentUser && uid === currentUser.uid) chatBtn.classList.add("hidden");
-  else {
-    chatBtn.classList.remove("hidden");
-    chatBtn.onclick = () => {
-      closeUserProfile();
-      showSection('chat');
-      startPrivateChatWith(uid);
-    };
-  }
-  
-  const modal = document.getElementById("userProfileModal");
-  modal.classList.remove("hidden");
-  modal.classList.add("flex");
-}
-window.openUserProfile = openUserProfile;
-
-function closeUserProfile() {
-  const modal = document.getElementById("userProfileModal");
-  modal.classList.add("hidden");
-  modal.classList.remove("flex");
-}
-window.closeUserProfile = closeUserProfile;
-
-// Lógica de mensajería cifrada
-function renderUsersList() {
+function renderUsers() {
   const container = document.getElementById("usersList");
-  if(!container) return;
-  if(allUsers.length <= 1) {
-    container.innerHTML = `<div class="text-xs text-zinc-600 font-bold p-4 text-center">No hay otros miembros activos aún</div>`;
-    return;
-  }
-  
+  if (!container) return;
   container.innerHTML = "";
-  allUsers.forEach(u => {
-    if(currentUser && u.id === currentUser.uid) return;
-    const isSelected = selectedUser && selectedUser.id === u.id;
+  allUsers.forEach(user => {
+    if(currentUser && user.id === currentUser.uid) return;
     const div = document.createElement("div");
-    div.className = `p-3 rounded-2xl flex items-center gap-3 cursor-pointer transition ${isSelected ? 'bg-green-500 text-black shadow-md shadow-green-500/10 font-bold' : 'bg-zinc-900/40 border border-zinc-900 text-zinc-300 hover:bg-zinc-900/80 hover:border-zinc-800'}`;
-    div.onclick = () => startPrivateChatWith(u.id);
+    div.className = `flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-900 rounded-2xl p-3 cursor-pointer hover:border-zinc-800 transition-all duration-200`;
+    div.onclick = () => {
+      selectedUser = user;
+      SoundFX.playClick();
+      listenMessages();
+    };
     div.innerHTML = `
-      <img src="${getUserAvatar(u.avatarUrl)}" class="w-8 h-8 rounded-full object-cover border ${isSelected ? 'border-black/20' : 'border-zinc-800'}">
-      <div class="min-w-0 flex-1">
-        <div class="text-xs font-black truncate">${u.fullName}</div>
-        <div class="text-[9px] opacity-60 font-mono truncate">@${u.username}</div>
-      </div>
+    <img src="${getUserAvatar(user.avatar)}" class="w-10 h-10 rounded-full object-cover">
+    <div>
+      <div class="font-extrabold text-sm text-zinc-200 truncate">@${user.username}</div>
+      <div class="text-xs text-zinc-500 font-medium">${user.fullName || ''}</div>
+    </div>
     `;
     container.appendChild(div);
   });
 }
 
-let activeChatListener = null;
-function startPrivateChatWith(uid) {
-  const targetUser = allUsers.find(u => u.id === uid);
-  if(!targetUser) return;
-  selectedUser = targetUser;
-  renderUsersList();
-  
-  const header = document.getElementById("chatHeader");
-  header.innerHTML = `
-    <div class="flex items-center gap-3 w-full">
-      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer text-zinc-400 hover:text-white" onclick="closeActiveChat()"></i>
-      <img src="${getUserAvatar(targetUser.avatarUrl)}" class="w-8 h-8 rounded-full object-cover border border-zinc-800">
-      <div>
-        <div class="text-xs font-black text-zinc-100">${targetUser.fullName}</div>
-        <div class="text-[9px] font-bold text-green-400 font-mono">@${targetUser.username}</div>
+function insertEmoji(emoji) {
+  const input = document.getElementById("messageInput");
+  if(input) {
+    input.value += emoji;
+    input.focus();
+    SoundFX.playClick();
+  }
+}
+window.insertEmoji = insertEmoji;
+
+async function sendMessage(){
+  if(!selectedUser){ showNotification("Selecciona un usuario primero", "error"); return; }
+  const input = document.getElementById("messageInput");
+  const text = input ? input.value.trim() : "";
+  if(!text) return;
+
+  await addDoc(getCol("messages"),{
+    from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
+  });
+  input.value = "";
+  SoundFX.playMessage();
+}
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
+
+document.getElementById("messageInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") sendMessage();
+});
+
+function listenMessages(){
+  if(!selectedUser) return;
+  document.getElementById("chatHeader").innerHTML = `
+    <div class="flex items-center gap-3">
+      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer mr-1" onclick="closeActiveChat()"></i>
+      <img src="${getUserAvatar(selectedUser.avatar)}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
+      <div class="flex flex-col text-left cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
+        <span class="text-white font-bold hover:text-green-400 text-sm transition">@${selectedUser.username}</span>
+        <span class="text-zinc-400 font-medium text-xs">${selectedUser.fullName || ''}</span>
       </div>
     </div>
   `;
-  
-  if(activeChatListener) activeChatListener();
-  
-  const q = query(getCol("messages"));
-  activeChatListener = onSnapshot(q, (snapshot) => {
-    const msgs = [];
-    snapshot.docs.forEach(doc => {
-      const d = doc.data();
-      if((d.from === currentUser.uid && d.to === uid) || (d.from === uid && d.to === currentUser.uid)) {
-        msgs.push(d);
-      }
-    });
+  const q = query(getCol("messages"), orderBy("createdAt","asc"));
+  onSnapshot(q,(snapshot)=>{
+    const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
+    .filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
+
+    const container = document.getElementById("chatMessages");
+    if(!container) return;
+    container.innerHTML = "";
     
-    msgs.sort((a,b) => a.createdAt - b.createdAt);
-    
-    const box = document.getElementById("chatMessages");
-    if(msgs.length === 0) {
-      box.innerHTML = `<div class="h-full flex flex-col items-center justify-center text-zinc-600 text-xs font-bold"><i class="fa-regular fa-comment-dots text-3xl mb-1"></i> Ningún mensaje aún. ¡Saluda!</div>`;
-      return;
+    if (messages.length === 0) {
+      container.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-zinc-600">
+          <p class="text-xs">Di hola para empezar una conversación con @${selectedUser.username}.</p>
+        </div>`;
     }
-    
-    box.innerHTML = "";
-    msgs.forEach(m => {
-      const isMe = m.from === currentUser.uid;
+
+    messages.forEach(msg => {
+      const mine = msg.from === currentUser.uid;
+      const censoredMsgText = filterBadWords(msg.text);
       const div = document.createElement("div");
-      div.className = `flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in`;
-      div.innerHTML = `
-        <div class="max-w-[75%] p-3 rounded-2xl text-xs font-medium border break-words shadow-sm ${isMe ? 'bg-green-500 text-black border-green-600/20 font-bold rounded-tr-none' : 'bg-zinc-900 text-zinc-200 border-zinc-800/80 rounded-tl-none'}">
-          ${filterBadWords(m.text)}
-        </div>
-      `;
-      box.appendChild(div);
+      div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
+      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold shadow-md shadow-green-500/10' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${censoredMsgText}</div>`;
+      container.appendChild(div);
     });
-    box.scrollTop = box.scrollHeight;
+    container.scrollTop = container.scrollHeight;
   });
 }
 
 function closeActiveChat() {
   selectedUser = null;
-  if(activeChatListener) activeChatListener();
-  renderUsersList();
-  document.getElementById("chatHeader").innerHTML = `<span class="text-zinc-500 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left md:hidden cursor-pointer"></i> Selecciona un usuario para chatear</span>`;
-  document.getElementById("chatMessages").innerHTML = `<div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2"><i class="fa-regular fa-paper-plane text-4xl"></i><p class="text-sm">Tus chats privados están encriptados en la nube</p></div>`;
+  SoundFX.playClick();
+  document.getElementById("chatHeader").innerHTML = `<span class="text-zinc-500 text-sm">Selecciona un usuario para chatear</span>`;
+  document.getElementById("chatMessages").innerHTML = `
+    <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
+      <i class="fa-regular fa-paper-plane text-4xl"></i>
+      <p class="text-sm">Tus chats privados están encriptados en la nube</p>
+    </div>`;
 }
 window.closeActiveChat = closeActiveChat;
 
-async function sendDirectMessage() {
-  if(!currentUser || !selectedUser) return;
-  const inp = document.getElementById("messageInput");
-  if(!inp || !inp.value.trim()) return;
-  
-  SoundFX.playMessage();
-  const text = inp.value.trim();
-  inp.value = "";
+async function saveProfileChanges() {
+  if (!currentUser) return;
+  const newUsername = document.getElementById("editUsername").value.trim();
+  const newFullName = document.getElementById("editFullName").value.trim();
+  const newBio = document.getElementById("editBio").value.trim();
+  if (!newUsername || !newFullName) return showNotification("El nombre de usuario y nombre completo no pueden estar vacíos", "error");
   
   try {
-    await addDoc(getCol("messages"), {
-      from: currentUser.uid,
-      to: selectedUser.id,
-      text: text,
-      createdAt: Date.now()
-    });
-  } catch(e) { console.error(e); }
+    showNotification("Guardando perfil...", "info");
+    await updateProfile(currentUser, { displayName: newUsername });
+    await setDoc(getDocRef("users", currentUser.uid), { username: newUsername, fullName: newFullName, bio: newBio }, { merge: true });
+    SoundFX.playSuccess();
+    showNotification("¡Perfil actualizado con éxito!", "success");
+  } catch(err) { showNotification("Error: " + err.message, "error"); }
+}
+window.saveProfileChanges = saveProfileChanges;
+
+async function logout(){ 
+  await signOut(auth); 
+  SoundFX.playClick();
+  showNotification("Sesión cerrada", "info");
 }
 
-const sendMsgBtn = document.getElementById("sendBtn");
-if(sendMsgBtn) sendMsgBtn.addEventListener("click", sendDirectMessage);
-const msgInp = document.getElementById("messageInput");
-if(msgInp) msgInp.addEventListener("keydown", (e) => { if(e.key === 'Enter') sendDirectMessage(); });
-
-function insertEmoji(emoji) {
-  SoundFX.playClick();
-  const inp = document.getElementById("messageInput");
-  if(inp) {
-    inp.value += emoji;
-    inp.focus();
-  }
-}
-window.insertEmoji = insertEmoji;
-
-// Auth Actions Hooks
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const pass = document.getElementById("loginPassword").value;
-  if(!email || !pass) return;
-  SoundFX.playClick();
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    showNotification("Sesión iniciada correctamente", "success");
-  } catch(e) { showNotification("Credenciales inválidas", "error"); }
-};
-
-document.getElementById("recoverSendBtn").onclick = async () => {
-  const email = document.getElementById("recoverEmail").value.trim();
-  if(!email) return;
-  SoundFX.playClick();
-  try {
-    await sendPasswordResetEmail(auth, email);
-    showNotification("Correo de recuperación despachado", "success");
-    hideRecoverFlow();
-  } catch(e) { showNotification("Error al despachar el correo", "error"); }
-};
-
-document.getElementById("registerBtn").onclick = async () => {
-  const username = cleanUsernameInput(document.getElementById("registerUsername").value);
-  const fullName = document.getElementById("registerFullName").value.trim();
-  const email = document.getElementById("registerEmail").value.trim();
-  const pass = document.getElementById("registerPassword").value;
-  
-  if(!username || !fullName || !email || !pass) {
-    showNotification("Por favor, rellena todos los campos", "error");
-    return;
-  }
-  SoundFX.playClick();
-  try {
-    const qUser = query(getCol("users"), where("username", "==", username));
-    const querySnap = await getDocs(qUser);
-    if(!querySnap.empty) {
-      showNotification("Este nombre de usuario ya está tomado", "error");
-      return;
+function updateNavbar(){
+  const nav = document.getElementById("navUser");
+  if(!nav) return;
+  if(currentUser){
+    nav.innerHTML = `
+    <div class="flex items-center gap-2">
+      <img src="${getUserAvatar(currentUser.photoURL)}" class="w-8 h-8 rounded-full object-cover border border-green-500 cursor-pointer hidden sm:block" onclick="showSection('profile')">
+      <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider">Salir</button>
+    </div>
+    `;
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    
+    const miniCard = document.getElementById("miniProfileCard");
+    if(miniCard) {
+      const myData = allUsers.find(u => u.id === currentUser.uid);
+      miniCard.innerHTML = `
+        <img src="${getUserAvatar(currentUser.photoURL)}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
+        <div class="truncate flex-1 text-left">
+          <div class="font-extrabold text-sm text-zinc-200">@${myData?.username || currentUser.displayName || 'usuario'}</div>
+          <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">${myData?.fullName || 'Mi Perfil'}</div>
+        </div>
+      `;
     }
-    
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await setDoc(getDocRef("users", cred.user.uid), {
-      username: username,
-      fullName: fullName,
-      bio: "¡Hola! Acabo de unirme al ecosistema Rankiu.",
-      avatarUrl: selectedDefaultAvatarUrl,
-      createdAt: Date.now()
-    });
-    
-    showNotification("Bienvenido a Rankiu. Cuenta creada", "success");
-  } catch(e) { showNotification("Error crítico de registro", "error"); }
-};
+  }else{ 
+    nav.innerHTML = `<div class="text-zinc-500 text-xs">Invitado</div>`; 
+  }
+}
 
-// Monitor de notificaciones inteligentes
-const appLoadTime = Date.now();
-const notifiedMessages = new Set();
+function renderProfile(){
+  if(!currentUser) return;
+  document.getElementById("profileAvatar").src = getUserAvatar(currentUser.photoURL);
+  const myData = allUsers.find(u => u.id === currentUser.uid);
+  document.getElementById("editUsername").value = myData?.username || currentUser.displayName || '';
+  document.getElementById("editFullName").value = myData?.fullName || '';
+  document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
+}
+
+const postsQuery = query(getCol("posts"), orderBy("createdAt","desc"));
+onSnapshot(postsQuery, (snapshot)=>{
+  const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
+  renderPosts(posts);
+});
+
+async function updateProfilePhoto(){
+  if(!currentUser) return;
+  const file = document.getElementById("newProfilePhoto").files[0];
+  if(!file){ showNotification("Por favor, selecciona una foto", "error"); return; }
+  try{
+    showNotification("Actualizando avatar...", "info");
+    const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
+    await updateProfile(currentUser,{ photoURL:imageUrl });
+    await setDoc(getDocRef("users", currentUser.uid), { avatar:imageUrl }, { merge:true });
+    
+    document.getElementById("profileAvatar").src = imageUrl;
+    updateNavbar();
+    SoundFX.playSuccess();
+    showNotification("Avatar de perfil actualizado", "success");
+  }catch(error){ showNotification(error.message, "error"); }
+}
+document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
+
+function applyVotesStyles(snapshot) {
+    if (!snapshot) return;
+    const postVotes = {};
+    const myVotes = {}; 
+
+    snapshot.docs.forEach(doc => {
+        const vote = doc.data();
+        if (!postVotes[vote.postId]) {
+            postVotes[vote.postId] = { up: 0, down: 0 };
+        }
+        if (vote.type === "up") { postVotes[vote.postId].up += 1; } 
+        else if (vote.type === "down") { postVotes[vote.postId].down += 1; }
+        
+        if (currentUser && vote.userId === currentUser.uid) {
+          myVotes[vote.postId] = vote.type;
+        }
+    });
+
+    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
+        const postId = card.id.replace('post-card-', '');
+        const votes = postVotes[postId] || { up: 0, down: 0 };
+        
+        const upCounter = card.querySelector(`#up-counter-${postId}`);
+        const downCounter = card.querySelector(`#down-counter-${postId}`);
+        const upBtn = card.querySelector(`#up-btn-${postId}`);
+        const downBtn = card.querySelector(`#down-btn-${postId}`);
+
+        if (upCounter) upCounter.innerText = votes.up;
+        if (downCounter) downCounter.innerText = votes.down;
+
+        if (upBtn) {
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5";
+        }
+        if (downBtn) {
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5";
+        }
+
+        if (myVotes[postId] === "up" && upBtn) {
+          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
+        } else if (myVotes[postId] === "down" && downBtn) {
+          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
+        }
+
+        card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
+        if (votes.up > votes.down) {
+            card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
+        } else if (votes.down > votes.up) {
+            card.classList.add("border-red-500", "shadow-[0_0_15px_rgba(239,68,68,0.15)]");
+        } else {
+            card.classList.add("border-zinc-900");
+        }
+    });
+}
+
+onSnapshot(getCol("votes"), (snapshot) => {
+    cachedVotesSnapshot = snapshot;
+    cachedGlobalVotes = snapshot.docs.map(doc => doc.data());
+    applyVotesStyles(snapshot);
+    updateProfileStats();
+});
+
+let appLoadTime = Date.now();
+let notifiedMessages = new Set();
+
 function listenIncomingMessages() {
   if (!currentUser) return;
   onSnapshot(query(getCol("messages")), (snapshot) => {
@@ -1634,14 +1474,9 @@ onAuthStateChanged(auth, async (user)=>{
     showSection("feed");
     listenUsers();
     listenFollowers();
-    listenGlobalVotes();
-    listenCommentUpvotes(); // Activado monitor reactivo de votos arriba de comentarios
     listenIncomingMessages();
-    const statsLabel = document.getElementById("feed-stats-label");
-    if(statsLabel) statsLabel.innerText = "Ecosistema Rankiu en Línea";
   }else{
     document.getElementById("authModal").classList.remove("hidden");
-    switchAuth("login");
   }
 });
 </script>
