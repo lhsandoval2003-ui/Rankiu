@@ -225,7 +225,7 @@
             </div>
           </div>
 
-          <button id="saveProfileBtn" onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
+          <button id="saveProfileBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
             Guardar Cambios
           </button>
         </div>
@@ -390,10 +390,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Diccionario de malas palabras a censurar
 const BAD_WORDS = ["mierda", "puta", "puto", "marico", "pendejo", "pendeja", "culero", "culera", "gonorrea", "hijueputa", "cabron", "cabrona", "perra", "perro", "chinga", "verga", "carajo", "malparido"];
 
-// Función para censurar texto manteniendo las letras de los extremos
 function filterBadWords(text) {
   if (!text) return "";
   let filtered = text;
@@ -407,7 +405,6 @@ function filterBadWords(text) {
   return filtered;
 }
 
-// Forzar formato estilo Instagram en los inputs de username
 function cleanUsernameInput(val) {
   return val.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '');
 }
@@ -598,7 +595,6 @@ function showNotification(message, type = "info") {
     toast.className += " bg-zinc-950 text-zinc-300 border-zinc-800";
     toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400 text-sm"></i> ${message}`;
   }
-  
   container.appendChild(toast);
   setTimeout(() => { toast.classList.remove("translate-y-2", "opacity-0"); }, 50);
   setTimeout(() => {
@@ -613,7 +609,6 @@ if (postTextarea) {
     const len = e.target.value.length;
     document.getElementById("charCounter").innerText = `${len} / 150`;
     const label = document.getElementById("charCounter");
-    
     if (len >= 130) {
       label.className = "text-xs text-red-400 bg-red-500/10 px-2 py-0.5 rounded-md font-mono border border-red-500/20";
     } else if (len >= 90) {
@@ -621,7 +616,6 @@ if (postTextarea) {
     } else {
       label.className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
     }
-
     if (len < 50) {
       e.target.className = "w-full bg-transparent border-0 text-white placeholder-zinc-700 focus:ring-0 focus:outline-none h-24 resize-none text-2xl font-black transition-all duration-300 text-green-400";
     } else if (len < 100) {
@@ -652,791 +646,837 @@ window.switchAuth = switchAuth;
 function showRecoverFlow() {
   SoundFX.playClick();
   document.getElementById("loginBox").classList.add("hidden");
-  document.getElementById("authToggleContainer").classList.add("hidden");
   document.getElementById("recoverBox").classList.remove("hidden");
-  const currentLoginEmail = document.getElementById("loginEmail").value.trim();
-  document.getElementById("recoverEmail").value = currentLoginEmail;
+  document.getElementById("authToggleContainer").classList.add("hidden");
 }
 window.showRecoverFlow = showRecoverFlow;
 
 function hideRecoverFlow() {
-  SoundFX.playClick();
-  document.getElementById("recoverBox").classList.add("hidden");
   document.getElementById("loginBox").classList.remove("hidden");
+  document.getElementById("recoverBox").classList.add("hidden");
   document.getElementById("authToggleContainer").classList.remove("hidden");
 }
 window.hideRecoverFlow = hideRecoverFlow;
 
-async function sendResetLinkFlow() {
-  const emailInput = document.getElementById("recoverEmail").value.trim();
-  if (!emailInput) return showNotification("Por favor introduce tu correo", "error");
-  try {
-    showNotification("Enviando enlace...", "info");
-    await sendPasswordResetEmail(auth, emailInput);
-    showNotification(`¡Enlace enviado con éxito a ${emailInput}!`, "success");
-    SoundFX.playSuccess();
-    hideRecoverFlow();
-  } catch(error) { showNotification("Error: " + error.message, "error"); }
-}
-document.getElementById("recoverSendBtn").addEventListener("click", sendResetLinkFlow);
-
-async function uploadImage(file, path) {
-  const storageRef = ref(storage, `artifacts/${appId}/${path}`);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
-}
-
-function listenFollowers() {
-  if (!currentUser) return;
-  onSnapshot(getCol("followers"), (snapshot) => {
-    followingSet.clear();
-    followerCounts = {};
-    followingCounts = {};
-    snapshot.docs.forEach(doc => {
-      const data = doc.data();
-      if (data.followerId === currentUser.uid) {
-        followingSet.add(data.followingId);
-      }
-      followerCounts[data.followingId] = (followerCounts[data.followingId] || 0) + 1;
-      followingCounts[data.followerId] = (followingCounts[data.followerId] || 0) + 1;
-    });
-    renderPosts(currentPosts);
-    updateProfileStats();
-    renderSuggestedUsers();
-  });
-}
-
-function getUserReputationMarkup(userId) {
-  let upvotes = 0;
-  let downvotes = 0;
-  
-  const userPostsIds = currentPosts.filter(p => p.authorId === userId).map(p => p.id);
-  
-  cachedGlobalVotes.forEach(v => {
-    if (userPostsIds.includes(v.postId)) {
-      if (v.type === "up") upvotes++;
-      if (v.type === "down") downvotes++;
-    }
-  });
-  
-  const total = upvotes - downvotes;
-  if (total > 0) {
-    return `<span class="text-green-400 font-extrabold">+${total}</span>`;
-  } else if (total < 0) {
-    return `<span class="text-red-500 font-extrabold">${total}</span>`;
-  } else {
-    return `<span class="text-zinc-400 font-bold">0</span>`;
-  }
-}
-
-function updateProfileStats() {
-  if (currentUser) {
-    const myFollowers = followerCounts[currentUser.uid] || 0;
-    const myFollowing = followingCounts[currentUser.uid] || 0;
-    const fCountEl = document.getElementById("followersCount");
-    const fFollowingEl = document.getElementById("followingCount");
-    if(fCountEl) fCountEl.innerText = myFollowers;
-    if(fFollowingEl) fFollowingEl.innerText = myFollowing;
-    
-    const repContainer = document.getElementById("userReputationPoints");
-    if (repContainer) {
-      repContainer.innerHTML = getUserReputationMarkup(currentUser.uid);
-    }
-  }
-}
-
-async function viewUserProfile(userId) {
-  if (!userId) return;
-  let user = allUsers.find(u => u.id === userId);
-  if (!user) {
-    try {
-      const userDoc = await getDoc(getDocRef("users", userId));
-      if (userDoc.exists()) user = { id: userDoc.id, ...userDoc.data() };
-    } catch(e) { console.error(e); }
-  }
-  if (!user) return showNotification("No se pudo cargar el perfil", "error");
-  
-  SoundFX.playClick();
-  document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
-  document.getElementById("modalUsername").innerText = user.username ? `@${user.username}` : "@usuario";
-  document.getElementById("modalFullName").innerText = user.fullName || "Nombre completo";
-  document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía.";
-  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
-  
-  const modalRep = document.getElementById("modalReputation");
-  if(modalRep) {
-    modalRep.innerHTML = getUserReputationMarkup(userId);
-  }
-  
-  const followBtn = document.getElementById("modalFollowBtn");
-  if (userId === currentUser?.uid) {
-    followBtn.classList.add("hidden");
-  } else {
-    followBtn.classList.remove("hidden");
-    const isFollowing = followingSet.has(userId);
-    if (isFollowing) {
-      followBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> Siguiendo';
-      followBtn.className = "flex-grow bg-zinc-900 border border-zinc-800 text-green-400 font-extrabold py-3 rounded-xl transition text-xs uppercase";
-    } else {
-      followBtn.innerHTML = '<i class="fa-solid fa-user-plus mr-2"></i> Seguir';
-      followBtn.className = "flex-grow bg-green-500 text-black font-extrabold py-3 rounded-xl transition text-xs uppercase";
-    }
-    followBtn.onclick = () => {
-      toggleFollow(userId);
-      setTimeout(() => viewUserProfile(userId), 350);
-    };
-  }
-  
-  const chatBtn = document.getElementById("modalChatBtn");
-  if (userId === currentUser?.uid) {
-    chatBtn.classList.add("hidden");
-  } else {
-    chatBtn.classList.remove("hidden");
-    chatBtn.onclick = () => {
-      selectedUser = user;
-      closeUserProfile();
-      showSection("chat");
-      listenMessages();
-    };
-  }
-  document.getElementById("userProfileModal").style.display = "flex";
-}
-window.viewUserProfile = viewUserProfile;
-
-function closeUserProfile() {
-  SoundFX.playClick();
-  document.getElementById("userProfileModal").style.display = "none";
-}
-window.closeUserProfile = closeUserProfile;
-
-function getFontSize(content) {
-  if (!content) return "text-sm";
-  if (content.length < 50) return "text-2xl font-black text-green-400";
-  if (content.length < 100) return "text-lg font-bold text-zinc-100";
-  return "text-sm font-semibold text-zinc-300";
-}
-
-function renderPosts(posts) {
-  currentPosts = posts;
-  
-  const container = document.getElementById("postsContainer");
-  if (container) {
-    let filteredPosts = posts;
-    if (feedFilter === 'following' && currentUser) {
-      filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
-    }
-    
-    const statsLabel = document.getElementById("feed-stats-label");
-    if(statsLabel) statsLabel.innerText = `${filteredPosts.length} Publicaciones`;
-
-    if (filteredPosts.length === 0) {
-      container.innerHTML = `
-        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
-          <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
-          <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
-        </div>
-      `;
-    } else {
-      container.innerHTML = "";
-      filteredPosts.forEach(post => {
-        container.appendChild(createPostCardElement(post));
-      });
-    }
-  }
-
-  const myPostsContainer = document.getElementById("myPostsContainer");
-  if (myPostsContainer && currentUser) {
-    const myFilteredPosts = posts.filter(p => p.authorId === currentUser.uid);
-    if (myFilteredPosts.length === 0) {
-      myPostsContainer.innerHTML = `
-        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-6 text-center text-zinc-600 text-xs">
-          Aún no has compartido ninguna publicación.
-        </div>
-      `;
-    } else {
-      myPostsContainer.innerHTML = "";
-      myFilteredPosts.forEach(post => {
-        myPostsContainer.appendChild(createPostCardElement(post));
-      });
-    }
-  }
-
-  if (cachedVotesSnapshot) {
-     applyVotesStyles(cachedVotesSnapshot);
-  }
-  updateProfileStats();
-}
-
-function createPostCardElement(post) {
-  const isFollowing = followingSet.has(post.authorId);
-  let followBtnMarkup = '';
-  
-  if (currentUser && post.authorId !== currentUser.uid) {
-    if (isFollowing) {
-      followBtnMarkup = `
-        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-extrabold flex items-center gap-1">
-          <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
-        </button>`;
-    } else {
-      followBtnMarkup = `
-        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black text-xs font-black flex items-center gap-1">
-          <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
-        </button>`;
-    }
-  }
-
-  // Censurar contenido del post en vivo al renderizar
-  const censoredContent = filterBadWords(post.content);
-
-  const div = document.createElement("div");
-  div.id = `post-card-${post.id}`;
-  div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
-  div.innerHTML = `
-  <div class="flex justify-between items-center">
-    <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
-      <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
-      <div>
-        <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">@${post.authorUsername || 'usuario'}</div>
-        <div class="text-[11px] text-zinc-400 font-medium">${post.authorFullName || 'Nombre'}</div>
-      </div>
-    </div>
-    <div class="flex items-center gap-2">
-      ${followBtnMarkup}
-      ${currentUser && post.authorId === currentUser.uid ? `
-        <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 p-2 rounded-xl transition-colors">
-          <i class="fa-solid fa-trash text-sm"></i>
-        </button>
-      ` : ''}
-    </div>
-  </div>
-  
-  <p class="mt-4 leading-relaxed whitespace-pre-wrap ${getFontSize(censoredContent)}">${censoredContent}</p>
-
-  <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
-    <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
-      <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
-        <i class="fa-solid fa-circle-arrow-up text-lg" id="up-icon-${post.id}"></i>
-        <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
-      </button>
-      <div class="w-[1px] h-6 bg-zinc-800"></div>
-      <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
-        <i class="fa-solid fa-circle-arrow-down text-lg" id="down-icon-${post.id}"></i>
-        <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
-      </button>
-    </div>
-  </div>
-
-  <div class="mt-4">
-    <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
-    <div class="flex gap-2">
-      <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"/>
-      <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}">
-        <i class="fa-solid fa-paper-plane"></i>
-      </button>
-    </div>
-  </div>
-  `;
-
-  const commentsQuery = query(getCol("comments"), where("postId", "==", post.id));
-  onSnapshot(commentsQuery, (commentSnapshot) => {
-      const commentListContainer = div.querySelector(`#comments-list-${post.id}`);
-      if (commentListContainer) {
-          commentListContainer.innerHTML = "";
-          const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
-          sortedDocs.forEach(comment => {
-              const censoredCommentText = filterBadWords(comment.text);
-              const commentDiv = document.createElement("div");
-              commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
-              commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer" onclick="viewUserProfile('${comment.authorId}')">@${comment.authorUsername || 'usuario'}:</strong> <span class="text-zinc-300 ml-1">${censoredCommentText}</span>`;
-              commentListContainer.appendChild(commentDiv);
-          });
-      }
-  });
-
-  return div;
-}
-
-document.addEventListener("click", async (event) => {
-    const target = event.target;
-
-    if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
-        const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
-        const postId = btn.dataset.id;
-        if (!confirm("¿Estás seguro de que quieres eliminar este post permanentemente?")) return;
-        try {
-            await deleteDoc(getDocRef("posts", postId));
-            showNotification("Publicación eliminada correctamente.", "success");
-        } catch (error) { showNotification("No se pudo eliminar el post.", "error"); }
-        return;
-    }
-
-    if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
-        const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
-        if(!currentUser) return showNotification("Debes iniciar sesión", "error");
-        
-        const postId = btn.dataset.id;
-        const input = document.getElementById(`comment-input-${postId}`);
-        const text = input ? input.value.trim() : "";
-        if(!text) return;
-
-        const myUserData = allUsers.find(u => u.id === currentUser.uid);
-
-        await addDoc(getCol("comments"), {
-            postId, 
-            text, 
-            authorUsername: myUserData?.username || currentUser.displayName, 
-            authorId: currentUser.uid, 
-            createdAt: Date.now()
-        });
-        if(input) input.value = "";
-        SoundFX.playSuccess();
-        showNotification("Comentario publicado", "success");
-        return;
-    }
-
-    if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
-        const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
-        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-        
-        const postId = btn.dataset.id;
-        const voteId = `${currentUser.uid}_${postId}`;
-        const icon = document.getElementById(`up-icon-${postId}`);
-        
-        SoundFX.playVoteUp();
-        if (icon) {
-          icon.classList.add("animate-upvote-arrow");
-          icon.addEventListener("animationend", () => icon.classList.remove("animate-upvote-arrow"), { once: true });
-        }
-        
-        const voteRef = getDocRef("votes", voteId);
-        const voteSnap = await getDoc(voteRef);
-        
-        if (voteSnap.exists() && voteSnap.data().type === "up") {
-            await deleteDoc(voteRef);
-            showNotification("Voto retirado", "info");
-        } else {
-            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "up", createdAt: Date.now() });
-        }
-        return;
-    }
-
-    if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
-        const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
-        if(!currentUser) return showNotification("Inicia sesión para votar", "error");
-        
-        const postId = btn.dataset.id;
-        const voteId = `${currentUser.uid}_${postId}`;
-        const icon = document.getElementById(`down-icon-${postId}`);
-
-        SoundFX.playVoteDown();
-        if (icon) {
-          icon.classList.add("animate-downvote-arrow");
-          icon.addEventListener("animationend", () => icon.classList.remove("animate-downvote-arrow"), { once: true });
-        }
-        
-        const voteRef = getDocRef("votes", voteId);
-        const voteSnap = await getDoc(voteRef);
-        
-        if (voteSnap.exists() && voteSnap.data().type === "down") {
-            await deleteDoc(voteRef);
-            showNotification("Voto retirado", "info");
-        } else {
-            await setDoc(voteRef, { postId, userId: currentUser.uid, type: "down", createdAt: Date.now() });
-        }
-        return;
-    }
-});
-
-window.setFeedFilter = function(filter) {
-  feedFilter = filter;
-  SoundFX.playClick();
-  const btnAll = document.getElementById("filter-all");
-  const btnFollow = document.getElementById("filter-following");
-  if(filter === 'all') {
-    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
-    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-  } else {
-    if(btnAll) btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
-    if(btnFollow) btnFollow.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
-  }
-  renderPosts(currentPosts);
-};
-
-window.toggleFollow = async function(targetUserId) {
-  if(!currentUser) return showNotification("Inicia sesión para seguir usuarios", "error");
-  const followId = `${currentUser.uid}_${targetUserId}`;
-  const followRef = getDocRef("followers", followId);
-  const snap = await getDoc(followRef);
-  if(snap.exists()) {
-    await deleteDoc(followRef);
-    showNotification("Dejaste de seguir a este usuario", "info");
-  } else {
-    await setDoc(followRef, { followerId: currentUser.uid, followingId: targetUserId, createdAt: Date.now() });
-    showNotification("¡Ahora sigues a este usuario!", "success");
-  }
-};
-
-window.showSection = function(section) {
+function showSection(secId) {
   SoundFX.playClick();
   document.getElementById("feedSection").classList.add("hidden");
   document.getElementById("chatSection").classList.add("hidden");
   document.getElementById("profileSection").classList.add("hidden");
   
-  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
-  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
-  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all text-zinc-400 hover:text-white";
+  document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-300";
+  document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-300";
+  document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all duration-200 text-zinc-500 hover:text-zinc-300";
 
-  if(section === 'feed') {
+  if (secId === 'feed') {
     document.getElementById("feedSection").classList.remove("hidden");
-    document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
-  } else if(section === 'chat') {
+    document.getElementById(`tab-feed`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-zinc-900 text-green-400 border border-zinc-800/60 shadow-lg shadow-green-500/5";
+  } else if (secId === 'chat') {
     document.getElementById("chatSection").classList.remove("hidden");
-    document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
-  } else if(section === 'profile') {
+    document.getElementById(`tab-chat`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-zinc-900 text-green-400 border border-zinc-800/60 shadow-lg shadow-green-500/5";
+    renderUsersList();
+  } else if (secId === 'profile') {
     document.getElementById("profileSection").classList.remove("hidden");
-    document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
-    renderPosts(currentPosts);
+    document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold bg-zinc-900 text-green-400 border border-zinc-800/60 shadow-lg shadow-green-500/5";
+    loadMyProfileData();
   }
-};
+}
+window.showSection = showSection;
 
-document.getElementById("loginBtn").onclick = async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const pass = document.getElementById("loginPassword").value.trim();
-  if(!email || !pass) return showNotification("Por favor rellena todos los campos", "error");
-  try {
-    await signInWithEmailAndPassword(auth, email, pass);
-    showNotification("Sesión iniciada correctamente", "success");
-  } catch(err) { showNotification("Credenciales inválidas", "error"); }
-};
+// --- CONTROLADOR DE INICIO DE SESIÓN ---
+const loginBtn = document.getElementById("loginBtn");
+if (loginBtn) {
+  loginBtn.onclick = async () => {
+    SoundFX.playClick();
+    const email = document.getElementById("loginEmail").value.trim();
+    const pass = document.getElementById("loginPassword").value;
+    if(!email || !pass) {
+      showNotification("Completa todos los campos del login.", "error");
+      return;
+    }
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      SoundFX.playSuccess();
+      showNotification("¡Sesión iniciada correctamente!", "success");
+    } catch(err) {
+      console.error(err);
+      showNotification("Credenciales incorrectas o inválidas.", "error");
+    }
+  };
+}
 
-document.getElementById("registerBtn").onclick = async () => {
-  const username = document.getElementById("registerUsername").value.trim();
-  const fullName = document.getElementById("registerFullName").value.trim();
-  const email = document.getElementById("registerEmail").value.trim();
-  const pass = document.getElementById("registerPassword").value.trim();
-  if(!username || !fullName || !email || !pass) return showNotification("Por favor rellena todos los campos", "error");
-  try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
-    await updateProfile(cred.user, { displayName: username, photoURL: selectedDefaultAvatarUrl });
-    await setDoc(getDocRef("users", cred.user.uid), {
-      uid: cred.user.uid, username, fullName, email, bio: "¡Hola! Estoy usando Rankiu.", avatar: selectedDefaultAvatarUrl, createdAt: Date.now()
-    });
-    showNotification("Cuenta creada con éxito", "success");
-  } catch(err) { showNotification("Error al registrar cuenta", "error"); }
-};
+// --- CONTROLADOR DE REGISTRO INTEGRADO CON VALIDACIÓN DE USUARIO ÚNICO ---
+const registerBtn = document.getElementById("registerBtn");
+if (registerBtn) {
+  registerBtn.onclick = async () => {
+    SoundFX.playClick();
+    
+    let username = document.getElementById("registerUsername").value.trim();
+    const fullName = document.getElementById("registerFullName").value.trim();
+    const email = document.getElementById("registerEmail").value.trim();
+    const password = document.getElementById("registerPassword").value;
 
-document.getElementById("publishBtn").onclick = async () => {
-  if(!currentUser) return showNotification("Inicia sesión para publicar", "error");
-  const content = document.getElementById("postContent").value.trim();
-  if(!content) return showNotification("El contenido no puede estar vacío", "error");
-  try {
-    const myUserData = allUsers.find(u => u.id === currentUser.uid);
+    username = cleanUsernameInput(username);
 
-    await addDoc(getCol("posts"), {
-      content, 
-      authorUsername: myUserData?.username || currentUser.displayName, 
-      authorFullName: myUserData?.fullName || "Usuario",
-      authorId: currentUser.uid, 
-      authorAvatar: currentUser.photoURL, 
-      createdAt: Date.now()
-    });
-    document.getElementById("postContent").value = "";
-    document.getElementById("charCounter").innerText = "0 / 150";
-    showNotification("Publicación enviada", "success");
-  } catch(err) { showNotification("Error al publicar", "error"); }
-};
+    if (!username || !fullName || !email || !password) {
+      showNotification("Por favor, completa todos los campos obligatorios.", "error");
+      return;
+    }
 
-function renderSuggestedUsers() {
-  const container = document.getElementById("suggestedUsersList");
-  if (!container) return;
-  const suggestions = allUsers.filter(u => u.id !== currentUser?.uid && !followingSet.has(u.id)).slice(0, 4);
+    if (username.length < 3) {
+      showNotification("El nombre de usuario debe tener al menos 3 caracteres.", "error");
+      return;
+    }
+
+    try {
+      // Bloqueo estricto de Duplicados en Firestore
+      const usersRef = getCol("users");
+      const q = query(usersRef, where("username", "==", username));
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        showNotification("El nombre de usuario ya está en uso. Elige otro.", "error");
+        return; 
+      }
+
+      // Si pasa la validación, procedemos a registrar en Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      await setDoc(getDocRef("users", user.uid), {
+        uid: user.uid,
+        username: username,
+        fullName: fullName,
+        email: email,
+        bio: "¡Hola! Estoy usando Rankiu.",
+        avatarUrl: selectedDefaultAvatarUrl,
+        createdAt: serverTimestamp()
+      });
+
+      SoundFX.playSuccess();
+      showNotification("¡Cuenta creada con éxito!", "success");
+      document.getElementById("authModal").classList.add("hidden");
+      
+    } catch (error) {
+      console.error("Error en registro:", error);
+      let errMsg = "Error al crear la cuenta.";
+      if (error.code === "auth/email-already-in-use") errMsg = "El correo ya está registrado.";
+      if (error.code === "auth/weak-password") errMsg = "La contraseña es muy débil.";
+      showNotification(errMsg, "error");
+    }
+  };
+}
+
+// --- CONTROLADOR DE RECUPERACIÓN VINCULADO EXCLUSIVAMENTE AL CORREO ---
+const recoverSendBtn = document.getElementById("recoverSendBtn");
+if (recoverSendBtn) {
+  recoverSendBtn.onclick = async () => {
+    SoundFX.playClick();
+    
+    const email = document.getElementById("recoverEmail").value.trim();
+    
+    if (!email) {
+      showNotification("Por favor, ingresa tu correo electrónico.", "error");
+      return;
+    }
+
+    try {
+      // Validar si el correo existe previamente en la colección de usuarios de la app
+      const usersRef = getCol("users");
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        showNotification("El correo ingresado no pertenece a ninguna cuenta activa.", "error");
+        return;
+      }
+
+      // Procede con el envío seguro solo si es el único correo legítimo
+      await sendPasswordResetEmail(auth, email);
+      SoundFX.playSuccess();
+      showNotification("Enlace enviado. Revisa tu bandeja de entrada.", "success");
+      hideRecoverFlow();
+      
+    } catch (error) {
+      console.error("Error al recuperar cuenta:", error);
+      showNotification("No se pudo enviar el enlace de recuperación.", "error");
+    }
+  };
+}
+
+function updateNavbar() {
+  const navUser = document.getElementById("navUser");
+  if(!navUser) return;
+  if(currentUser) {
+    const dbUser = allUsers.find(u => u.id === currentUser.uid);
+    const name = dbUser ? dbUser.fullName : (currentUser.displayName || "Usuario");
+    const av = dbUser ? getUserAvatar(dbUser.avatarUrl) : DefaultAvatars[0].url;
+    const nick = dbUser ? `@${dbUser.username}` : "";
+    
+    navUser.innerHTML = `
+      <div class="flex items-center gap-2.5 bg-zinc-900/40 border border-zinc-900 px-3 py-1.5 rounded-xl cursor-pointer" onclick="showSection('profile')">
+        <img class="w-6 h-6 rounded-full object-cover border border-green-500/30" src="${av}">
+        <div class="hidden md:block text-left">
+          <div class="text-xs font-black text-zinc-200 max-w-[100px] truncate">${name}</div>
+          <div class="text-[9px] text-zinc-500 font-bold tracking-tight">${nick}</div>
+        </div>
+      </div>
+      <button id="logoutBtn" class="bg-zinc-900 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-400 hover:text-red-400 p-2.5 rounded-xl transition text-xs" title="Cerrar sesión"><i class="fa-solid fa-power-off"></i></button>
+    `;
+    const logout = document.getElementById("logoutBtn");
+    if(logout) logout.onclick = () => { SoundFX.playClick(); signOut(auth); };
+  } else {
+    navUser.innerHTML = `
+      <button onclick="document.getElementById('authModal').classList.remove('hidden')" class="bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold px-5 py-2 rounded-xl text-xs transition uppercase tracking-wider shadow-lg shadow-green-500/10 glow-green">Acceder</button>
+    `;
+  }
+}
+
+function loadMyProfileData() {
+  if(!currentUser) return;
+  const dbUser = allUsers.find(u => u.id === currentUser.uid);
+  if(!dbUser) return;
   
-  if (suggestions.length === 0) {
-    container.innerHTML = `<p class="text-xs text-zinc-500">Ya sigues a todos los miembros.</p>`;
+  document.getElementById("profileAvatar").src = getUserAvatar(dbUser.avatarUrl);
+  document.getElementById("editUsername").value = dbUser.username || "";
+  document.getElementById("editFullName").value = dbUser.fullName || "";
+  document.getElementById("editBio").value = dbUser.bio || "";
+  
+  document.getElementById("followersCount").innerText = followerCounts[currentUser.uid] || 0;
+  document.getElementById("followingCount").innerText = followingCounts[currentUser.uid] || 0;
+  document.getElementById("userReputationPoints").innerText = calculateUserReputation(currentUser.uid);
+  
+  renderMyPosts();
+}
+
+async function saveProfileChanges() {
+  if(!currentUser) return;
+  SoundFX.playClick();
+  
+  let username = document.getElementById("editUsername").value.trim();
+  const fullName = document.getElementById("editFullName").value.trim();
+  const bio = document.getElementById("editBio").value.trim();
+  
+  username = cleanUsernameInput(username);
+  
+  if(!username || !fullName) {
+    showNotification("El nombre de usuario y el nombre completo no pueden estar vacíos.", "error");
     return;
   }
   
-  container.innerHTML = "";
-  suggestions.forEach(user => {
-    const div = document.createElement("div");
-    div.className = "flex items-center justify-between p-2 rounded-2xl bg-zinc-900/30 border border-zinc-900 hover:border-zinc-800 transition";
-    div.innerHTML = `
-      <div class="flex items-center gap-2.5 cursor-pointer" onclick="viewUserProfile('${user.id}')">
-        <img src="${getUserAvatar(user.avatar)}" class="w-8 h-8 rounded-full object-cover">
-        <div class="truncate max-w-[110px]">
-          <div class="text-xs font-black text-zinc-200">@${user.username}</div>
-          <div class="text-[9px] text-zinc-500 font-medium truncate">${user.fullName || ''}</div>
-        </div>
-      </div>
-      <button onclick="toggleFollow('${user.id}')" class="px-3 py-1 bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-black font-extrabold text-[10px] rounded-lg transition-all border border-green-500/20">
-        Seguir
-      </button>
-    `;
-    container.appendChild(div);
-  });
+  try {
+    const usersRef = getCol("users");
+    const q = query(usersRef, where("username", "==", username));
+    const querySnapshot = await getDocs(q);
+    
+    // Validar duplicidad excluyendo nuestro propio UID actual
+    let isDuplicated = false;
+    querySnapshot.forEach(doc => {
+      if(doc.id !== currentUser.uid) {
+        isDuplicated = true;
+      }
+    });
+    
+    if(isDuplicated) {
+      showNotification("Ese nombre de usuario ya está tomado.", "error");
+      return;
+    }
+    
+    const userRef = getDocRef("users", currentUser.uid);
+    await setDoc(userRef, { username, fullName, bio }, { merge: true });
+    
+    SoundFX.playSuccess();
+    showNotification("¡Perfil actualizado con éxito!", "success");
+    updateNavbar();
+    renderMiniProfileCard();
+    
+  } catch(e) {
+    console.error(e);
+    showNotification("Error al guardar cambios de perfil.", "error");
+  }
+}
+window.saveProfileChanges = saveProfileChanges;
+
+const saveProfileBtn = document.getElementById("saveProfileBtn");
+if(saveProfileBtn) {
+  saveProfileBtn.onclick = saveProfileChanges;
+}
+
+const newPhotoInput = document.getElementById("newProfilePhoto");
+if(newPhotoInput) {
+  newPhotoInput.onchange = async (e) => {
+    if(!currentUser || !e.target.files || e.target.files.length === 0) return;
+    showNotification("Subiendo imagen de perfil...", "info");
+    const file = e.target.files[0];
+    try {
+      const storageRef = ref(storage, `artifacts/${appId}/avatars/${currentUser.uid}_${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const downloadUrl = await getDownloadURL(storageRef);
+      
+      await setDoc(getDocRef("users", currentUser.uid), { avatarUrl: downloadUrl }, { merge: true });
+      document.getElementById("profileAvatar").src = downloadUrl;
+      SoundFX.playSuccess();
+      showNotification("¡Foto de perfil actualizada!", "success");
+      updateNavbar();
+      renderMiniProfileCard();
+    } catch(err) {
+      console.error(err);
+      showNotification("Error al cargar la foto.", "error");
+    }
+  };
 }
 
 function listenUsers() {
   onSnapshot(query(getCol("users")), (snapshot) => {
     allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderUsers();
-    renderSuggestedUsers();
     updateNavbar();
-    renderProfile();
+    renderMiniProfileCard();
+    renderSuggestedUsers();
+    if(!document.getElementById("chatSection").classList.contains("hidden")) {
+      renderUsersList();
+    }
+    if(!document.getElementById("profileSection").classList.contains("hidden")) {
+      const repLabel = document.getElementById("userReputationPoints");
+      if(repLabel && currentUser) repLabel.innerText = calculateUserReputation(currentUser.uid);
+    }
+    listenPosts();
   });
 }
 
-function renderUsers() {
-  const container = document.getElementById("usersList");
-  if (!container) return;
-  container.innerHTML = "";
-  allUsers.forEach(user => {
-    if(currentUser && user.id === currentUser.uid) return;
-    const div = document.createElement("div");
-    div.className = `flex items-center gap-3 bg-zinc-900/40 hover:bg-zinc-900 border border-zinc-900 rounded-2xl p-3 cursor-pointer hover:border-zinc-800 transition-all duration-200`;
-    div.onclick = () => {
-      selectedUser = user;
-      SoundFX.playClick();
-      listenMessages();
-    };
-    div.innerHTML = `
-    <img src="${getUserAvatar(user.avatar)}" class="w-10 h-10 rounded-full object-cover">
-    <div>
-      <div class="font-extrabold text-sm text-zinc-200 truncate">@${user.username}</div>
-      <div class="text-xs text-zinc-500 font-medium">${user.fullName || ''}</div>
+function listenFollowers() {
+  onSnapshot(query(getCol("followers")), (snapshot) => {
+    followingSet.clear();
+    followerCounts = {};
+    followingCounts = {};
+    
+    snapshot.docs.forEach(doc => {
+      const follow = doc.data();
+      const follower = follow.followerUid;
+      const followed = follow.followedUid;
+      
+      if(currentUser && follower === currentUser.uid) {
+        followingSet.add(followed);
+      }
+      followerCounts[followed] = (followerCounts[followed] || 0) + 1;
+      followingCounts[follower] = (followingCounts[follower] || 0) + 1;
+    });
+    
+    if(!document.getElementById("profileSection").classList.contains("hidden") && currentUser) {
+      document.getElementById("followersCount").innerText = followerCounts[currentUser.uid] || 0;
+      document.getElementById("followingCount").innerText = followingCounts[currentUser.uid] || 0;
+    }
+    renderSuggestedUsers();
+    renderPostsList();
+  });
+}
+
+function renderMiniProfileCard() {
+  const card = document.getElementById("miniProfileCard");
+  if(!card || !currentUser) return;
+  const dbUser = allUsers.find(u => u.id === currentUser.uid);
+  if(!dbUser) return;
+  
+  const rep = calculateUserReputation(currentUser.uid);
+  
+  card.innerHTML = `
+    <div class="flex items-center gap-4 cursor-pointer" onclick="showSection('profile')">
+      <img class="w-12 h-12 rounded-full object-cover border-2 border-green-500/40 shadow-md" src="${getUserAvatar(dbUser.avatarUrl)}">
+      <div class="flex-1 min-w-0">
+        <h4 class="font-extrabold text-sm text-zinc-200 truncate">${dbUser.fullName}</h4>
+        <p class="text-xs text-zinc-500 truncate font-medium">@${dbUser.username}</p>
+      </div>
+      <div class="text-right bg-zinc-900/60 border border-zinc-900 px-2.5 py-1 rounded-xl">
+        <div class="text-xs font-black text-green-400">${rep}</div>
+        <div class="text-[8px] text-zinc-500 font-bold uppercase tracking-tight">Rep</div>
+      </div>
     </div>
+  `;
+}
+
+function renderSuggestedUsers() {
+  const list = document.getElementById("suggestedUsersList");
+  if(!list) return;
+  if(!currentUser) { list.innerHTML = "<p class='text-xs text-zinc-600 text-center py-2'>Inicia sesión para ver sugerencias</p>"; return; }
+  
+  const suggestions = allUsers.filter(u => u.id !== currentUser.uid && !followingSet.has(u.id)).slice(0, 4);
+  
+  if(suggestions.length === 0) {
+    list.innerHTML = "<p class='text-xs text-zinc-600 text-center py-2'>Estás siguiendo a toda la comunidad ✨</p>";
+    return;
+  }
+  
+  list.innerHTML = "";
+  suggestions.forEach(u => {
+    const div = document.createElement("div");
+    div.className = "flex items-center justify-between p-2 bg-zinc-900/20 hover:bg-zinc-900/40 rounded-xl border border-zinc-900/50 transition duration-150 group";
+    
+    div.innerHTML = `
+      <div class="flex items-center gap-2.5 min-w-0 cursor-pointer flex-1" onclick="openUserProfile('${u.id}')">
+        <img class="w-9 h-9 rounded-full object-cover border border-zinc-800 group-hover:border-green-500/40 transition" src="${getUserAvatar(u.avatarUrl)}">
+        <div class="min-w-0">
+          <div class="text-xs font-bold text-zinc-200 truncate">${u.fullName}</div>
+          <div class="text-[10px] text-zinc-500 font-semibold truncate">@${u.username}</div>
+        </div>
+      </div>
+      <button class="bg-zinc-100 hover:bg-white text-black font-extrabold px-3 py-1.5 rounded-lg text-[10px] transition uppercase tracking-wider" onclick="followUser('${u.id}')">Seguir</button>
+    `;
+    list.appendChild(div);
+  });
+}
+
+async function followUser(userId) {
+  if(!currentUser) return;
+  SoundFX.playClick();
+  try {
+    const followId = `${currentUser.uid}_${userId}`;
+    await setDoc(getDocRef("followers", followId), {
+      followerUid: currentUser.uid,
+      followedUid: userId,
+      createdAt: serverTimestamp()
+    });
+    showNotification("¡Ahora sigues a este usuario!", "success");
+  } catch(e) { console.error(e); }
+}
+window.followUser = followUser;
+
+async function unfollowUser(userId) {
+  if(!currentUser) return;
+  SoundFX.playClick();
+  try {
+    const followId = `${currentUser.uid}_${userId}`;
+    await deleteDoc(getDocRef("followers", followId));
+    showNotification("Dejaste de seguir a este usuario.", "info");
+    const modal = document.getElementById("userProfileModal");
+    if(!modal.classList.contains("hidden")) {
+      openUserProfile(userId);
+    }
+  } catch(e) { console.error(e); }
+}
+window.unfollowUser = unfollowUser;
+
+const publishBtn = document.getElementById("publishBtn");
+if(publishBtn) {
+  publishBtn.onclick = async () => {
+    if(!currentUser) { showNotification("Debes iniciar sesión para publicar.", "error"); return; }
+    SoundFX.playClick();
+    const txt = document.getElementById("postContent").value.trim();
+    if(!txt) return;
+    
+    try {
+      await addDoc(getCol("posts"), {
+        uid: currentUser.uid,
+        text: txt,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById("postContent").value = "";
+      document.getElementById("charCounter").innerText = "0 / 150";
+      document.getElementById("charCounter").className = "text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-md font-mono border border-green-500/20";
+      SoundFX.playSuccess();
+      showNotification("¡Pensamiento publicado con éxito!", "success");
+    } catch(err) { console.error(err); }
+  };
+}
+
+function listenPosts() {
+  onSnapshot(query(getCol("posts"), orderBy("createdAt", "desc")), (snapshot) => {
+    currentPosts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    
+    const label = document.getElementById("feed-stats-label");
+    if(label) label.innerText = `${currentPosts.length} publicaciones globales`;
+    
+    listenVotes();
+  });
+}
+
+function listenVotes() {
+  if (cachedVotesSnapshot) {
+    cachedVotesSnapshot(); 
+  }
+  cachedVotesSnapshot = onSnapshot(query(getCol("votes")), (snapshot) => {
+    cachedGlobalVotes = snapshot.docs.map(doc => doc.data());
+    renderPostsList();
+    if(!document.getElementById("profileSection").classList.contains("hidden")) {
+      renderMyPosts();
+    }
+  });
+}
+
+function calculateUserReputation(userId) {
+  let rep = 0;
+  const userPostsIds = currentPosts.filter(p => p.uid === userId).map(p => p.id);
+  
+  cachedGlobalVotes.forEach(v => {
+    if(userPostsIds.includes(v.postId)) {
+      if(v.type === 'up') rep += 1;
+      if(v.type === 'down') rep -= 1;
+    }
+  });
+  return rep;
+}
+
+function setFeedFilter(filter) {
+  feedFilter = filter;
+  SoundFX.playClick();
+  
+  const btnAll = document.getElementById("filter-all");
+  const btnFol = document.getElementById("filter-following");
+  
+  if(filter === 'all') {
+    btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
+    btnFol.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
+  } else {
+    btnFol.className = "px-4 py-1.5 rounded-xl text-xs font-bold bg-green-500 text-black shadow-md shadow-green-500/10 transition";
+    btnAll.className = "px-4 py-1.5 rounded-xl text-xs font-bold text-zinc-400 hover:text-white transition";
+  }
+  renderPostsList();
+}
+window.setFeedFilter = setFeedFilter;
+
+function renderPostsList() {
+  const container = document.getElementById("postsContainer");
+  if(!container) return;
+  
+  let postsToRender = currentPosts;
+  if(feedFilter === 'following') {
+    postsToRender = currentPosts.filter(p => followingSet.has(p.uid) || p.uid === (currentUser ? currentUser.uid : ''));
+  }
+  
+  if(postsToRender.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-12 text-zinc-600 bg-zinc-950/20 border border-zinc-900 rounded-3xl space-y-2">
+        <i class="fa-solid fa-cube text-3xl text-zinc-700"></i>
+        <p class="text-sm font-medium">No hay publicaciones disponibles para mostrar aquí.</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = "";
+  postsToRender.forEach(post => {
+    const user = allUsers.find(u => u.id === post.uid);
+    if(!user) return;
+    
+    const postVotes = cachedGlobalVotes.filter(v => v.postId === post.id);
+    const upvotes = postVotes.filter(v => v.type === 'up').length;
+    const downvotes = postVotes.filter(v => v.type === 'down').length;
+    const score = upvotes - downvotes;
+    
+    const myVote = currentUser ? postVotes.find(v => v.userUid === currentUser.uid) : null;
+    
+    const card = document.createElement("div");
+    card.className = "bg-zinc-950/70 border border-zinc-900 hover:border-zinc-800 rounded-3xl p-5 md:p-6 flex gap-4 transition duration-200 shadow-lg relative animate-fade-in";
+    
+    const censoredText = filterBadWords(post.text);
+    
+    let scoreColorClass = "text-zinc-400";
+    if(score > 0) scoreColorClass = "text-green-400 font-black";
+    if(score < 0) scoreColorClass = "text-red-400 font-black";
+    
+    const upArrowColor = (myVote && myVote.type === 'up') ? 'text-green-400 scale-110' : 'text-zinc-600 hover:text-zinc-400';
+    const downArrowColor = (myVote && myVote.type === 'down') ? 'text-red-400 scale-110' : 'text-zinc-600 hover:text-zinc-400';
+    
+    card.innerHTML = `
+      <div class="flex flex-col items-center gap-1 bg-zinc-900/30 border border-zinc-900/60 p-1.5 rounded-2xl h-fit select-none min-w-[40px]">
+        <button onclick="vote('${post.id}', 'up', this)" class="p-1 transition-all ${upArrowColor}"><i class="fa-solid fa-circle-chevron-up text-lg"></i></button>
+        <span class="text-sm font-mono tracking-tighter ${scoreColorClass}">${score}</span>
+        <button onclick="vote('${post.id}', 'down', this)" class="p-1 transition-all ${downArrowColor}"><i class="fa-solid fa-circle-chevron-down text-lg"></i></button>
+      </div>
+      
+      <div class="flex-1 min-w-0 space-y-2">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="openUserProfile('${user.id}')">
+          <img class="w-10 h-10 rounded-full object-cover border border-zinc-900" src="${getUserAvatar(user.avatarUrl)}">
+          <div class="min-w-0">
+            <span class="block text-xs font-black text-zinc-100 hover:underline truncate">${user.fullName}</span>
+            <span class="block text-[10px] text-zinc-500 font-medium truncate">@${user.username}</span>
+          </div>
+        </div>
+        
+        <p class="text-md font-bold text-zinc-200 leading-snug break-words whitespace-pre-wrap">${censoredText}</p>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function renderMyPosts() {
+  const container = document.getElementById("myPostsContainer");
+  if(!container || !currentUser) return;
+  
+  const myPosts = currentPosts.filter(p => p.uid === currentUser.uid);
+  
+  if(myPosts.length === 0) {
+    container.innerHTML = "<p class='text-xs text-zinc-600 text-center py-6 bg-zinc-950/40 border border-zinc-900 rounded-2xl'>Aún no has publicado nada.</p>";
+    return;
+  }
+  
+  container.innerHTML = "";
+  myPosts.forEach(post => {
+    const postVotes = cachedGlobalVotes.filter(v => v.postId === post.id);
+    const score = postVotes.filter(v => v.type === 'up').length - postVotes.filter(v => v.type === 'down').length;
+    
+    const div = document.createElement("div");
+    div.className = "p-4 bg-zinc-950/60 border border-zinc-900 rounded-2xl flex justify-between items-center gap-4 text-xs";
+    div.innerHTML = `
+      <p class="font-bold text-zinc-300 break-words flex-1 min-w-0">${filterBadWords(post.text)}</p>
+      <div class="flex items-center gap-3 shrink-0">
+        <span class="font-mono bg-zinc-900 border border-zinc-800 px-2 py-1 rounded-md text-zinc-400 font-bold">Rep: ${score}</span>
+        <button onclick="deletePost('${post.id}')" class="text-zinc-600 hover:text-red-400 transition p-1"><i class="fa-regular fa-trash-can text-sm"></i></button>
+      </div>
     `;
     container.appendChild(div);
   });
 }
 
-function insertEmoji(emoji) {
-  const input = document.getElementById("messageInput");
-  if(input) {
-    input.value += emoji;
-    input.focus();
-    SoundFX.playClick();
+async function deletePost(postId) {
+  if(!confirm("¿Estás seguro de que quieres eliminar esta publicación permanente?")) return;
+  SoundFX.playClick();
+  try {
+    await deleteDoc(getDocRef("posts", postId));
+    showNotification("Publicación eliminada.", "info");
+  } catch(e) { console.error(e); }
+}
+window.deletePost = deletePost;
+
+async function vote(postId, type, btnElement) {
+  if(!currentUser) { showNotification("Inicia sesión para votar.", "error"); return; }
+  
+  const voteId = `${currentUser.uid}_${postId}`;
+  const voteRef = getDocRef("votes", voteId);
+  
+  try {
+    const docSnap = await getDoc(voteRef);
+    if(docSnap.exists()) {
+      const currentVoteType = docSnap.data().type;
+      if(currentVoteType === type) {
+        await deleteDoc(voteRef);
+        SoundFX.playClick();
+        return;
+      }
+    }
+    
+    if(type === 'up') {
+      const icon = btnElement.querySelector("i");
+      if(icon) icon.classList.add("animate-upvote-arrow");
+      SoundFX.playVoteUp();
+    } else {
+      const icon = btnElement.querySelector("i");
+      if(icon) icon.classList.add("animate-downvote-arrow");
+      SoundFX.playVotedown = SoundFX.playVoteDown(); 
+    }
+    
+    await setDoc(voteRef, {
+      postId: postId,
+      userUid: currentUser.uid,
+      type: type,
+      createdAt: serverTimestamp()
+    });
+    
+  } catch(e) { console.error(e); }
+}
+window.vote = vote;
+
+async function openUserProfile(userId) {
+  SoundFX.playClick();
+  const modal = document.getElementById("userProfileModal");
+  const u = allUsers.find(user => user.id === userId);
+  if(!u || !modal) return;
+  
+  document.getElementById("modalAvatar").src = getUserAvatar(u.avatarUrl);
+  document.getElementById("modalUsername").innerText = `@${u.username}`;
+  document.getElementById("modalFullName").innerText = u.fullName;
+  document.getElementById("modalBio").innerText = u.bio || "Sin biografía todavía.";
+  
+  document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
+  document.getElementById("modalReputation").innerText = calculateUserReputation(userId);
+  
+  const followBtn = document.getElementById("modalFollowBtn");
+  const chatBtn = document.getElementById("modalChatBtn");
+  
+  if(currentUser && userId === currentUser.uid) {
+    followBtn.className = "hidden";
+    chatBtn.className = "hidden";
+  } else {
+    followBtn.className = "flex-1 text-xs uppercase tracking-wider font-extrabold py-3 rounded-xl transition-all";
+    chatBtn.className = "bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-bold px-4 rounded-xl transition text-sm";
+    
+    if(followingSet.has(userId)) {
+      followBtn.innerText = "Siguiendo";
+      followBtn.className += " bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-red-400";
+      followBtn.onclick = () => unfollowUser(userId);
+    } else {
+      followBtn.innerText = "Seguir";
+      followBtn.className += " bg-green-500 hover:bg-green-400 text-black";
+      followBtn.onclick = () => followUser(userId);
+    }
+    
+    chatBtn.onclick = () => {
+      modal.classList.add("hidden");
+      showSection("chat");
+      startChatWith(userId);
+    };
   }
+  
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 }
-window.insertEmoji = insertEmoji;
+window.openUserProfile = openUserProfile;
 
-async function sendMessage(){
-  if(!selectedUser){ showNotification("Selecciona un usuario primero", "error"); return; }
-  const input = document.getElementById("messageInput");
-  const text = input ? input.value.trim() : "";
-  if(!text) return;
+function closeUserProfile() {
+  SoundFX.playClick();
+  const modal = document.getElementById("userProfileModal");
+  modal.classList.remove("flex");
+  modal.classList.add("hidden");
+}
+window.closeUserProfile = closeUserProfile;
 
-  await addDoc(getCol("messages"),{
-    from:currentUser.uid, to:selectedUser.id, text, createdAt:serverTimestamp()
+function renderUsersList() {
+  const container = document.getElementById("usersList");
+  if(!container) return;
+  if(!currentUser) { container.innerHTML = "<p class='text-xs text-zinc-600 text-center p-4'>Inicia sesión para chatear</p>"; return; }
+  
+  const chatPartners = allUsers.filter(u => u.id !== currentUser.uid);
+  if(chatPartners.length === 0) {
+    container.innerHTML = "<p class='text-xs text-zinc-600 text-center p-4'>No hay otros usuarios registrados.</p>";
+    return;
+  }
+  
+  container.innerHTML = "";
+  chatPartners.forEach(u => {
+    const isSelected = selectedUser && selectedUser.id === u.id;
+    const btn = document.createElement("button");
+    btn.className = `w-full text-left p-3 rounded-xl flex items-center gap-3 transition-all text-xs ${isSelected ? 'bg-green-500/10 border border-green-500/20 text-white' : 'hover:bg-zinc-900/40 text-zinc-400 hover:text-zinc-200'}`;
+    
+    btn.onclick = () => startChatWith(u.id);
+    btn.innerHTML = `
+      <img class="w-8 h-8 rounded-full object-cover border border-zinc-900" src="${getUserAvatar(u.avatarUrl)}">
+      <div class="flex-1 min-w-0">
+        <div class="font-bold truncate text-zinc-200">${u.fullName}</div>
+        <div class="text-[10px] text-zinc-500 truncate">@${u.username}</div>
+      </div>
+    `;
+    container.appendChild(btn);
   });
-  input.value = "";
-  SoundFX.playMessage();
 }
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
 
-document.getElementById("messageInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") sendMessage();
-});
-
-function listenMessages(){
-  if(!selectedUser) return;
-  document.getElementById("chatHeader").innerHTML = `
-    <div class="flex items-center gap-3">
-      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer mr-1" onclick="closeActiveChat()"></i>
-      <img src="${getUserAvatar(selectedUser.avatar)}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
-      <div class="flex flex-col text-left cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
-        <span class="text-white font-bold hover:text-green-400 text-sm transition">@${selectedUser.username}</span>
-        <span class="text-zinc-400 font-medium text-xs">${selectedUser.fullName || ''}</span>
+function startChatWith(userId) {
+  const partner = allUsers.find(u => u.id === userId);
+  if(!partner) return;
+  selectedUser = partner;
+  
+  renderUsersList();
+  
+  const header = document.getElementById("chatHeader");
+  header.innerHTML = `
+    <div class="flex items-center gap-3 w-full">
+      <i class="fa-solid fa-arrow-left md:hidden cursor-pointer text-zinc-400 hover:text-white" onclick="closeActiveChat()"></i>
+      <img class="w-8 h-8 rounded-full object-cover border border-zinc-900" src="${getUserAvatar(partner.avatarUrl)}">
+      <div>
+        <div class="text-sm font-black text-zinc-200">${partner.fullName}</div>
+        <div class="text-[10px] text-zinc-500 font-semibold">@${partner.username}</div>
       </div>
     </div>
   `;
-  const q = query(getCol("messages"), orderBy("createdAt","asc"));
-  onSnapshot(q,(snapshot)=>{
-    const messages = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }))
-    .filter(msg => (msg.from === currentUser.uid && msg.to === selectedUser.id) || (msg.to === currentUser.uid && msg.from === selectedUser.id));
-
-    const container = document.getElementById("chatMessages");
-    if(!container) return;
-    container.innerHTML = "";
-    
-    if (messages.length === 0) {
-      container.innerHTML = `
-        <div class="h-full flex flex-col items-center justify-center text-zinc-600">
-          <p class="text-xs">Di hola para empezar una conversación con @${selectedUser.username}.</p>
-        </div>`;
-    }
-
-    messages.forEach(msg => {
-      const mine = msg.from === currentUser.uid;
-      const censoredMsgText = filterBadWords(msg.text);
-      const div = document.createElement("div");
-      div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
-      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold shadow-md shadow-green-500/10' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${censoredMsgText}</div>`;
-      container.appendChild(div);
-    });
-    container.scrollTop = container.scrollHeight;
-  });
+  
+  listenMessages();
 }
+window.startChatWith = startChatWith;
 
 function closeActiveChat() {
   selectedUser = null;
-  SoundFX.playClick();
-  document.getElementById("chatHeader").innerHTML = `<span class="text-zinc-500 text-sm">Selecciona un usuario para chatear</span>`;
+  renderUsersList();
+  const header = document.getElementById("chatHeader");
+  header.innerHTML = `<span class="text-zinc-500 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left md:hidden cursor-pointer" onclick="closeActiveChat()"></i> Selecciona un usuario para chatear</span>`;
   document.getElementById("chatMessages").innerHTML = `
     <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-2">
       <i class="fa-regular fa-paper-plane text-4xl"></i>
       <p class="text-sm">Tus chats privados están encriptados en la nube</p>
-    </div>`;
+    </div>
+  `;
 }
 window.closeActiveChat = closeActiveChat;
 
-async function saveProfileChanges() {
-  if (!currentUser) return;
-  const newUsername = document.getElementById("editUsername").value.trim();
-  const newFullName = document.getElementById("editFullName").value.trim();
-  const newBio = document.getElementById("editBio").value.trim();
-  if (!newUsername || !newFullName) return showNotification("El nombre de usuario y nombre completo no pueden estar vacíos", "error");
+let currentMessagesListener = null;
+function listenMessages() {
+  if (currentMessagesListener) currentMessagesListener();
+  if (!currentUser || !selectedUser) return;
   
-  try {
-    showNotification("Guardando perfil...", "info");
-    await updateProfile(currentUser, { displayName: newUsername });
-    await setDoc(getDocRef("users", currentUser.uid), { username: newUsername, fullName: newFullName, bio: newBio }, { merge: true });
-    SoundFX.playSuccess();
-    showNotification("¡Perfil actualizado con éxito!", "success");
-  } catch(err) { showNotification("Error: " + err.message, "error"); }
-}
-window.saveProfileChanges = saveProfileChanges;
-
-async function logout(){ 
-  await signOut(auth); 
-  SoundFX.playClick();
-  showNotification("Sesión cerrada", "info");
-}
-
-function updateNavbar(){
-  const nav = document.getElementById("navUser");
-  if(!nav) return;
-  if(currentUser){
-    nav.innerHTML = `
-    <div class="flex items-center gap-2">
-      <img src="${getUserAvatar(currentUser.photoURL)}" class="w-8 h-8 rounded-full object-cover border border-green-500 cursor-pointer hidden sm:block" onclick="showSection('profile')">
-      <button id="logoutBtn" class="bg-red-500/10 border border-red-500/20 hover:bg-red-500 hover:text-black text-red-500 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-wider">Salir</button>
-    </div>
-    `;
-    document.getElementById("logoutBtn").addEventListener("click", logout);
+  const container = document.getElementById("chatMessages");
+  container.innerHTML = "<div class='text-center py-8 text-zinc-600 text-xs animate-pulse'>Abriendo canal seguro...</div>";
+  
+  const q = query(getCol("messages"), orderBy("createdAt", "asc"));
+  currentMessagesListener = onSnapshot(q, (snapshot) => {
+    container.innerHTML = "";
+    let count = 0;
     
-    const miniCard = document.getElementById("miniProfileCard");
-    if(miniCard) {
-      const myData = allUsers.find(u => u.id === currentUser.uid);
-      miniCard.innerHTML = `
-        <img src="${getUserAvatar(currentUser.photoURL)}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
-        <div class="truncate flex-1 text-left">
-          <div class="font-extrabold text-sm text-zinc-200">@${myData?.username || currentUser.displayName || 'usuario'}</div>
-          <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">${myData?.fullName || 'Mi Perfil'}</div>
+    snapshot.docs.forEach(doc => {
+      const msg = doc.data();
+      const isMine = msg.from === currentUser.uid;
+      const isForMe = msg.to === currentUser.uid && msg.from === selectedUser.id;
+      const amISender = msg.from === currentUser.uid && msg.to === selectedUser.id;
+      
+      if (isForMe || amISender) {
+        count++;
+        const row = document.createElement("div");
+        row.className = `flex w-full ${isMine ? 'justify-end' : 'justify-start'} animate-fade-in text-xs`;
+        
+        const bubbleBg = isMine ? 'bg-green-500 text-black font-semibold rounded-2xl rounded-tr-sm' : 'bg-zinc-900 text-zinc-100 font-medium rounded-2xl rounded-tl-sm border border-zinc-800/60';
+        const censoredMsgText = filterBadWords(msg.text);
+        
+        row.innerHTML = `
+          <div class="max-w-[75%] px-4 py-2.5 shadow-md ${bubbleBg} break-words whitespace-pre-wrap">${censoredMsgText}</div>
+        `;
+        container.appendChild(row);
+      }
+    });
+    
+    if(count === 0) {
+      container.innerHTML = `
+        <div class="h-full flex flex-col items-center justify-center text-zinc-600 space-y-1">
+          <i class="fa-regular fa-comments text-2xl"></i>
+          <p class="text-xs">Canal vacío. Dile hola a @${selectedUser.username}</p>
         </div>
       `;
+    } else {
+      container.scrollTop = container.scrollHeight;
     }
-  }else{ 
-    nav.innerHTML = `<div class="text-zinc-500 text-xs">Invitado</div>`; 
-  }
+  });
 }
 
-function renderProfile(){
-  if(!currentUser) return;
-  document.getElementById("profileAvatar").src = getUserAvatar(currentUser.photoURL);
-  const myData = allUsers.find(u => u.id === currentUser.uid);
-  document.getElementById("editUsername").value = myData?.username || currentUser.displayName || '';
-  document.getElementById("editFullName").value = myData?.fullName || '';
-  document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
-}
+const sendBtn = document.getElementById("sendBtn");
+const messageInput = document.getElementById("messageInput");
 
-const postsQuery = query(getCol("posts"), orderBy("createdAt","desc"));
-onSnapshot(postsQuery, (snapshot)=>{
-  const posts = snapshot.docs.map(doc => ({ id:doc.id, ...doc.data() }));
-  renderPosts(posts);
-});
-
-async function updateProfilePhoto(){
-  if(!currentUser) return;
-  const file = document.getElementById("newProfilePhoto").files[0];
-  if(!file){ showNotification("Por favor, selecciona una foto", "error"); return; }
-  try{
-    showNotification("Actualizando avatar...", "info");
-    const imageUrl = await uploadImage(file, "profilePhotos/" + currentUser.uid + "_" + Date.now());
-    await updateProfile(currentUser,{ photoURL:imageUrl });
-    await setDoc(getDocRef("users", currentUser.uid), { avatar:imageUrl }, { merge:true });
-    
-    document.getElementById("profileAvatar").src = imageUrl;
-    updateNavbar();
-    SoundFX.playSuccess();
-    showNotification("Avatar de perfil actualizado", "success");
-  }catch(error){ showNotification(error.message, "error"); }
-}
-document.getElementById("newProfilePhoto").addEventListener("change", updateProfilePhoto);
-
-function applyVotesStyles(snapshot) {
-    if (!snapshot) return;
-    const postVotes = {};
-    const myVotes = {}; 
-
-    snapshot.docs.forEach(doc => {
-        const vote = doc.data();
-        if (!postVotes[vote.postId]) {
-            postVotes[vote.postId] = { up: 0, down: 0 };
-        }
-        if (vote.type === "up") { postVotes[vote.postId].up += 1; } 
-        else if (vote.type === "down") { postVotes[vote.postId].down += 1; }
-        
-        if (currentUser && vote.userId === currentUser.uid) {
-          myVotes[vote.postId] = vote.type;
-        }
+async function sendMessage() {
+  if(!currentUser || !selectedUser || !messageInput) return;
+  const txt = messageInput.value.trim();
+  if(!txt) return;
+  
+  messageInput.value = "";
+  try {
+    await addDoc(getCol("messages"), {
+      from: currentUser.uid,
+      to: selectedUser.id,
+      text: txt,
+      createdAt: serverTimestamp()
     });
-
-    document.querySelectorAll('[id^="post-card-"]').forEach(card => {
-        const postId = card.id.replace('post-card-', '');
-        const votes = postVotes[postId] || { up: 0, down: 0 };
-        
-        const upCounter = card.querySelector(`#up-counter-${postId}`);
-        const downCounter = card.querySelector(`#down-counter-${postId}`);
-        const upBtn = card.querySelector(`#up-btn-${postId}`);
-        const downBtn = card.querySelector(`#down-btn-${postId}`);
-
-        if (upCounter) upCounter.innerText = votes.up;
-        if (downCounter) downCounter.innerText = votes.down;
-
-        if (upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5";
-        }
-        if (downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5";
-        }
-
-        if (myVotes[postId] === "up" && upBtn) {
-          upBtn.className = "upvoteBtn px-4 py-2 rounded-xl text-black bg-green-500 border border-green-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
-        } else if (myVotes[postId] === "down" && downBtn) {
-          downBtn.className = "downvoteBtn px-4 py-2 rounded-xl text-white bg-red-500 border border-red-400 font-black text-sm flex items-center gap-1.5 scale-105 transition-all";
-        }
-
-        card.className = "bg-zinc-950/80 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2";
-        if (votes.up > votes.down) {
-            card.classList.add("border-green-500", "shadow-[0_0_15px_rgba(34,197,94,0.15)]");
-        } else if (votes.down > votes.up) {
-            card.classList.add("border-red-500", "shadow-[0_0_15px_rgba(239,68,68,0.15)]");
-        } else {
-            card.classList.add("border-zinc-900");
-        }
-    });
+    SoundFX.playClick();
+  } catch(e) { console.error(e); }
 }
 
-onSnapshot(getCol("votes"), (snapshot) => {
-    cachedVotesSnapshot = snapshot;
-    cachedGlobalVotes = snapshot.docs.map(doc => doc.data());
-    applyVotesStyles(snapshot);
-    updateProfileStats();
-});
+if(sendBtn) sendBtn.onclick = sendMessage;
+if(messageInput) {
+  messageInput.onkeydown = (e) => { if(e.key === 'Enter') sendMessage(); };
+}
 
-let appLoadTime = Date.now();
+function insertEmoji(emoji) {
+  if(!messageInput) return;
+  SoundFX.playClick();
+  messageInput.value += emoji;
+  messageInput.focus();
+}
+window.insertEmoji = insertEmoji;
+
 let notifiedMessages = new Set();
+const appLoadTime = Date.now();
 
 function listenIncomingMessages() {
   if (!currentUser) return;
@@ -1477,6 +1517,7 @@ onAuthStateChanged(auth, async (user)=>{
     listenIncomingMessages();
   }else{
     document.getElementById("authModal").classList.remove("hidden");
+    closeActiveChat();
   }
 });
 </script>
