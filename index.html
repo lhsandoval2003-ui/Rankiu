@@ -38,7 +38,6 @@
     animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
 
-  /* Animaciones de los votos de Rankiu */
   @keyframes slideUpArrow {
     0% { transform: translateY(0); opacity: 1; }
     40% { transform: translateY(-16px); opacity: 0; }
@@ -105,7 +104,6 @@
           <span class="text-xs text-zinc-500 font-medium mr-2" id="feed-stats-label">Cargando comunidad...</span>
         </div>
 
-        <!-- Creador de Publicaciones de Texto Adaptativo -->
         <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-5 relative overflow-hidden shadow-xl">
           <div class="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
           
@@ -178,7 +176,7 @@
         </div>
       </section>
 
-      <section id="profileSection" class="hidden animate-fade-in">
+      <section id="profileSection" class="hidden animate-fade-in space-y-6">
         <div class="bg-zinc-950/90 border border-zinc-900 rounded-3xl p-6 md:p-8 max-w-xl mx-auto text-center backdrop-blur-sm relative overflow-hidden shadow-2xl">
           <div class="absolute top-0 left-0 w-full h-[4px] bg-gradient-to-r from-green-500 to-emerald-500"></div>
           
@@ -192,8 +190,16 @@
 
           <div class="space-y-3 max-w-sm mx-auto">
             <div class="text-left">
-              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre público</label>
-              <input type="text" id="editUsername" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl px-3 py-2 text-center font-bold text-white text-lg focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all" value="" placeholder="Nombre público">
+              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre de usuario (Estilo Instagram)</label>
+              <div class="relative flex items-center">
+                <span class="absolute left-3 font-bold text-zinc-500 text-lg">@</span>
+                <input type="text" id="editUsername" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl pl-8 pr-3 py-2 font-bold text-white text-md focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all" value="" placeholder="username">
+              </div>
+            </div>
+
+            <div class="text-left">
+              <label class="text-[10px] text-zinc-500 font-extrabold uppercase tracking-widest pl-2">Nombre completo / normal</label>
+              <input type="text" id="editFullName" class="w-full bg-zinc-900/50 border border-zinc-800 focus:border-green-500 rounded-xl px-3 py-2 font-bold text-white text-md focus:outline-none focus:ring-1 focus:ring-green-500/30 transition-all" value="" placeholder="Nombre Normal">
             </div>
             
             <div class="text-left">
@@ -209,6 +215,11 @@
             </div>
             <div class="w-[1px] bg-zinc-900"></div>
             <div class="text-center">
+              <div id="userReputationPoints" class="text-xl font-black text-zinc-400">0</div>
+              <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Puntos Totales</div>
+            </div>
+            <div class="w-[1px] bg-zinc-900"></div>
+            <div class="text-center">
               <div id="followingCount" class="text-xl font-black text-emerald-400">0</div>
               <div class="text-[10px] text-zinc-500 uppercase tracking-widest font-bold">Siguiendo</div>
             </div>
@@ -217,6 +228,13 @@
           <button id="saveProfileBtn" onclick="saveProfileChanges()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all duration-200 shadow-md shadow-green-500/10">
             Guardar Cambios
           </button>
+        </div>
+
+        <div class="max-w-xl mx-auto space-y-4">
+          <h3 class="text-sm font-black text-zinc-400 uppercase tracking-wider pl-2 flex items-center gap-2">
+            <i class="fa-solid fa-table-columns text-green-400"></i> Mis Publicaciones
+          </h3>
+          <div id="myPostsContainer" class="space-y-4"></div>
         </div>
       </section>
 
@@ -285,7 +303,6 @@
       <button onclick="switchAuth('register')" class="flex-1 rounded-xl py-2.5 text-xs font-bold transition-all text-zinc-500" id="btn-switch-register">Registro</button>
     </div>
     
-    <!-- Iniciar Sesión -->
     <div id="loginBox" class="space-y-3">
       <input id="loginEmail" placeholder="Email o correo" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
       <input type="password" id="loginPassword" placeholder="Contraseña de seguridad" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
@@ -295,7 +312,6 @@
       </div>
     </div>
     
-    <!-- Recuperación de contraseña integrada -->
     <div id="recoverBox" class="hidden space-y-3">
       <p class="text-xs text-zinc-400 text-center mb-2">Ingresa tu correo electrónico para enviarte un enlace exclusivo de recuperación:</p>
       <input id="recoverEmail" placeholder="Correo electrónico de tu cuenta" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
@@ -305,16 +321,17 @@
       </div>
     </div>
     
-    <!-- Registro -->
     <div id="registerBox" class="hidden space-y-3">
-      <input id="registerUsername" placeholder="Nombre único de usuario" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      <div class="relative flex items-center">
+        <span class="absolute left-3 font-bold text-zinc-500 text-sm">@</span>
+        <input id="registerUsername" placeholder="username_instagram" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl pl-8 pr-4 py-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
+      </div>
+      <input id="registerFullName" placeholder="Nombre completo" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
       <input id="registerEmail" placeholder="Correo electrónico" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
       <input type="password" id="registerPassword" placeholder="Crea tu contraseña" class="w-full bg-zinc-900/80 border border-zinc-800 focus:border-green-500 rounded-xl p-4 text-white placeholder-zinc-500 focus:outline-none text-sm transition"/>
       
       <div class="p-3 bg-zinc-900/50 border border-zinc-800/80 rounded-xl">
-        <div class="flex justify-center gap-3" id="avatarSelectorContainer">
-          <!-- Generado por JS -->
-        </div>
+        <div class="flex justify-center gap-3" id="avatarSelectorContainer"></div>
       </div>
       
       <button id="registerBtn" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-black font-extrabold py-4 rounded-xl hover:from-green-400 hover:to-emerald-400 transition text-xs uppercase tracking-wider">Crear Cuenta Nueva</button>
@@ -327,13 +344,19 @@
     <button onclick="closeUserProfile()" class="absolute top-4 right-4 text-zinc-500 hover:text-zinc-200 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
     
     <img id="modalAvatar" class="w-24 h-24 rounded-full mx-auto object-cover border-4 border-green-500 mb-4 shadow-xl" src="">
-    <h3 id="modalUsername" class="text-2xl font-bold text-white mb-1"></h3>
-    <p id="modalBio" class="text-zinc-400 text-sm mb-4 italic"></p>
+    <h3 id="modalUsername" class="text-xl font-black text-white"></h3>
+    <p id="modalFullName" class="text-zinc-400 text-sm mb-2 font-medium"></p>
+    <p id="modalBio" class="text-zinc-500 text-xs mb-4 italic"></p>
     
     <div class="flex justify-around items-center bg-zinc-900/40 rounded-2xl py-3 border border-zinc-900/80 mb-6">
       <div>
         <div id="modalFollowers" class="text-lg font-black text-green-400">0</div>
         <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Seguidores</div>
+      </div>
+      <div class="w-[1px] bg-zinc-800 h-6"></div>
+      <div>
+        <div id="modalReputation" class="text-lg font-black text-zinc-400">0</div>
+        <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Puntos</div>
       </div>
     </div>
     
@@ -367,6 +390,37 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
+// Diccionario de malas palabras a censurar
+const BAD_WORDS = ["mierda", "puta", "puto", "marico", "pendejo", "pendeja", "culero", "culera", "gonorrea", "hijueputa", "cabron", "cabrona", "perra", "perro", "chinga", "verga", "carajo", "malparido"];
+
+// Función para censurar texto manteniendo las letras de los extremos
+function filterBadWords(text) {
+  if (!text) return "";
+  let filtered = text;
+  BAD_WORDS.forEach(word => {
+    const regex = new RegExp(`\\b${word}\\b`, "gi");
+    filtered = filtered.replace(regex, (match) => {
+      if (match.length <= 2) return "*".repeat(match.length);
+      return match[0] + "*".repeat(match.length - 2) + match[match.length - 1];
+    });
+  });
+  return filtered;
+}
+
+// Forzar formato estilo Instagram en los inputs de username
+function cleanUsernameInput(val) {
+  return val.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_.]/g, '');
+}
+
+const regUserInp = document.getElementById("registerUsername");
+if(regUserInp) {
+  regUserInp.addEventListener("input", (e) => { e.target.value = cleanUsernameInput(e.target.value); });
+}
+const editUserInp = document.getElementById("editUsername");
+if(editUserInp) {
+  editUserInp.addEventListener("input", (e) => { e.target.value = cleanUsernameInput(e.target.value); });
+}
+
 setPersistence(auth, browserLocalPersistence).catch((error) => console.error("Error de persistencia:", error));
 
 function getCol(colName) {
@@ -376,7 +430,6 @@ function getDocRef(colName, docId) {
   return doc(db, 'artifacts', appId, 'public', 'data', colName, docId);
 }
 
-// Sistema de Audio Sintetizado
 const SoundFX = {
   ctx: null,
   init() {
@@ -481,6 +534,7 @@ let followingCounts = {};
 let currentPosts = [];
 let feedFilter = 'all'; 
 let cachedVotesSnapshot = null;
+let cachedGlobalVotes = [];
 
 const DefaultAvatars = [
   { id: 'teal', color: '#075e54' },
@@ -652,6 +706,29 @@ function listenFollowers() {
   });
 }
 
+function getUserReputationMarkup(userId) {
+  let upvotes = 0;
+  let downvotes = 0;
+  
+  const userPostsIds = currentPosts.filter(p => p.authorId === userId).map(p => p.id);
+  
+  cachedGlobalVotes.forEach(v => {
+    if (userPostsIds.includes(v.postId)) {
+      if (v.type === "up") upvotes++;
+      if (v.type === "down") downvotes++;
+    }
+  });
+  
+  const total = upvotes - downvotes;
+  if (total > 0) {
+    return `<span class="text-green-400 font-extrabold">+${total}</span>`;
+  } else if (total < 0) {
+    return `<span class="text-red-500 font-extrabold">${total}</span>`;
+  } else {
+    return `<span class="text-zinc-400 font-bold">0</span>`;
+  }
+}
+
 function updateProfileStats() {
   if (currentUser) {
     const myFollowers = followerCounts[currentUser.uid] || 0;
@@ -660,6 +737,11 @@ function updateProfileStats() {
     const fFollowingEl = document.getElementById("followingCount");
     if(fCountEl) fCountEl.innerText = myFollowers;
     if(fFollowingEl) fFollowingEl.innerText = myFollowing;
+    
+    const repContainer = document.getElementById("userReputationPoints");
+    if (repContainer) {
+      repContainer.innerHTML = getUserReputationMarkup(currentUser.uid);
+    }
   }
 }
 
@@ -676,9 +758,15 @@ async function viewUserProfile(userId) {
   
   SoundFX.playClick();
   document.getElementById("modalAvatar").src = getUserAvatar(user.avatar);
-  document.getElementById("modalUsername").innerText = user.username || "Usuario";
+  document.getElementById("modalUsername").innerText = user.username ? `@${user.username}` : "@usuario";
+  document.getElementById("modalFullName").innerText = user.fullName || "Nombre completo";
   document.getElementById("modalBio").innerText = user.bio || "Este usuario no ha escrito una biografía.";
   document.getElementById("modalFollowers").innerText = followerCounts[userId] || 0;
+  
+  const modalRep = document.getElementById("modalReputation");
+  if(modalRep) {
+    modalRep.innerHTML = getUserReputationMarkup(userId);
+  }
   
   const followBtn = document.getElementById("modalFollowBtn");
   if (userId === currentUser?.uid) {
@@ -730,134 +818,158 @@ function getFontSize(content) {
 
 function renderPosts(posts) {
   currentPosts = posts;
+  
   const container = document.getElementById("postsContainer");
-  if (!container) return;
-  
-  let filteredPosts = posts;
-  if (feedFilter === 'following' && currentUser) {
-    filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
-  }
-  
-  const statsLabel = document.getElementById("feed-stats-label");
-  if(statsLabel) statsLabel.innerText = `${filteredPosts.length} Publicaciones`;
-
-  if (filteredPosts.length === 0) {
-    container.innerHTML = `
-      <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
-        <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
-        <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
-      </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = "";
-  filteredPosts.forEach(post => {
-    const isFollowing = followingSet.has(post.authorId);
-    let followBtnMarkup = '';
-    
-    if (currentUser && post.authorId !== currentUser.uid) {
-      if (isFollowing) {
-        followBtnMarkup = `
-          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-extrabold flex items-center gap-1">
-            <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
-          </button>`;
-      } else {
-        followBtnMarkup = `
-          <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black text-xs font-black flex items-center gap-1">
-            <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
-          </button>`;
-      }
+  if (container) {
+    let filteredPosts = posts;
+    if (feedFilter === 'following' && currentUser) {
+      filteredPosts = posts.filter(p => followingSet.has(p.authorId) || p.authorId === currentUser.uid);
     }
-
-    const div = document.createElement("div");
-    div.id = `post-card-${post.id}`;
-    div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
-    div.innerHTML = `
-    <div class="flex justify-between items-center">
-      <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
-        <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
-        <div>
-          <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">${post.author || 'Usuario'}</div>
-          <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Publicado</div>
-        </div>
-      </div>
-      <div class="flex items-center gap-2">
-        ${followBtnMarkup}
-        ${currentUser && post.authorId === currentUser.uid ? `
-          <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 p-2 rounded-xl">
-            <i class="fa-solid fa-trash text-sm"></i>
-          </button>
-        ` : ''}
-      </div>
-    </div>
     
-    <p class="mt-4 leading-relaxed whitespace-pre-wrap ${getFontSize(post.content)}">${post.content}</p>
+    const statsLabel = document.getElementById("feed-stats-label");
+    if(statsLabel) statsLabel.innerText = `${filteredPosts.length} Publicaciones`;
 
-    <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
-      <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
-        <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
-          <i class="fa-solid fa-circle-arrow-up text-lg" id="up-icon-${post.id}"></i>
-          <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
-        </button>
-        <div class="w-[1px] h-6 bg-zinc-800"></div>
-        <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
-          <i class="fa-solid fa-circle-arrow-down text-lg" id="down-icon-${post.id}"></i>
-          <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
-        </button>
-      </div>
-    </div>
+    if (filteredPosts.length === 0) {
+      container.innerHTML = `
+        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-12 text-center text-zinc-500">
+          <i class="fa-solid fa-layer-group text-4xl mb-3 block text-zinc-700"></i>
+          <p class="text-sm font-bold">No hay publicaciones aquí todavía</p>
+        </div>
+      `;
+    } else {
+      container.innerHTML = "";
+      filteredPosts.forEach(post => {
+        container.appendChild(createPostCardElement(post));
+      });
+    }
+  }
 
-    <div class="mt-4">
-      <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
-      <div class="flex gap-2">
-        <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"/>
-        <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}">
-          <i class="fa-solid fa-paper-plane"></i>
-        </button>
-      </div>
-    </div>
-    `;
-    container.appendChild(div);
-
-    const commentsQuery = query(getCol("comments"), where("postId", "==", post.id));
-    onSnapshot(commentsQuery, (commentSnapshot) => {
-        const commentListContainer = document.getElementById(`comments-list-${post.id}`);
-        if (commentListContainer) {
-            commentListContainer.innerHTML = "";
-            const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
-            sortedDocs.forEach(comment => {
-                const commentDiv = document.createElement("div");
-                commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
-                commentDiv.innerHTML = `<strong class="text-zinc-400" onclick="viewUserProfile('${comment.authorId}')">${comment.author}:</strong> <span class="text-zinc-300 ml-1">${comment.text}</span>`;
-                commentListContainer.appendChild(commentDiv);
-            });
-        }
-    });
-  });
+  const myPostsContainer = document.getElementById("myPostsContainer");
+  if (myPostsContainer && currentUser) {
+    const myFilteredPosts = posts.filter(p => p.authorId === currentUser.uid);
+    if (myFilteredPosts.length === 0) {
+      myPostsContainer.innerHTML = `
+        <div class="bg-zinc-950/40 border border-zinc-900/60 rounded-3xl p-6 text-center text-zinc-600 text-xs">
+          Aún no has compartido ninguna publicación.
+        </div>
+      `;
+    } else {
+      myPostsContainer.innerHTML = "";
+      myFilteredPosts.forEach(post => {
+        myPostsContainer.appendChild(createPostCardElement(post));
+      });
+    }
+  }
 
   if (cachedVotesSnapshot) {
      applyVotesStyles(cachedVotesSnapshot);
   }
+  updateProfileStats();
 }
 
-// LISTENER GLOBAL DE CLICKS SIN DUPLICADOS NI CÓDIGO ROTO
+function createPostCardElement(post) {
+  const isFollowing = followingSet.has(post.authorId);
+  let followBtnMarkup = '';
+  
+  if (currentUser && post.authorId !== currentUser.uid) {
+    if (isFollowing) {
+      followBtnMarkup = `
+        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-extrabold flex items-center gap-1">
+          <i class="fa-solid fa-check text-xs"></i> <span class="hidden sm:inline">Siguiendo</span>
+        </button>`;
+    } else {
+      followBtnMarkup = `
+        <button onclick="toggleFollow('${post.authorId}')" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-black text-xs font-black flex items-center gap-1">
+          <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Seguir</span>
+        </button>`;
+    }
+  }
+
+  // Censurar contenido del post en vivo al renderizar
+  const censoredContent = filterBadWords(post.content);
+
+  const div = document.createElement("div");
+  div.id = `post-card-${post.id}`;
+  div.className = `bg-zinc-950/80 border border-zinc-900 rounded-3xl p-5 hover:border-zinc-800 transition-all duration-300 relative overflow-hidden border-2`;
+  div.innerHTML = `
+  <div class="flex justify-between items-center">
+    <div class="flex gap-3 items-center cursor-pointer group" onclick="viewUserProfile('${post.authorId}')">
+      <img src="${getUserAvatar(post.authorAvatar)}" class="w-11 h-11 rounded-full object-cover ring-2 ring-zinc-900">
+      <div>
+        <div class="font-extrabold text-sm text-zinc-100 group-hover:text-green-400 transition-colors">@${post.authorUsername || 'usuario'}</div>
+        <div class="text-[11px] text-zinc-400 font-medium">${post.authorFullName || 'Nombre'}</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      ${followBtnMarkup}
+      ${currentUser && post.authorId === currentUser.uid ? `
+        <button data-id="${post.id}" class="deletePostBtn text-zinc-600 hover:text-red-500 p-2 rounded-xl transition-colors">
+          <i class="fa-solid fa-trash text-sm"></i>
+        </button>
+      ` : ''}
+    </div>
+  </div>
+  
+  <p class="mt-4 leading-relaxed whitespace-pre-wrap ${getFontSize(censoredContent)}">${censoredContent}</p>
+
+  <div class="mt-4 flex gap-3 items-center border-b border-zinc-900/60 pb-4">
+    <div class="flex items-center bg-zinc-900/60 p-1.5 rounded-2xl border border-zinc-800/80 gap-1.5">
+      <button id="up-btn-${post.id}" class="upvoteBtn px-4 py-2 rounded-xl text-green-400 bg-green-500/10 border border-green-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
+        <i class="fa-solid fa-circle-arrow-up text-lg" id="up-icon-${post.id}"></i>
+        <span id="up-counter-${post.id}" class="text-xs font-extrabold text-green-300">0</span>
+      </button>
+      <div class="w-[1px] h-6 bg-zinc-800"></div>
+      <button id="down-btn-${post.id}" class="downvoteBtn px-4 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/20 transition-all font-black text-sm flex items-center gap-1.5" data-id="${post.id}">
+        <i class="fa-solid fa-circle-arrow-down text-lg" id="down-icon-${post.id}"></i>
+        <span id="down-counter-${post.id}" class="text-xs font-extrabold text-red-300">0</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <div id="comments-list-${post.id}" class="space-y-2 mb-3 max-h-36 overflow-y-auto scrollbar text-xs"></div>
+    <div class="flex gap-2">
+      <input id="comment-input-${post.id}" placeholder="Escribe un comentario..." autocomplete="off" class="flex-1 bg-zinc-900/30 border border-zinc-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"/>
+      <button class="bg-zinc-900 border border-zinc-800 text-green-400 px-4 py-2 rounded-xl text-xs commentBtn" data-id="${post.id}">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+  `;
+
+  const commentsQuery = query(getCol("comments"), where("postId", "==", post.id));
+  onSnapshot(commentsQuery, (commentSnapshot) => {
+      const commentListContainer = div.querySelector(`#comments-list-${post.id}`);
+      if (commentListContainer) {
+          commentListContainer.innerHTML = "";
+          const sortedDocs = commentSnapshot.docs.map(d => d.data()).sort((a,b) => a.createdAt - b.createdAt);
+          sortedDocs.forEach(comment => {
+              const censoredCommentText = filterBadWords(comment.text);
+              const commentDiv = document.createElement("div");
+              commentDiv.className = "bg-zinc-900/20 p-2.5 rounded-xl border border-zinc-900/40";
+              commentDiv.innerHTML = `<strong class="text-zinc-400 cursor-pointer" onclick="viewUserProfile('${comment.authorId}')">@${comment.authorUsername || 'usuario'}:</strong> <span class="text-zinc-300 ml-1">${censoredCommentText}</span>`;
+              commentListContainer.appendChild(commentDiv);
+          });
+      }
+  });
+
+  return div;
+}
+
 document.addEventListener("click", async (event) => {
     const target = event.target;
 
-    // ELIMINAR POST
     if (target.classList.contains("deletePostBtn") || target.closest(".deletePostBtn")) {
         const btn = target.classList.contains("deletePostBtn") ? target : target.closest(".deletePostBtn");
         const postId = btn.dataset.id;
-        if (!confirm("¿Estás seguro de eliminar esta publicación?")) return;
+        if (!confirm("¿Estás seguro de que quieres eliminar este post permanentemente?")) return;
         try {
             await deleteDoc(getDocRef("posts", postId));
-            showNotification("Publicación eliminada", "success");
-        } catch (error) { showNotification("No se pudo eliminar", "error"); }
+            showNotification("Publicación eliminada correctamente.", "success");
+        } catch (error) { showNotification("No se pudo eliminar el post.", "error"); }
         return;
     }
 
-    // PUBLICAR COMENTARIO
     if (target.classList.contains("commentBtn") || target.closest(".commentBtn")) {
         const btn = target.classList.contains("commentBtn") ? target : target.closest(".commentBtn");
         if(!currentUser) return showNotification("Debes iniciar sesión", "error");
@@ -867,8 +979,14 @@ document.addEventListener("click", async (event) => {
         const text = input ? input.value.trim() : "";
         if(!text) return;
 
+        const myUserData = allUsers.find(u => u.id === currentUser.uid);
+
         await addDoc(getCol("comments"), {
-            postId, text, author: currentUser.displayName || "Anónimo", authorId: currentUser.uid, createdAt: Date.now()
+            postId, 
+            text, 
+            authorUsername: myUserData?.username || currentUser.displayName, 
+            authorId: currentUser.uid, 
+            createdAt: Date.now()
         });
         if(input) input.value = "";
         SoundFX.playSuccess();
@@ -876,7 +994,6 @@ document.addEventListener("click", async (event) => {
         return;
     }
 
-    // UPVOTE
     if (target.classList.contains("upvoteBtn") || target.closest(".upvoteBtn")) {
         const btn = target.classList.contains("upvoteBtn") ? target : target.closest(".upvoteBtn");
         if(!currentUser) return showNotification("Inicia sesión para votar", "error");
@@ -903,7 +1020,6 @@ document.addEventListener("click", async (event) => {
         return;
     }
 
-    // DOWNVOTE
     if (target.classList.contains("downvoteBtn") || target.closest(".downvoteBtn")) {
         const btn = target.classList.contains("downvoteBtn") ? target : target.closest(".downvoteBtn");
         if(!currentUser) return showNotification("Inicia sesión para votar", "error");
@@ -979,6 +1095,7 @@ window.showSection = function(section) {
   } else if(section === 'profile') {
     document.getElementById("profileSection").classList.remove("hidden");
     document.getElementById(`tab-profile`).className = "nav-tab px-4 py-2 rounded-xl text-xs md:text-sm font-bold transition-all bg-zinc-900 border border-zinc-800 text-green-400 shadow-lg shadow-green-500/5";
+    renderPosts(currentPosts);
   }
 };
 
@@ -994,14 +1111,15 @@ document.getElementById("loginBtn").onclick = async () => {
 
 document.getElementById("registerBtn").onclick = async () => {
   const username = document.getElementById("registerUsername").value.trim();
+  const fullName = document.getElementById("registerFullName").value.trim();
   const email = document.getElementById("registerEmail").value.trim();
   const pass = document.getElementById("registerPassword").value.trim();
-  if(!username || !email || !pass) return showNotification("Por favor rellena todos los campos", "error");
+  if(!username || !fullName || !email || !pass) return showNotification("Por favor rellena todos los campos", "error");
   try {
     const cred = await createUserWithEmailAndPassword(auth, email, pass);
     await updateProfile(cred.user, { displayName: username, photoURL: selectedDefaultAvatarUrl });
     await setDoc(getDocRef("users", cred.user.uid), {
-      uid: cred.user.uid, username, email, bio: "¡Hola! Estoy usando Rankiu.", avatar: selectedDefaultAvatarUrl, createdAt: Date.now()
+      uid: cred.user.uid, username, fullName, email, bio: "¡Hola! Estoy usando Rankiu.", avatar: selectedDefaultAvatarUrl, createdAt: Date.now()
     });
     showNotification("Cuenta creada con éxito", "success");
   } catch(err) { showNotification("Error al registrar cuenta", "error"); }
@@ -1012,8 +1130,15 @@ document.getElementById("publishBtn").onclick = async () => {
   const content = document.getElementById("postContent").value.trim();
   if(!content) return showNotification("El contenido no puede estar vacío", "error");
   try {
+    const myUserData = allUsers.find(u => u.id === currentUser.uid);
+
     await addDoc(getCol("posts"), {
-      content, author: currentUser.displayName, authorId: currentUser.uid, authorAvatar: currentUser.photoURL, createdAt: Date.now()
+      content, 
+      authorUsername: myUserData?.username || currentUser.displayName, 
+      authorFullName: myUserData?.fullName || "Usuario",
+      authorId: currentUser.uid, 
+      authorAvatar: currentUser.photoURL, 
+      createdAt: Date.now()
     });
     document.getElementById("postContent").value = "";
     document.getElementById("charCounter").innerText = "0 / 150";
@@ -1038,7 +1163,10 @@ function renderSuggestedUsers() {
     div.innerHTML = `
       <div class="flex items-center gap-2.5 cursor-pointer" onclick="viewUserProfile('${user.id}')">
         <img src="${getUserAvatar(user.avatar)}" class="w-8 h-8 rounded-full object-cover">
-        <div class="text-xs font-black text-zinc-200 truncate max-w-[100px]">${user.username}</div>
+        <div class="truncate max-w-[110px]">
+          <div class="text-xs font-black text-zinc-200">@${user.username}</div>
+          <div class="text-[9px] text-zinc-500 font-medium truncate">${user.fullName || ''}</div>
+        </div>
       </div>
       <button onclick="toggleFollow('${user.id}')" class="px-3 py-1 bg-green-500/10 hover:bg-green-500 text-green-400 hover:text-black font-extrabold text-[10px] rounded-lg transition-all border border-green-500/20">
         Seguir
@@ -1073,7 +1201,10 @@ function renderUsers() {
     };
     div.innerHTML = `
     <img src="${getUserAvatar(user.avatar)}" class="w-10 h-10 rounded-full object-cover">
-    <div class="font-extrabold text-sm text-zinc-300 truncate">${user.username}</div>
+    <div>
+      <div class="font-extrabold text-sm text-zinc-200 truncate">@${user.username}</div>
+      <div class="text-xs text-zinc-500 font-medium">${user.fullName || ''}</div>
+    </div>
     `;
     container.appendChild(div);
   });
@@ -1113,7 +1244,10 @@ function listenMessages(){
     <div class="flex items-center gap-3">
       <i class="fa-solid fa-arrow-left md:hidden cursor-pointer mr-1" onclick="closeActiveChat()"></i>
       <img src="${getUserAvatar(selectedUser.avatar)}" class="w-9 h-9 rounded-full object-cover cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
-      <span class="text-white hover:text-green-400 cursor-pointer transition" onclick="viewUserProfile('${selectedUser.id}')">${selectedUser.username}</span>
+      <div class="flex flex-col text-left cursor-pointer" onclick="viewUserProfile('${selectedUser.id}')">
+        <span class="text-white font-bold hover:text-green-400 text-sm transition">@${selectedUser.username}</span>
+        <span class="text-zinc-400 font-medium text-xs">${selectedUser.fullName || ''}</span>
+      </div>
     </div>
   `;
   const q = query(getCol("messages"), orderBy("createdAt","asc"));
@@ -1128,15 +1262,16 @@ function listenMessages(){
     if (messages.length === 0) {
       container.innerHTML = `
         <div class="h-full flex flex-col items-center justify-center text-zinc-600">
-          <p class="text-xs">Di hola para empezar una conversación con ${selectedUser.username}.</p>
+          <p class="text-xs">Di hola para empezar una conversación con @${selectedUser.username}.</p>
         </div>`;
     }
 
     messages.forEach(msg => {
       const mine = msg.from === currentUser.uid;
+      const censoredMsgText = filterBadWords(msg.text);
       const div = document.createElement("div");
       div.className = `flex ${mine ? 'justify-end' : 'justify-start'}`;
-      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold shadow-md shadow-green-500/10' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${msg.text}</div>`;
+      div.innerHTML = `<div class="max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${mine ? 'bg-green-500 text-black font-semibold shadow-md shadow-green-500/10' : 'bg-zinc-900 text-zinc-200 border border-zinc-800'}">${censoredMsgText}</div>`;
       container.appendChild(div);
     });
     container.scrollTop = container.scrollHeight;
@@ -1157,14 +1292,15 @@ window.closeActiveChat = closeActiveChat;
 
 async function saveProfileChanges() {
   if (!currentUser) return;
-  const newName = document.getElementById("editUsername").value.trim();
+  const newUsername = document.getElementById("editUsername").value.trim();
+  const newFullName = document.getElementById("editFullName").value.trim();
   const newBio = document.getElementById("editBio").value.trim();
-  if (!newName) return showNotification("El nombre de usuario no puede estar vacío", "error");
+  if (!newUsername || !newFullName) return showNotification("El nombre de usuario y nombre completo no pueden estar vacíos", "error");
   
   try {
     showNotification("Guardando perfil...", "info");
-    await updateProfile(currentUser, { displayName: newName });
-    await setDoc(getDocRef("users", currentUser.uid), { username: newName, bio: newBio }, { merge: true });
+    await updateProfile(currentUser, { displayName: newUsername });
+    await setDoc(getDocRef("users", currentUser.uid), { username: newUsername, fullName: newFullName, bio: newBio }, { merge: true });
     SoundFX.playSuccess();
     showNotification("¡Perfil actualizado con éxito!", "success");
   } catch(err) { showNotification("Error: " + err.message, "error"); }
@@ -1191,11 +1327,12 @@ function updateNavbar(){
     
     const miniCard = document.getElementById("miniProfileCard");
     if(miniCard) {
+      const myData = allUsers.find(u => u.id === currentUser.uid);
       miniCard.innerHTML = `
         <img src="${getUserAvatar(currentUser.photoURL)}" class="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30">
-        <div class="truncate flex-1">
-          <div class="font-extrabold text-sm text-zinc-200">${currentUser.displayName || 'Usuario'}</div>
-          <div class="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Mi Perfil Activo</div>
+        <div class="truncate flex-1 text-left">
+          <div class="font-extrabold text-sm text-zinc-200">@${myData?.username || currentUser.displayName || 'usuario'}</div>
+          <div class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">${myData?.fullName || 'Mi Perfil'}</div>
         </div>
       `;
     }
@@ -1207,8 +1344,9 @@ function updateNavbar(){
 function renderProfile(){
   if(!currentUser) return;
   document.getElementById("profileAvatar").src = getUserAvatar(currentUser.photoURL);
-  document.getElementById("editUsername").value = currentUser.displayName || '';
   const myData = allUsers.find(u => u.id === currentUser.uid);
+  document.getElementById("editUsername").value = myData?.username || currentUser.displayName || '';
+  document.getElementById("editFullName").value = myData?.fullName || '';
   document.getElementById("editBio").value = myData?.bio || '¡Hola! Estoy usando Rankiu.';
 }
 
@@ -1258,10 +1396,10 @@ function applyVotesStyles(snapshot) {
         const postId = card.id.replace('post-card-', '');
         const votes = postVotes[postId] || { up: 0, down: 0 };
         
-        const upCounter = document.getElementById(`up-counter-${postId}`);
-        const downCounter = document.getElementById(`down-counter-${postId}`);
-        const upBtn = document.getElementById(`up-btn-${postId}`);
-        const downBtn = document.getElementById(`down-btn-${postId}`);
+        const upCounter = card.querySelector(`#up-counter-${postId}`);
+        const downCounter = card.querySelector(`#down-counter-${postId}`);
+        const upBtn = card.querySelector(`#up-btn-${postId}`);
+        const downBtn = card.querySelector(`#down-btn-${postId}`);
 
         if (upCounter) upCounter.innerText = votes.up;
         if (downCounter) downCounter.innerText = votes.down;
@@ -1292,7 +1430,9 @@ function applyVotesStyles(snapshot) {
 
 onSnapshot(getCol("votes"), (snapshot) => {
     cachedVotesSnapshot = snapshot;
+    cachedGlobalVotes = snapshot.docs.map(doc => doc.data());
     applyVotesStyles(snapshot);
+    updateProfileStats();
 });
 
 let appLoadTime = Date.now();
@@ -1315,7 +1455,9 @@ function listenIncomingMessages() {
             SoundFX.playMessage();
             if (!isCurrentActiveChat) {
               const sender = allUsers.find(u => u.id === msg.from);
-              showNotification(`Nuevo mensaje de ${sender ? sender.username : "Alguien"}: "${msg.text}"`, "success");
+              const senderDisplayName = sender ? `@${sender.username}` : "Alguien";
+              const censoredNotificationText = filterBadWords(msg.text);
+              showNotification(`Nuevo mensaje de ${senderDisplayName}: "${censoredNotificationText}"`, "success");
             }
           }
         }
