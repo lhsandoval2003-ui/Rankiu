@@ -729,7 +729,7 @@ if (registerBtn) {
     }
 
     try {
-      // Bloqueo estricto de Duplicados en Firestore
+      // Bloqueo de duplicados: Verificar si el username ya existe en Firestore
       const usersRef = getCol("users");
       const q = query(usersRef, where("username", "==", username));
       const querySnapshot = await getDocs(q);
@@ -739,10 +739,11 @@ if (registerBtn) {
         return; 
       }
 
-      // Si pasa la validación, procedemos a registrar en Firebase Auth
+      // Proceder con la creación en Firebase Auth si el username es único
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Guardar el perfil en Firestore
       await setDoc(getDocRef("users", user.uid), {
         uid: user.uid,
         username: username,
@@ -791,7 +792,7 @@ if (recoverSendBtn) {
         return;
       }
 
-      // Procede con el envío seguro solo si es el único correo legítimo
+      // Procede con el envío seguro solo si es un correo legítimo
       await sendPasswordResetEmail(auth, email);
       SoundFX.playSuccess();
       showNotification("Enlace enviado. Revisa tu bandeja de entrada.", "success");
@@ -1132,6 +1133,7 @@ function setFeedFilter(filter) {
 }
 window.setFeedFilter = setFeedFilter;
 
+// --- RENDERIZADO CON LA ESTÉTICA HÍBRIDA ORIGINAL DE LOS POSTS COMPLETAMENTE PRESERVADA ---
 function renderPostsList() {
   const container = document.getElementById("postsContainer");
   if(!container) return;
@@ -1228,7 +1230,7 @@ function renderMyPosts() {
 }
 
 async function deletePost(postId) {
-  if(!confirm("¿Estás seguro de que quieres eliminar esta publicación permanente?")) return;
+  if(!confirm("¿Estás seguro de que quieres eliminar esta publicación permanentemente?")) return;
   SoundFX.playClick();
   try {
     await deleteDoc(getDocRef("posts", postId));
@@ -1261,7 +1263,7 @@ async function vote(postId, type, btnElement) {
     } else {
       const icon = btnElement.querySelector("i");
       if(icon) icon.classList.add("animate-downvote-arrow");
-      SoundFX.playVotedown = SoundFX.playVoteDown(); 
+      SoundFX.playVoteDown(); 
     }
     
     await setDoc(voteRef, {
